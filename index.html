@@ -626,7 +626,11 @@ function onRemote(){clearTimeout(remoteT);remoteT=setTimeout(refreshFromServer,7
 async function refreshFromServer(force){
   if(!me)return;
   if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
+  const before=new Set(data.map(r=>r.id));
   try{await fetchAll()}catch(e){console.error(e);return}
+  const fresh=data.filter(r=>!before.has(r.id)&&(r.history[0]?.by==='Website'));
+  if(fresh.length&&before.size)toast(fresh.length>1?`${fresh.length} new leads from the website`:`New lead: ${fresh[0].name}`);
+  locateMissing();
   render();if(selId){if(job(selId))openDetail(selId);else closeDetail()}
 }
 const me_name=()=>me?.name||(me?.email||'').split('@')[0];
@@ -788,7 +792,7 @@ function openPay(k){inlinePay=k;if(selId)openDetail(selId);setTimeout(()=>{const
 function openDetail(id,pan){
   const r=job(id);if(!r){closeDetail();return}
   if(selId!==id)inlinePay=null;selId=id;if(pan&&r.lat!=null)flyTo(r.lat,r.lng);
-  const st=STAGES[stageOf(r)],nx=nextStep(r),dest=encodeURIComponent(`${r.address}, ${r.city}, Ontario, Canada`);
+  const st=STAGES[stageOf(r)],nx=nextStep(r),dest=encodeURIComponent([r.address,r.city&&!r.address.toLowerCase().includes(r.city.toLowerCase())?r.city:'','Ontario','Canada'].filter(Boolean).join(', '));
   const ph=(r.phone||'').replace(/[^0-9+]/g,''),wa=(r.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');
   const T=total(r),P=paid(r),B=balance(r),ps=payStatus(r);
   const nextText=!nx?'All steps complete':nx.k==='visit'&&r.ms.visit?.date?`Site visit ${fmtDate(r.ms.visit.date)}${r.ms.visit.time?' at '+fmtTime(r.ms.visit.time):''}`:nx.k==='start'&&r.ms.start?.date?`Work starts ${fmtDate(r.ms.start.date)}`:nx.k==='final'&&T?`Collect ${money(B)}`:nx.k==='deposit'&&T?`Collect deposit (${money(Math.round(T*.3))} suggested)`:({contacted:'Call the customer',visit:'Book the site visit',estimate:'Send the estimate',contract:'Get the contract signed',deposit:'Collect the deposit',start:'Set a start date',complete:'Finish the work',final:'Collect final payment',review:'Ask for a review'})[nx.k];
@@ -911,7 +915,7 @@ if(HAS_MAP){
 /* ---------- geocoding ---------- */
 let gq=Promise.resolve();
 function geocode(address,city){
-  const run=async()=>{const q=encodeURIComponent(`${address}, ${city}, Ontario, Canada`);
+  const run=async()=>{const q=encodeURIComponent([address,city&&!new RegExp(city,'i').test(address)?city:'','Ontario','Canada'].filter(Boolean).join(', '));
     const res=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ca&q=${q}`);
     if(!res.ok)throw new Error('lookup failed');const j=await res.json();await new Promise(r=>setTimeout(r,1100));
     return j[0]?{lat:+(+j[0].lat).toFixed(6),lng:+(+j[0].lon).toFixed(6)}:null};
@@ -990,7 +994,9 @@ let tt;function toast(m,canUndo){const t=$('toast');t.querySelector('span').text
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId)closeDetail()}});
 function render(){data.forEach(r=>r.stage=stageOf(r));renderToday();if(tab==='jobs'){renderSum();renderList()}if(tab==='cal')renderCal();drawPins()}
-async function locateMissing(){const todo=data.filter(r=>r.lat==null);
+let locating=false;
+async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
+async function locateMissingRun(){const todo=data.filter(r=>r.lat==null);
   for(const r of todo){let p=null;try{p=await geocode(r.address,r.city)}catch(e){}
     if(p){r.lat=p.lat;r.lng=p.lng;r.approx=false}else{const c=cityPoint(r.city);r.lat=c.lat;r.lng=c.lng;r.approx=true}save();render()}
   if(todo.length)fit(data)}
