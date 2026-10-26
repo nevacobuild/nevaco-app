@@ -393,6 +393,35 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .pin.p3 .b{color:#1d1d1f}
 
 #sMap .placebar{position:absolute;z-index:600}
+/* ===== customers ===== */
+#sCust .searchbox{margin:0 32px 12px;max-width:820px}
+.cfil{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.cfil button{padding:7px 12px;border-radius:999px;background:var(--card);font-weight:600;font-size:13.5px;display:flex;gap:6px;align-items:center}
+.cfil button em{font-style:normal;color:var(--label2);font-variant-numeric:tabular-nums}
+.cfil button[aria-pressed="true"]{background:var(--tint);color:var(--onTint)}
+.cfil button[aria-pressed="true"] em{color:inherit;opacity:.7}
+.av{width:40px;height:40px;border-radius:50%;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 70%,#fff),var(--c));color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;flex:none;letter-spacing:.02em}
+.crow{align-items:flex-start}
+.crow .av{margin-top:1px}
+.rt>.needs{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;white-space:normal;overflow:visible}
+.rt>.ok{white-space:normal}
+.need{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:6px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--label);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.need i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.ok{font-size:12px;color:var(--green);font-weight:600;margin-top:5px}
+.cbig{display:flex;align-items:center;gap:14px;padding:4px 4px 16px}
+.cbig .av{width:64px;height:64px;font-size:24px}
+.cbig h2{margin:0;font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.cbig p{margin:3px 0 0;color:var(--label2);font-size:14px}
+.needlist .nrow{display:flex;gap:12px;align-items:center;padding:11px 14px;position:relative;width:100%;text-align:left}
+.needlist .nrow+.nrow::before{content:"";position:absolute;top:0;left:48px;right:0;height:.5px;background:var(--sep)}
+.needlist .nrow .gl{width:26px;height:26px}
+.needlist .nrow .gl svg{width:13px;height:13px}
+.needlist .nrow b{display:block;font-weight:600;font-size:14.5px}
+.needlist .nrow .rt{flex:1;min-width:0}
+.needlist .nrow .rt>b{color:var(--label)}
+.needlist .nrow .rt>span{display:block;font-size:12.5px;color:var(--label2)}
+.needlist .nrow>svg{color:var(--label3)}
+.cstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
 /* ===== estimates ===== */
 .items .itm{display:flex;gap:10px;align-items:flex-start;padding:8px 10px 8px 14px;position:relative}
 .items .itm+.itm::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
@@ -459,7 +488,12 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   .lt h1{font-size:31px}
   .lt .sub{font-size:14px}
   .screen>.scroll{padding:2px 14px calc(96px + env(safe-area-inset-bottom))}
-  #sJobs .searchbox{margin:0 14px 8px}
+  #sJobs .searchbox,#sCust .searchbox{margin:0 14px 8px}
+  .tabbar button{font-size:10px}
+  .tabbar button svg{width:24px;height:24px}
+  .cfil{flex-wrap:nowrap;overflow-x:auto;margin:0 -14px 12px;padding:0 14px;scrollbar-width:none}
+  .cfil::-webkit-scrollbar{display:none}
+  .cfil button{flex:none;font-size:13px}
   .legend{left:10px;top:calc(10px + env(safe-area-inset-top));font-size:11px;padding:4px 6px;max-width:calc(100% - 70px)}
   #sMap .ctrls{top:calc(10px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right));gap:8px}
   #sMap .maptype{display:none}
@@ -548,6 +582,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   <div class="brand"><button class="logo acctbtn" id="acctBtn" aria-label="Account"><svg class="i" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg><i></i></button><div><h1>Job Map</h1><small id="syncStatus">NEVACO BUILD</small></div></div>
   <button class="navbtn" data-tab="today" aria-selected="true"><span class="ni" style="--nc:var(--red)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span>Today<em class="tcount" hidden></em></button>
   <button class="navbtn" data-tab="jobs" aria-selected="false"><span class="ni" style="--nc:var(--blue)"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg></span>Jobs<em id="jobsCount"></em></button>
+  <button class="navbtn" data-tab="cust" aria-selected="false"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em id="custCount" hidden></em></button>
   <button class="navbtn" data-tab="cal" aria-selected="false"><span class="ni" style="--nc:var(--orange)"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>Calendar</button>
   <button class="navbtn" data-tab="map" aria-selected="false"><span class="ni" style="--nc:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>Map</button>
   <button class="newbtn" id="addBtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New Customer</button>
@@ -567,6 +602,12 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <div class="secthead"><h3 id="listTitle">All Jobs</h3><button id="clearFilter" hidden>Show All</button></div>
       <div class="group" id="list"></div>
     </div></div>
+  </section>
+  <section class="screen" id="sCust" hidden>
+    <header class="lt"><div><h1>Customers</h1><div class="sub" id="custSub"></div></div>
+      <div class="tools ph"><button class="iconbtn dark js-add" aria-label="New customer"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
+    <label class="searchbox" id="custSearchWrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="cq" type="search" placeholder="Search name, phone, email, address" aria-label="Search customers"></label>
+    <div class="scroll"><div class="wrap" id="pCust"></div></div>
   </section>
   <section class="screen" id="sCal" hidden>
     <header class="lt"><div><h1 id="calTitle">Calendar</h1></div>
@@ -593,6 +634,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 <nav class="tabbar" aria-label="Sections">
   <button data-tab="today" aria-selected="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>Today<em class="tcount" hidden></em></button>
   <button data-tab="jobs" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>Jobs</button>
+  <button data-tab="cust" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg>Customers<em class="ccount" hidden></em></button>
   <button data-tab="cal" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Calendar</button>
   <button data-tab="map" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Map</button>
 </nav>
@@ -678,6 +720,20 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   </form>
 </div>
 
+<div class="scrim" id="custModal" hidden>
+  <form class="sheet" id="custForm" novalidate>
+    <header><button type="button" id="custCancel">Cancel</button><h3>Edit Contact</h3><button type="submit" class="save">Done</button></header>
+    <div class="body">
+      <div class="fg">
+        <label><span>Name</span><input id="c-name" autocomplete="off"></label>
+        <label><span>Phone</span><input id="c-phone" type="tel"></label>
+        <label><span>Email</span><input id="c-email" type="email"></label>
+      </div>
+      <p class="fnote">Changes apply to all of this customer’s jobs.</p>
+    </div>
+  </form>
+</div>
+
 <div class="auth" id="auth" hidden>
   <form class="authcard glass" id="authForm" novalidate>
     <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg><i></i></div>
@@ -717,7 +773,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.10 (Oct 26)';
+const APP_VERSION='1.11 (Oct 26)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -735,6 +791,7 @@ const IC={
  dir:'<path d="M12 2 4 21l8-4 8 4z"/>',call:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
  msg:'<path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4A8 8 0 1 1 20 11.5z"/>',view:'<circle cx="12" cy="8" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2M3 14c-1 .7-1 1.5 0 2.2M21 14c1 .7 1 1.5 0 2.2"/>',
  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',x:'<path d="M7 7l10 10M17 7 7 17"/>',
+ mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
  tday:'<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>',
  calp:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M12 13v5M9.5 15.5h5"/>'
 };
@@ -893,7 +950,7 @@ async function refreshFromServer(force){
   const signed=(db.docs||[]).filter(x=>x.status==='accepted'&&!signedBefore.has(x.id));
   if(signed.length&&before.size)toast(`Estimate ${signed[0].number} signed by ${signed[0].acceptedName||'customer'}`);
   locateMissing();
-  render();if(selId){if(job(selId))openDetail(selId);else closeDetail()}
+  render();if(selId){if(job(selId))openDetail(selId);else closeDetail()}else if(custSel)openCustomer(custSel);
 }
 const me_name=()=>me?.name||(me?.email||'').split('@')[0];
 
@@ -1069,10 +1126,126 @@ function renderList(){
 }
 $('list').onclick=e=>{const b=e.target.closest('.row');if(b)openDetail(b.dataset.id,true)};
 
+/* ---------- customers ---------- */
+const digits=v=>String(v||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');
+const custKey=r=>(r.email||'').trim().toLowerCase()||(digits(r.phone).length>=10?'p'+digits(r.phone):'')||'n'+String(r.name||'').trim().toLowerCase();
+const looksLikeAddress=n=>/^\d/.test(String(n||'').trim());
+const initials=n=>looksLikeAddress(n)?'#':String(n||'?').replace(/[^A-Za-z\s.]/g,'').split(/[\s.]+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('')||'?';
+const AVC=['--s-lead','--s-visit','--s-sent','--s-won','--s-follow','--s-quote','--s-pay'];
+const avColor=k=>AVC[[...k].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7)%AVC.length];
+function customers(){
+  const m=new Map();
+  for(const r of data){const k=custKey(r);if(!m.has(k))m.set(k,{key:k,jobs:[]});m.get(k).jobs.push(r)}
+  const out=[];
+  for(const c of m.values()){
+    c.jobs.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const main=c.jobs.find(j=>!j.lost)||c.jobs[0];
+    c.name=main.name;c.phone=c.jobs.map(j=>j.phone).find(Boolean)||'';c.email=c.jobs.map(j=>j.email).find(Boolean)||'';
+    c.address=main.address;c.city=main.city;
+    c.value=c.jobs.filter(j=>!j.lost).reduce((t,j)=>t+total(j),0);c.paid=c.jobs.reduce((t,j)=>t+paid(j),0);
+    c.needs=custNeeds(c);c.rank=Math.min(9,...c.needs.map(n=>n.p));
+    out.push(c)}
+  return out.sort((a,b)=>a.rank-b.rank||b.needs.length-a.needs.length||String(a.name).localeCompare(String(b.name)));
+}
+function custNeeds(c){
+  const T=today(),n=[];
+  for(const r of c.jobs){if(r.lost)continue;const tag=c.jobs.length>1?` · ${r.type||r.name}`:'';
+    for(const d of (db.docs||[]).filter(x=>x.jobId===r.id&&x.status==='sent')){const age=d.sentAt?dayDiff(T,String(d.sentAt).slice(0,10)):0;
+      n.push({k:'sign',p:age>=5?1:2,c:age>=5?'--p1':'--p2',ic:'sign',t:`Sign estimate ${d.number}`,s:`${money(d.total)} · sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}${tag}`,job:r.id,doc:d.id})}
+    if(stepDone(r,'complete')&&!stepDone(r,'final')&&total(r)>0){const age=ageOf(r.ms.complete?.date,T);
+      n.push({k:'pay',p:age>7?1:2,c:age>7?'--p1':'--p2',ic:'pay',t:`Final payment ${money(balance(r))}`,s:`Work completed ${fmtDate(r.ms.complete?.date)}${tag}`,job:r.id})}
+    else if(stepDone(r,'contract')&&!stepDone(r,'deposit'))
+      n.push({k:'dep',p:2,c:'--p2',ic:'pay',t:`Deposit${total(r)?' '+money(Math.round(total(r)*.3)):''}`,s:`Contract signed ${fmtDate(r.ms.contract?.date)}${tag}`,job:r.id});
+    else if(!stepDone(r,'complete')&&stepDone(r,'deposit')&&total(r)>0&&balance(r)>0.5&&stepDone(r,'start'))
+      n.push({k:'bal',p:4,c:'--p4',ic:'pay',t:`Balance ${money(balance(r))} on completion`,s:`Job in progress${tag}`,job:r.id});
+    if(stageOf(r)==='sent'&&!(db.docs||[]).some(x=>x.jobId===r.id&&x.status==='sent'))
+      n.push({k:'dec',p:3,c:'--p3',ic:'follow',t:'Decision on estimate',s:`${money(total(r))||'Estimate'} sent ${fmtDate(r.ms.estimate?.date)}${tag}`,job:r.id});
+    if(!stepDone(r,'visit')&&r.ms.visit?.date&&r.ms.visit.date>=T)
+      n.push({k:'visit',p:r.ms.visit.date===T?2:4,c:r.ms.visit.date===T?'--p2':'--p4',ic:'visit',t:`Site visit ${fmtDate(r.ms.visit.date)}${r.ms.visit.time?' '+fmtTime(r.ms.visit.time):''}`,s:`Be home for the visit${tag}`,job:r.id});
+    if(stepDone(r,'complete')&&stepDone(r,'final')&&!stepDone(r,'review')&&!r.sample)
+      n.push({k:'review',p:4,c:'--p4',ic:'star',t:'Leave a review',s:`Google or HomeStars${tag}`,job:r.id});
+  }
+  const open=c.jobs.some(j=>!j.lost&&stageOf(j)!=='done');
+  if(open){if(!c.phone)n.push({k:'phone',p:3,c:'--p0',ic:'call',t:'Phone number',s:'Missing',edit:1});
+    if(!c.email)n.push({k:'email',p:3,c:'--p0',ic:'mail',t:'Email address',s:'Missing',edit:1});
+    if(!c.jobs.some(j=>String(j.address||'').trim()&&!looksLikeAddress(j.name)?true:String(j.address||'').trim()))n.push({k:'addr',p:3,c:'--p0',ic:'dir',t:'Project address',s:'Missing',job:c.jobs[0].id,editJob:1})}
+  return n.sort((a,b)=>a.p-b.p);
+}
+let custFilter='all',custQuery='';
+const CF=[{k:'all',n:'All'},{k:'need',n:'Need something',f:c=>c.needs.length},{k:'money',n:'Owe money',f:c=>c.needs.some(x=>['pay','dep'].includes(x.k))},
+  {k:'sign',n:'Waiting to sign',f:c=>c.needs.some(x=>x.k==='sign'||x.k==='dec')},{k:'info',n:'Missing info',f:c=>c.needs.some(x=>['phone','email','addr'].includes(x.k))},{k:'past',n:'Past customers',f:c=>c.jobs.every(j=>j.lost||stageOf(j)==='done')}];
+function renderCustCount(){if(!loaded)return;const cs=customers(),n=cs.filter(c=>c.needs.some(x=>x.p<=2)).length;
+  const e=$('custCount');e.textContent=n;e.hidden=!n;e.classList.toggle('hot',n>0);
+  document.querySelectorAll('.ccount').forEach(x=>{x.textContent=n;x.hidden=!n;x.classList.add('calm')})}
+function renderCust(){
+  if(!loaded){$('pCust').innerHTML='<div class="empty" style="padding-top:60px"><b>Loading…</b></div>';return}
+  const all=customers();
+  $('custSub').textContent=`${all.length} customer${all.length===1?'':'s'} · ${all.filter(c=>c.needs.length).length} need something`;
+  const q=custQuery.toLowerCase();
+  const F=CF.find(x=>x.k===custFilter);
+  const list=all.filter(c=>(!F.f||F.f(c))&&(!q||[c.name,c.phone,c.email,c.address,c.city,...c.jobs.map(j=>j.type)].join(' ').toLowerCase().includes(q)));
+  $('pCust').innerHTML=`<div class="cfil">${CF.map(f=>`<button data-cf="${f.k}" aria-pressed="${f.k===custFilter}">${f.n}<em>${f.f?all.filter(f.f).length:all.length}</em></button>`).join('')}</div>
+    <div class="group">${list.length?list.map(c=>`<button class="row crow" data-cust="${esc(c.key)}">
+      <span class="av" style="--c:var(${avColor(c.key)})">${esc(initials(c.name))}</span>
+      <span class="rt"><b>${esc(c.name)}</b><span>${esc([c.phone,c.email].filter(Boolean).join(' · ')||[c.address,c.city].filter(Boolean).join(', ')||'No contact info')}</span>
+        ${c.needs.length?`<span class="needs">${c.needs.slice(0,3).map(n=>`<span class="need" style="--c:var(${n.c})"><i></i>${esc(n.t)}</span>`).join('')}${c.needs.length>3?`<span class="need" style="--c:var(--p0)">+${c.needs.length-3}</span>`:''}</span>`:'<span class="ok">✓ Nothing needed</span>'}</span>
+      <span class="rv"><em>${c.jobs.length>1?c.jobs.length+' jobs':''}</em>${ico('chev')}</span></button>`).join('')
+      :`<div class="empty"><b>${q?'No Results':'Nobody Here'}</b>${q?'Try a different name or number.':'No customers in this group.'}</div>`}</div>`;
+}
+$('pCust').addEventListener('click',e=>{const f=e.target.closest('[data-cf]');if(f){custFilter=f.dataset.cf;renderCust();return}
+  const r=e.target.closest('[data-cust]');if(r)openCustomer(r.dataset.cust)});
+$('cq').oninput=e=>{custQuery=e.target.value.trim();renderCust()};
+let custSel=null;
+function openCustomer(key){
+  const c=customers().find(x=>x.key===key);if(!c){closeDetail();return}
+  custSel=key;selId=null;
+  const ph=digits(c.phone),bal=c.jobs.reduce((t,j)=>t+((stepDone(j,'contract')||stepDone(j,'complete'))&&!j.lost?balance(j):0),0);
+  const v=$('vDetail');
+  v.innerHTML=`<div class="navbar"><button id="cBack">${ico('back')}${isPhone()?'Back':'Close'}</button><button id="cEdit">Edit</button></div>
+  <div class="scroll">
+    <div class="cbig"><span class="av" style="--c:var(${avColor(c.key)})">${esc(initials(c.name))}</span><div><h2>${esc(c.name)}</h2><p>${esc([c.address,c.city].filter(Boolean).join(', '))}</p></div></div>
+    <div class="acts">
+      <a class="act primary" href="${ph?'tel:+1'+ph:'#'}" aria-disabled="${!ph}">${ico('call')}Call</a>
+      <a class="act" href="${ph?'sms:+1'+ph:'#'}" aria-disabled="${!ph}">${ico('msg')}Text</a>
+      <a class="act" target="_blank" rel="noopener" href="${c.email?`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(c.email)}`:'#'}" aria-disabled="${!c.email}">${ico('mail')}Email</a>
+      <a class="act" target="_blank" rel="noopener" href="${ph?'https://wa.me/1'+ph:'#'}" aria-disabled="${!ph}">${ico('msg')}WhatsApp</a>
+    </div>
+    <div class="cstats"><div class="mt"><b>${kmoney(c.value)}</b><span>Total work</span></div><div class="mt"><b>${kmoney(c.paid)}</b><span>Paid</span></div><div class="mt"><b style="color:${bal>0.5?'var(--s-pay)':'inherit'}">${kmoney(bal)}</b><span>Balance</span></div></div>
+    <div class="block"><div class="label">What we need from them <span>${c.needs.length||''}</span></div>
+      <div class="group needlist">${c.needs.length?c.needs.map((n,i)=>`<button class="nrow" data-need="${i}"><span class="gl" style="--c:var(${n.c})">${ico(n.ic)}</span><span class="rt"><b>${esc(n.t)}</b><span>${esc(n.s)}</span></span>${ico('chev')}</button>`).join('')
+        :`<div class="empty" style="padding:18px"><b style="font-size:15px">Nothing needed</b>This customer is all set.</div>`}</div></div>
+    <div class="block"><div class="label">Jobs <span>${c.jobs.length}</span></div>
+      <div class="group">${c.jobs.map(r=>{const st=STAGES[stageOf(r)],P=PRIOR.by.get(r.id);return `<button class="row" data-job="${r.id}"><span class="gl" style="--c:var(${P?PC[P.p]:st.c})">${ico(st.ic)}</span><span class="rt"><b>${esc(r.type||r.name)}</b><span>${esc(r.address||r.city||'')} · ${st.n}</span></span><span class="rv"><em>${total(r)?money(total(r)):''}</em>${ico('chev')}</span></button>`}).join('')}</div></div>
+    <div class="block group info">
+      <div class="r"><span>Phone</span><b>${esc(c.phone)||'—'}</b></div>
+      <div class="r"><span>Email</span><b>${esc(c.email)||'—'}</b></div>
+      <div class="r"><span>Customer since</span><b>${fmtDate(c.jobs.map(j=>j.history?.[0]?.d||j.date).filter(Boolean).sort()[0]||'')||'—'}</b></div>
+    </div>
+  </div>`;
+  $('cBack').onclick=()=>{custSel=null;closeDetail()};
+  $('cEdit').onclick=()=>openCustEdit(c);
+  v.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{custSel=null;openDetail(b.dataset.job,true)});
+  v.querySelectorAll('[data-need]').forEach(b=>b.onclick=()=>{const n=c.needs[+b.dataset.need];
+    if(n.edit){openCustEdit(c);return}
+    if(n.editJob){custSel=null;openDetail(n.job,false);setTimeout(()=>openForm(job(n.job)),60);return}
+    custSel=null;openDetail(n.job,true);
+    if(n.doc)setTimeout(()=>openDoc(db.docs.find(x=>x.id===n.doc),job(n.job)),80);
+    else if(n.k==='dep')setTimeout(()=>openPay('deposit'),60);else if(n.k==='pay')setTimeout(()=>openPay('final'),60)});
+  v.classList.add('open');
+}
+let custEditing=null;
+function openCustEdit(c){custEditing=c;$('c-name').value=c.name;$('c-phone').value=c.phone;$('c-email').value=c.email;showModal('custModal');setTimeout(()=>$('c-phone').focus(),250)}
+$('custCancel').onclick=()=>hideModal('custModal');
+$('custModal').onclick=e=>{if(e.target.id==='custModal')hideModal('custModal')};
+$('custForm').onsubmit=e=>{e.preventDefault();const c=custEditing;if(!c)return;
+  const name=$('c-name').value.trim()||c.name,phone=$('c-phone').value.trim(),email=$('c-email').value.trim();
+  for(const r of c.jobs){if(r.name===c.name)r.name=name;r.phone=phone;r.email=email;log(r,'Contact updated')}
+  save();hideModal('custModal');render();const k=custKey(c.jobs[0]);openCustomer(k);toast('Contact saved')};
+
 /* ---------- tabs ---------- */
 function setTab(t){tab=t;
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  ['today','jobs','cal','map'].forEach(k=>{const el=$({today:'sToday',jobs:'sJobs',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
+  ['today','jobs','cust','cal','map'].forEach(k=>{const el=$({today:'sToday',jobs:'sJobs',cust:'sCust',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
   if(t!=='map'&&isPhone()&&selId&&false)closeDetail();
   render();
   if(t==='map'&&map){setTimeout(()=>{map.invalidateSize();if(!mapFitted){mapFitted=true;fit()}},30)}
@@ -1180,7 +1353,7 @@ function openDetail(id,pan){
   v.classList.add('open');
   renderList();drawPins();renderCards();
 }
-function closeDetail(){selId=null;inlinePay=null;$('vDetail').classList.remove('open');render()}
+function closeDetail(){selId=null;custSel=null;inlinePay=null;$('vDetail').classList.remove('open');render()}
 
 /* ---------- map ---------- */
 let map=null;const markers={},seen=new Set();
@@ -1425,8 +1598,8 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 /* ---------- misc ---------- */
 let tt;function toast(m,canUndo){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:2400)}
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId)closeDetail()}});
-function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>!r.lost&&stageOf(r)!=='done').length||'';if(tab==='jobs'){renderSum();renderList()}if(tab==='cal')renderCal();drawPins();renderCards()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId)closeDetail()}});
+function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>!r.lost&&stageOf(r)!=='done').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();if(tab==='cal')renderCal();drawPins();renderCards()}
 let locating=false;
 async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
 async function locateMissingRun(){const todo=data.filter(r=>r.lat==null);
