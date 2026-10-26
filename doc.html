@@ -59,6 +59,8 @@ td.amt{white-space:nowrap;font-weight:600;width:120px}
 .sigline img{max-height:64px;max-width:100%}
 .sigcap{font-size:11px;color:var(--ink3);margin-top:5px}
 .stamp{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:700;font-size:12px;border:1.5px solid var(--green);border-radius:6px;padding:3px 8px;margin-top:8px}
+.paidstamp{display:inline-block;margin-top:18px;border:3px solid var(--green);color:var(--green);font-weight:800;letter-spacing:.12em;font-size:18px;padding:6px 14px;border-radius:8px;transform:rotate(-3deg)}
+.sched small{color:var(--ink3)}
 .foot{background:var(--red);color:#fff;display:flex;justify-content:space-between;padding:10px 56px;font-size:11px;letter-spacing:.06em}
 /* customer accept panel */
 .accept{width:8.5in;max-width:calc(100% - 32px);margin:0 auto 40px;background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.1);padding:24px}
@@ -110,6 +112,7 @@ td.amt{white-space:nowrap;font-weight:600;width:120px}
 (async function(){
 const sb=window.supabase.createClient('https://pnomirvkekhurtuigxol.supabase.co','sb_publishable_hZvLBt3e7q6Ycvm1k6yEBA_YMfivV53',{auth:{persistSession:false}});
 const $=id=>document.getElementById(id);
+const HST_NO=''; // NEVACO BUILD HST registration number, e.g. '123456789 RT0001'
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const money=v=>'$'+Number(v||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fdate=d=>d?new Date(String(d).slice(0,10)+'T12:00').toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'}):'';
@@ -117,8 +120,10 @@ const qs=new URLSearchParams(location.search),token=qs.get('t')||'';
 if(!token){$('root').innerHTML='<div class="msg"><b>Link not valid</b>Please use the link NEVACO BUILD sent you.</div>';return}
 let d;
 try{const r=await sb.rpc('get_shared_doc',{p_token:token});if(r.error)throw r.error;d=r.data}catch(e){$('root').innerHTML='<div class="msg"><b>Could not load</b>Check your connection and try again.</div>';return}
-if(!d){$('root').innerHTML='<div class="msg"><b>Estimate not found</b>This link may have been replaced. Please contact NEVACO BUILD at 437-432-2252.</div>';return}
-document.title=`Estimate ${d.number} · NEVACO BUILD`;
+if(!d){$('root').innerHTML='<div class="msg"><b>Document not found</b>This link may have been replaced. Please contact NEVACO BUILD at 437-432-2252.</div>';return}
+const inv=d.kind==='invoice',KIND=inv?'Invoice':'Estimate';
+document.title=`${KIND} ${d.number} · NEVACO BUILD`;
+const credit=Number(d.credit)||0,due=Math.max(0,Math.round((Number(d.total)-credit)*100)/100),paidInv=inv&&d.status==='paid';
 const c=d.customer||{};
 const items=(d.items||[]).filter(i=>String(i.d||'').trim());
 const priced=items.some(i=>Number(i.a)>0);
@@ -131,35 +136,42 @@ function render(){
   <div class="inner">
     <div class="lh"><img src="logo-dark.png" alt="NEVACO BUILD">
       <div class="contact"><b>NEVACO BUILD INC.</b><br>Renovation & General Contracting<br>Toronto, Ontario<br>437-432-2252<br>nevacobuild@gmail.com<br>nevacobuild.ca</div></div>
-    <div class="head"><h1>ESTIMATE<span>${esc(d.title||'Renovation Estimate')}</span></h1>
-      <dl class="meta"><dt>Estimate no.</dt><dd>${esc(d.number)}</dd><dt>Date</dt><dd>${fdate(d.date)}</dd>${d.valid_until?`<dt>Valid until</dt><dd>${fdate(d.valid_until)}</dd>`:''}</dl></div>
+    <div class="head"><h1>${inv?'INVOICE':'ESTIMATE'}<span>${esc(d.title||(inv?'Renovation Invoice':'Renovation Estimate'))}</span></h1>
+      <dl class="meta"><dt>${KIND} no.</dt><dd>${esc(d.number)}</dd><dt>Date</dt><dd>${fdate(d.date)}</dd>${inv?`<dt>Due</dt><dd>${d.due_date&&d.due_date!==d.date?fdate(d.due_date):'On receipt'}</dd>${d.ref?`<dt>Estimate</dt><dd>${esc(d.ref)}</dd>`:''}${HST_NO?`<dt>HST no.</dt><dd>${esc(HST_NO)}</dd>`:''}`:(d.valid_until?`<dt>Valid until</dt><dd>${fdate(d.valid_until)}</dd>`:'')}</dl></div>
     <div class="parties">
-      <div><div class="lbl">Prepared for</div><p><b>${esc(c.name)}</b><br>${esc(place)}${c.phone?'<br>'+esc(c.phone):''}${c.email?'<br>'+esc(c.email):''}</p></div>
+      <div><div class="lbl">${inv?'Bill to':'Prepared for'}</div><p><b>${esc(c.name)}</b><br>${esc(place)}${c.phone?'<br>'+esc(c.phone):''}${c.email?'<br>'+esc(c.email):''}</p></div>
       <div><div class="lbl">Project address</div><p>${esc(place)||'—'}</p></div>
     </div>
-    <div class="lbl">Scope of work</div>
+    <div class="lbl">${inv?'Description':'Scope of work'}</div>
     <table><thead><tr><th style="width:28px">#</th><th>Description</th><th>${priced?'Amount':''}</th></tr></thead>
       <tbody>${items.map((i,k)=>`<tr><td class="n">${k+1}</td><td class="desc">${esc(i.d)}</td><td class="amt">${Number(i.a)>0?money(i.a):''}</td></tr>`).join('')}</tbody></table>
     <div class="totals">
       <div><span>${priced?'Subtotal':'Contract price'}</span><span>${money(d.subtotal)}</span></div>
       ${d.hst?`<div><span>HST (13%)</span><span>${money(d.tax)}</span></div>`:''}
-      <div class="grand"><span>Total${d.hst?'':' (HST not included)'}</span><span>${money(d.total)} CAD</span></div>
+      <div class="${inv&&credit?'':'grand'}"><span>Total${d.hst||inv?'':' (HST not included)'}</span><span>${money(d.total)}${inv&&credit?'':' CAD'}</span></div>
+      ${inv&&credit?`<div><span>Less payments received</span><span>−${money(credit)}</span></div><div class="grand"><span>Balance due</span><span>${money(due)} CAD</span></div>`:''}
     </div>
-    ${Number(d.deposit_pct)>0?`<div class="sched"><div class="lbl">Payment schedule</div>
+    ${paidInv?`<div class="paidstamp">PAID${d.paid_at?' · '+fdate(d.paid_at):''}${d.paid_method?' · '+esc(d.paid_method):''}</div>`:''}
+    ${inv&&!paidInv?`<div class="sched"><div class="lbl">How to pay · ${d.due_date&&d.due_date!==d.date?'due '+fdate(d.due_date):'due on receipt'}</div>
+      <div class="row"><span><b>Interac e-Transfer</b> to nevacobuild@gmail.com<br><small>Please include ${esc(d.number)} in the message.</small></span></div>
+      <div class="row"><span><b>Cheque</b> payable to NEVACO BUILD INC.</span></div>
+      <div class="row"><span><b>Cash</b> · a receipt will be provided</span></div></div>`:''}
+    ${!inv&&Number(d.deposit_pct)>0?`<div class="sched"><div class="lbl">Payment schedule</div>
       <div class="row"><span>Deposit at signing (${Number(d.deposit_pct)}%)</span><b>${money(dep)}</b></div>
       <div class="row"><span>Balance on completion</span><b>${money(Number(d.total)-dep)}</b></div></div>`:''}
     ${d.notes?`<div class="block"><div class="lbl">Notes</div><p>${esc(d.notes)}</p></div>`:''}
     ${d.terms?`<div class="block"><div class="lbl">Terms</div><p>${esc(d.terms)}</p></div>`:''}
-    <div class="sign">
+    ${inv?'<div class="block"><p style="color:var(--ink)">Thank you for choosing NEVACO BUILD.</p></div>':''}
+    <div class="sign" ${inv?'hidden':''}>
       <div><div class="sigline">${accepted&&d.signature?`<img src="${esc(d.signature)}" alt="Customer signature">`:''}</div>
         <div class="sigcap">Customer signature${accepted?` · ${esc(d.accepted_name)} · ${fdate(d.accepted_at)}`:''}</div>
         ${accepted?`<div class="stamp">✓ Accepted online ${new Date(d.accepted_at).toLocaleString('en-CA',{dateStyle:'medium',timeStyle:'short'})}</div>`:''}</div>
       <div><div class="sigline"></div><div class="sigcap">NEVACO BUILD INC.</div></div>
     </div>
   </div>
-  <div class="foot"><span>NEVACO BUILD INC. · nevacobuild.ca</span><span>Estimate ${esc(d.number)}</span></div>
+  <div class="foot"><span>NEVACO BUILD INC. · nevacobuild.ca</span><span>${KIND} ${esc(d.number)}</span></div>
   </article>
-  ${d.status==='draft'?'<div class="accept"><div class="done" style="background:#f2f2f5;color:#5f5f64">Draft preview. This estimate has not been sent yet.</div></div>':accepted?'<div class="accept"><div class="done">This estimate was accepted. Thank you! NEVACO BUILD will contact you to schedule the work.</div></div>':`
+  ${d.status==='draft'?`<div class="accept"><div class="done" style="background:#f2f2f5;color:#5f5f64">Draft preview. This ${KIND.toLowerCase()} has not been sent yet.</div></div>`:inv?'':accepted?'<div class="accept"><div class="done">This estimate was accepted. Thank you! NEVACO BUILD will contact you to schedule the work.</div></div>':`
   ${d.status!=='sent'?'':`<form class="accept" id="acc" novalidate>
     <h2>Accept this estimate</h2>
     <p>Review the scope and price above. To accept, type your name and sign below.</p>
@@ -170,7 +182,7 @@ function render(){
     <div class="err" id="err"></div>
   </form>`}`}`;
   $('bar').hidden=false;
-  if(!accepted&&d.status==='sent')setupPad();
+  if(!inv&&!accepted&&d.status==='sent')setupPad();
 }
 function setupPad(){
   const cv=$('pad'),ctx=cv.getContext('2d');let drawing=false,drawn=false,last=null;
