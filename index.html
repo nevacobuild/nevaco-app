@@ -607,7 +607,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       </div>
       <div class="fghead">Location</div>
       <div class="fg">
-        <label><span>Address</span><input id="f-address" placeholder="88 Elm Ridge Dr"></label>
+        <label><span>Address</span><input id="f-address" placeholder="88 Elm Ridge Dr (optional)" autocomplete="street-address"></label>
         <label><span>City</span><select id="f-city"></select></label>
       </div>
       <p class="fnote">The address is placed on the map automatically.</p>
@@ -1256,13 +1256,16 @@ function openForm(r){editingId=r?r.id:null;$('formTitle').textContent=r?'Edit Cu
   F.forEach(f=>$('f-'+f).value=r?(r[f]??''):({city:'Toronto',type:'Bathroom renovation',source:'Website form'}[f]||''));
   $('f-hst').checked=r?!!r.hst:true;$('f-vdate').value=r?.ms?.visit?.date||'';$('f-vtime').value=r?.ms?.visit?.time||'';
   showModal('modal');setTimeout(()=>$('f-name').focus(),250);validate()}
-function validate(){$('formSave').disabled=!($('f-name').value.trim()&&$('f-address').value.trim())}
-$('f-name').oninput=validate;$('f-address').oninput=validate;
+/* Add is always tappable; if something required is missing, say what */
+function validate(){$('formSave').disabled=false;$('formSave').style.opacity=$('f-name').value.trim()?'1':'.5'}
+['input','change','keyup','blur'].forEach(ev=>$('form').addEventListener(ev,validate,true));
 $('addBtn').onclick=()=>openForm(null);
 document.querySelectorAll('.js-add').forEach(b=>b.onclick=()=>openForm(null));
 $('formCancel').onclick=()=>hideModal('modal');
 $('modal').onclick=e=>{if(e.target.id==='modal')hideModal('modal')};
-$('form').onsubmit=async e=>{e.preventDefault();validate();if($('formSave').disabled)return;
+$('form').onsubmit=async e=>{e.preventDefault();
+  if(!$('f-name').value.trim()){toast('Add the customer name');$('f-name').focus();return}
+  if($('formSave').dataset.busy==='1')return;$('formSave').dataset.busy='1';setTimeout(()=>$('formSave').dataset.busy='',4000);
   const v={};F.forEach(f=>v[f]=$('f-'+f).value.trim());v.value=v.value?Number(v.value.replace(/[^0-9.]/g,''))||null:null;v.hst=$('f-hst').checked;
   const vd=$('f-vdate').value,vt=$('f-vtime').value;
   const btn=$('formSave');btn.disabled=true;btn.textContent='Locating…';
@@ -1271,10 +1274,10 @@ $('form').onsubmit=async e=>{e.preventDefault();validate();if($('formSave').disa
   else{r=Object.assign({id:'c'+Date.now(),date:today(),history:[{d:today(),t:'Lead added'}],ms:{},payments:[],lost:false},v);data.push(r)}
   if(vd){r.ms.visit=Object.assign(r.ms.visit||{},{date:vd,time:vt});if(!stepDone(r,'contacted'))r.ms.contacted={done:true,date:today()}}
   let found=null;
-  if(addrChanged){try{found=await geocode(v.address,v.city)}catch(err){}
+  if(addrChanged){if(v.address)try{found=await geocode(v.address,v.city)}catch(err){}
     if(found){r.lat=found.lat;r.lng=found.lng;r.approx=false}else{const p=cityPoint(v.city);r.lat=p.lat;r.lng=p.lng;r.approx=true}}
   save();hideModal('modal');filter=null;render();openDetail(r.id,true);
-  if(addrChanged&&!found){toast('Address not found. Tap the exact spot.');startPlacing(r.id)}
+  if(addrChanged&&!found&&v.address){toast('Address not found. Tap the exact spot.');startPlacing(r.id)}
   else toast(wasEdit?'Saved':'Customer added');
 };
 function startPlacing(id){placingId=id;$('vDetail').classList.remove('open');setTab('map');$('map').classList.add('placing');$('placebar').hidden=false;const r=job(id);if(r&&r.lat!=null)setTimeout(()=>flyTo(r.lat,r.lng,16),60)}
