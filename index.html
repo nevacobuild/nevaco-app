@@ -411,6 +411,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .docacts button.wide{grid-column:1/-1}
 .docacts button svg{width:18px;height:18px}
 .docacts button.danger{color:var(--red)}
+.docacts button.textnow{background:var(--green)}
 .banner{border-radius:12px;padding:12px 14px;font-weight:600;display:flex;gap:10px;align-items:center}
 .banner.ok{background:color-mix(in srgb,var(--green) 15%,transparent);color:var(--green)}
 .banner.info{background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--blue)}
@@ -716,7 +717,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.9 (Oct 26)';
+const APP_VERSION='1.10 (Oct 26)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1300,7 +1301,7 @@ const newToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.to
 function calcDoc(d){const items=(d.items||[]).filter(i=>String(i.d||'').trim()||Number(i.a)>0);const priced=items.some(i=>Number(i.a)>0);
   const sub=Math.round((priced?items.reduce((t,i)=>t+(Number(i.a)||0),0):(Number(d.lump)||0))*100)/100;const tax=d.hst?Math.round(sub*13)/100:0;
   return{sub,tax,total:Math.round((sub+tax)*100)/100,priced}}
-let docEdit=null,docJob=null;
+let docEdit=null,docJob=null,emailedDoc=null;
 function docLink(d){return location.origin+location.pathname.replace(/[^/]*$/,'')+'doc.html?t='+d.token}
 function itemRow(i,k){return `<div class="itm"><em>${k+1}</em><textarea data-k="${k}" data-f="d" rows="1" placeholder="Describe the work">${esc(i.d||'')}</textarea><input data-k="${k}" data-f="a" inputmode="decimal" placeholder="$" value="${i.a==null?'':i.a}"><button type="button" class="rm" data-rm="${k}" aria-label="Remove line">×</button></div>`}
 function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=$('d-date').value||today();d.validUntil=addDays(d.date,Number($('d-valid').value)||30);
@@ -1324,9 +1325,11 @@ function openDoc(d,r){docJob=r;
 function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');
   $('docActs').innerHTML=d.status==='accepted'
     ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed Estimate (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>`
-    :`<button type="button" class="primary" data-act="send">${ico(docJob.email?'mail':'sent')}${d.status==='sent'?'Send Again':'Send to Customer'}${docJob.email?' by Email':''}</button>
+    :`${d._emailed&&ph?`<div class="banner ok" style="grid-column:1/-1">${ico('check')} Email ready in Gmail. Now send the text message.</div><button type="button" class="primary textnow" data-act="sms">${ico('msg')}Send Text to ${esc(docJob.phone)}</button>`:''}
+      <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email?'mail':'sent')}${d.status==='sent'?'Send Again':'Send to Customer'}${docJob.email?' by Email':''}</button>
       <button type="button" data-act="pdf">${ico('quote')}Preview / PDF</button><button type="button" data-act="copy">Copy Link</button>
-      <button type="button" data-act="mail" ${docJob.email?'':'disabled style="opacity:.4" title="Add the customer email first"'}>${ico('mail')}Gmail</button><button type="button" data-act="wa" ${ph?'':'disabled style="opacity:.4"'}>${ico('msg')}WhatsApp</button>
+      <button type="button" data-act="mail" ${docJob.email?'':'disabled style="opacity:.4" title="Add the customer email first"'}>${ico('mail')}Gmail</button><button type="button" data-act="sms" ${ph?'':'disabled style="opacity:.4" title="Add the customer phone first"'}>${ico('msg')}Text</button>
+      <button type="button" class="wide" data-act="wa" ${ph?'':'disabled style="opacity:.4"'}>${ico('msg')}WhatsApp</button>
       ${d._new?'':'<button type="button" class="wide danger" data-act="del">Delete Estimate</button>'}`}
 $('d-items').addEventListener('input',e=>{const t=e.target,k=+t.dataset.k;if(!docEdit.items[k])return;docEdit.items[k][t.dataset.f]=t.dataset.f==='a'?(t.value.replace(/[^0-9.]/g,'')||null):t.value;
   if(t.tagName==='TEXTAREA'){t.style.height='auto';t.style.height=t.scrollHeight+'px'}paintTotals()});
@@ -1355,7 +1358,7 @@ $('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-
   if(d.status!=='accepted'){const c=calcDoc(Object.assign({},d,{hst:$('d-hst').checked,lump:$('d-lump').value}));if(!c.total&&act!=='pdf'){toast('Add a price before sending');return}}
   const sendVia=act==='send'?(docJob.email?'mail':((docJob.phone||'').replace(/\D/g,'').length>=10?'wa':'share')):act;
   const win=['pdf','wa','mail'].includes(sendVia)?window.open('about:blank','_blank'):null;
-  if(d.status!=='accepted'){storeDoc();if(['send','copy','mail','wa'].includes(act))markSent(docEdit);save()}
+  if(d.status!=='accepted'){storeDoc();if(['send','copy','mail','wa','sms'].includes(act))markSent(docEdit);save()}
   const ok=await flush();
   if(!ok){if(win)win.close();toast('Not saved. Check your connection.');return}
   const link=docLink(docEdit),nm=String(docJob.name||'').trim(),w0=nm.split(/\s+/)[0]||'';
@@ -1380,16 +1383,20 @@ Kevin
 NEVACO BUILD INC.
 437-432-2252 | nevacobuild@gmail.com | nevacobuild.ca`;
   const waMsg=`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. Your estimate ${docEdit.number} for ${proj.toLowerCase()} is ready (${money(docEdit.total)} CAD). You can review it, download the PDF and sign online here: ${link}`;
+  const email=docJob.email||'';
+  const smsMsg=`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. We just sent your estimate ${docEdit.number}${proj?' for your '+proj.toLowerCase()+' project':''}${email?' to your email ('+email+')':''}. Please check your inbox, and your spam folder just in case. You can also review and sign it here: ${link}`;
   const gmail=`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(docJob.email||'')}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`;
   const go=u=>{if(win)win.location=u;else location.href=u};
   if(sendVia==='pdf')go(link);
   else if(sendVia==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied')}catch(err){prompt('Copy this link',link)}}
-  else if(sendVia==='mail'){go(gmail);toast('Gmail opened with the estimate email')}
+  else if(sendVia==='mail'){go(gmail);docEdit._emailed=true;emailedDoc=docEdit.id;toast((docJob.phone?'Gmail opened. Now tap Send Text.':'Gmail opened with the estimate email'))}
+  else if(sendVia==='sms'){const raw=(docJob.phone||'').replace(/[^\d+]/g,'');const num=raw.startsWith('+')?raw:(raw.length===10?'+1'+raw:'+'+raw);
+    const apple=/iPhone|iPad|Macintosh/.test(navigator.userAgent);location.href=`sms:${num}${apple?'&':'?'}body=${encodeURIComponent(smsMsg)}`;emailedDoc=null;log(docJob,`Text sent about estimate ${docEdit.number}`);save()}
   else if(sendVia==='wa'){const ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');go(`https://wa.me/1${ph}?text=${encodeURIComponent(waMsg)}`)}
   else if(sendVia==='share'){
     if(navigator.share){try{await navigator.share({title:subject,text:waMsg})}catch(err){}}
     else{try{await navigator.clipboard.writeText(waMsg);toast('Message with link copied')}catch(err){prompt('Copy this message',waMsg)}}}
-  render();if(selId)openDetail(selId);docEdit=JSON.parse(JSON.stringify(db.docs.find(x=>x.id===docEdit.id)||docEdit));
+  render();if(selId)openDetail(selId);docEdit=JSON.parse(JSON.stringify(db.docs.find(x=>x.id===docEdit.id)||docEdit));docEdit._emailed=emailedDoc===docEdit.id;
   $('docBanner').innerHTML=docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`:$('docBanner').innerHTML;paintDocActs();
 });
 
