@@ -299,6 +299,14 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .authcard .big{background:var(--tint);color:var(--onTint);border-radius:12px;height:46px;font-weight:600;font-size:16px}
 .authcard .big:disabled{opacity:.5}
 .authcard .lnk{color:var(--blue);font-size:14px}
+.remember{display:flex;align-items:center;justify-content:space-between;padding:2px 4px;font-size:15px;cursor:pointer;text-align:left}
+.switch{position:relative;width:51px;height:31px;flex:none}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch i{position:absolute;inset:0;border-radius:16px;background:var(--card2);transition:background .25s}
+.switch i::after{content:"";position:absolute;left:2px;top:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16);transition:transform .25s var(--ease)}
+.switch input:checked+i{background:var(--green)}
+.switch input:checked+i::after{transform:translateX(20px)}
+.switch input:focus-visible+i{outline:3px solid color-mix(in srgb,var(--blue) 60%,transparent);outline-offset:2px}
 .autherr{color:var(--red);font-size:13px;min-height:18px}
 .authok{color:var(--green);font-size:13px}
 .acctbtn{border-radius:9px}
@@ -430,6 +438,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <label id="aEmailRow"><span>Email</span><input id="a-email" type="email" autocomplete="username" placeholder="name@email.com"></label>
       <label><span>Password</span><input id="a-pass" type="password" autocomplete="current-password" placeholder="Required"></label>
     </div>
+    <label class="remember" id="rememberRow"><span>Remember me</span><span class="switch"><input type="checkbox" id="a-remember" checked><i></i></span></label>
     <div class="autherr" id="authErr"></div>
     <button class="big" id="authBtn" type="submit">Sign In</button>
     <button class="lnk" type="button" id="authForgot">Forgot password?</button>
@@ -555,7 +564,16 @@ function migrate(r){
 /* ---------- cloud data (Supabase) ---------- */
 const SB_URL='https://pnomirvkekhurtuigxol.supabase.co';
 const SB_KEY='sb_publishable_hZvLBt3e7q6Ycvm1k6yEBA_YMfivV53';
-const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+/* "Remember me": on = stay signed in on this device; off = signed out when the app/browser is closed */
+const REM='nevaco-remember';
+const remembered=()=>{try{return localStorage.getItem(REM)!=='0'}catch(e){return true}};
+const safe=f=>{try{return f()}catch(e){return null}};
+const authStorage={
+  getItem:k=>safe(()=>localStorage.getItem(k))??safe(()=>sessionStorage.getItem(k)),
+  setItem:(k,v)=>{const keep=remembered();safe(()=>(keep?localStorage:sessionStorage).setItem(k,v));safe(()=>(keep?sessionStorage:localStorage).removeItem(k))},
+  removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
+};
+const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
 let db={jobs:[],events:[]};
 let data=db.jobs;
 let me=null,team=[],loaded=false;
@@ -979,7 +997,7 @@ async function locateMissing(){const todo=data.filter(r=>r.lat==null);
 /* ---------- auth + boot ---------- */
 let authMode='signin';
 function showAuth(mode,msg){authMode=mode||'signin';$('auth').hidden=false;$('authErr').textContent=msg||'';$('authErr').className='autherr';
-  const rec=authMode==='recover';$('aEmailRow').hidden=rec;$('authForgot').hidden=rec;
+  const rec=authMode==='recover';$('aEmailRow').hidden=rec;$('rememberRow').hidden=rec;$('a-remember').checked=remembered();if(!$('a-email').value)$('a-email').value=safe(()=>localStorage.getItem('nevaco-email'))||'';$('authForgot').hidden=rec;
   $('authTitle').textContent=rec?'New Password':'NEVACO Job Map';$('authSub').textContent=rec?'Choose a new password for your account.':'Sign in to continue.';
   $('authBtn').textContent=rec?'Save Password':'Sign In';$('a-pass').autocomplete=rec?'new-password':'current-password';$('a-pass').value='';
   setTimeout(()=>(rec?$('a-pass'):($('a-email').value?$('a-pass'):$('a-email'))).focus(),100)}
@@ -989,9 +1007,11 @@ $('authForm').onsubmit=async e=>{e.preventDefault();const btn=$('authBtn');const
     if(error){$('authErr').textContent=error.message;return}toast('Password saved');authMode='signin';const{data:{session}}=await sb.auth.getSession();if(session)start(session);return}
   const email=$('a-email').value.trim();if(!email||!pass){$('authErr').textContent='Enter your email and password.';return}
   btn.disabled=true;btn.textContent='Signing In…';
+  safe(()=>localStorage.setItem(REM,$('a-remember').checked?'1':'0'));
   const{data:d,error}=await sb.auth.signInWithPassword({email,password:pass});
   btn.disabled=false;btn.textContent='Sign In';
   if(error){$('authErr').textContent=error.message==='Invalid login credentials'?'Wrong email or password.':error.message;return}
+  safe(()=>localStorage.setItem('nevaco-email',email));
   start(d.session)};
 $('authForgot').onclick=async()=>{const email=$('a-email').value.trim();if(!email){$('authErr').textContent='Enter your email first, then tap Forgot password.';$('a-email').focus();return}
   const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
