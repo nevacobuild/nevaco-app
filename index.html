@@ -697,7 +697,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   <div class="sheet">
     <header><span></span><h3>Account</h3><button type="button" class="save" id="acctClose">Done</button></header>
     <div class="body">
-      <div class="who"><b id="acctName"></b><span id="acctEmail"></span></div>
+      <div class="who"><b id="acctName"></b><span id="acctEmail"></span><span style="display:block;font-size:12px;color:var(--label3);margin-top:4px">App version <span id="appVer"></span></span></div>
       <div><div class="label">Team</div><div class="group" id="acctTeam"></div></div>
       <div class="group linkbtns">
         <button class="row" id="acctExport">Export Jobs to Excel (CSV)</button>
@@ -716,6 +716,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
+const APP_VERSION='1.9 (Oct 26)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1475,7 +1476,7 @@ sb.auth.onAuthStateChange((ev,session)=>{
   if(session)start(session);else showAuth('signin');})();
 
 /* account sheet */
-const openAcct=()=>{if(!me)return;$('acctName').textContent=me.name;$('acctEmail').textContent=me.email;
+const openAcct=()=>{if(!me)return;$('appVer').textContent=APP_VERSION;$('acctName').textContent=me.name;$('acctEmail').textContent=me.email;
   $('acctTeam').innerHTML=team.map(t=>`<div class="row"><span>${esc(t.name||t.email.split('@')[0])}</span><span style="color:var(--label2);font-size:13px">${esc(t.email)}</span></div>`).join('');showModal('acctModal')};
 $('acctBtn').onclick=openAcct;document.querySelectorAll('.js-acct').forEach(b=>b.onclick=openAcct);
 $('acctClose').onclick=()=>hideModal('acctModal');
@@ -1487,7 +1488,13 @@ $('acctExport').onclick=()=>{
   const q=v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   const lines=[cols.join(',')].concat(data.map(r=>[r.name,r.phone,r.email,r.address,r.city,r.type,r.source,STAGES[stageOf(r)].n,total(r).toFixed(2),paid(r).toFixed(2),balance(r).toFixed(2),r.follow,r.notes].map(q).join(',')));
   const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`nevaco-jobs-${today()}.csv`;document.body.appendChild(a);a.click();a.remove();toast('Exported')};
-if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+/* always pick up the newest version: check on open, when the app comes back, and hourly; reload once when it changes */
+if('serviceWorker' in navigator&&location.protocol==='https:'){
+  const hadCtrl=!!navigator.serviceWorker.controller;let reloading=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadCtrl||reloading)return;reloading=true;location.reload()});
+  navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{const up=()=>reg.update().catch(()=>{});up();setInterval(up,3600000);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')up()})}).catch(()=>{});
+}
 setInterval(()=>{if(!selId&&$('modal').hidden&&$('evModal').hidden)render()},60000);
 })();
 </script>
