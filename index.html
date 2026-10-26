@@ -319,14 +319,86 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .acct .group .row{justify-content:space-between}
 .acct .linkbtns .row{justify-content:center}
 @media (max-width:760px){
-  .panel{left:0;right:0;bottom:0;top:auto;width:auto;height:90vh;border-radius:20px 20px 0 0;transform:translateY(calc(90vh - 52vh));transition:transform .5s var(--ease);padding-bottom:env(safe-area-inset-bottom)}
-  .panel.full{transform:none}
-  .panel.min{transform:translateY(calc(90vh - 170px))}
-  .handle{display:flex;justify-content:center;padding:8px 0 0;cursor:grab;touch-action:none}
-  .handle i{width:38px;height:5px;border-radius:3px;background:var(--label3)}
-  .phead{padding-top:8px}
+  /* phone: bottom sheet whose visible height IS its height, so every list scrolls fully into view */
+  .panel{left:0;right:0;bottom:0;top:auto;width:auto;height:58vh;height:58dvh;border-radius:22px 22px 0 0;border-bottom:0;transition:height .45s var(--ease)}
+  .panel.full{height:calc(100vh - 58px - env(safe-area-inset-top));height:calc(100dvh - 58px - env(safe-area-inset-top))}
+  .panel.min{height:calc(128px + env(safe-area-inset-bottom))}
+  .panel.min .scroll{visibility:hidden}
+  .handle{display:flex;justify-content:center;padding:8px 0 4px;cursor:grab;touch-action:none}
+  .handle i{width:36px;height:5px;border-radius:3px;background:var(--label3)}
+  body.sheet-full .ctrls,body.sheet-full .placebar{opacity:0;pointer-events:none}
+  .ctrls{transition:opacity .25s;top:calc(10px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right));gap:8px}
+  .stack button{width:38px;height:38px;font-size:17px}
+  .seg button{padding:5px 10px;font-size:13px}
+  .scroll{padding:0 14px calc(28px + env(safe-area-inset-bottom))}
+  .phead{padding:4px 14px 10px;gap:10px}
+  .logo{width:30px;height:30px;border-radius:8px}
+  .logo svg{width:18px;height:18px}
+  .brand h1{font-size:19px}
+  .brand small{font-size:11px}
+  .add{width:32px;height:32px;font-size:16px}
+  #tabs button{padding:6px 8px;font-size:14px}
+  .hello{margin:2px 2px 12px}
+  .hello small{font-size:12px}
+  .hello h2{font-size:24px}
+  .hello p{font-size:14px}
+  .money,.sum{gap:6px;margin-bottom:14px}
+  .mt,.tile{padding:9px 10px;border-radius:12px}
+  .mt b,.tile b{font-size:16px}
+  .mt span,.tile span{font-size:11px}
+  .tile .ic{width:20px;height:20px}
+  .tile .ic svg{width:11px;height:11px}
+  .sect{margin-bottom:16px}
+  .secthead{margin:0 2px 6px}
+  .secthead h3{font-size:17px}
+  .group{border-radius:12px}
+  .task{padding:9px 10px;gap:10px}
+  .task+.task::before,.row+.row::before{left:46px}
+  .chk{width:22px;height:22px}
+  .tt b{font-size:14.5px;line-height:1.3}
+  .tt span{font-size:12.5px}
+  .when{font-size:12px}
+  .row{padding:9px 10px;gap:10px}
+  .gl{width:30px;height:30px}
+  .gl svg{width:14px;height:14px}
+  .rt b{font-size:14.5px}
+  .rt>span{font-size:12.5px}
+  .rv em{font-size:13px}
+  .mini i{width:11px}
+  .navbar{padding:6px 10px 4px}
+  .dtitle{padding:0 2px 12px}
+  .dtitle h2{font-size:24px}
+  .dtitle p{font-size:14px}
+  .acts{gap:6px;margin-bottom:12px}
+  .act{padding:9px 2px 8px;font-size:11px;border-radius:12px}
+  .act svg{width:19px;height:19px}
+  .nextcard{padding:10px;margin-bottom:16px}
+  .nextcard .gl{width:32px;height:32px}
+  .nextcard p{font-size:15px}
+  .block{margin-bottom:16px}
+  .journey .step{padding:8px 10px;gap:10px}
+  .journey .step+.step::before{left:42px}
+  .journey .line{left:20px}
+  .journey .sx b{font-size:14.5px}
+  .journey .sx span{font-size:12px}
+  .journey .dt input{font-size:12px;padding:4px 6px;max-width:118px}
+  .journey .dt input[type=time]{max-width:84px}
+  .inline{padding:8px 10px 10px 42px}
+  .paysum{padding:12px}
+  .paysum .nums div b{font-size:16px}
+  .info .r,.pay{padding:10px 12px;font-size:14px}
+  .hist{padding:10px 12px;gap:10px}
+  .hist div{font-size:13.5px}
+  .label{font-size:12px}
+  .calhead h3{font-size:19px}
+  .day{height:42px}
+  .day b{width:26px;height:26px;font-size:14px}
   .scrim{align-items:flex-end;padding:0}
-  .sheet{border-radius:14px 14px 0 0;max-height:94vh;transform:translateY(100%)}
+  .sheet{border-radius:16px 16px 0 0;max-height:94vh;max-height:94dvh;transform:translateY(100%)}
+  .sheet .body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+  .fg label>span{width:96px;font-size:15px}
+  .fg input,.fg select,.fg textarea{font-size:16px}
+  .toast{max-width:calc(100% - 24px)}
 }
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
 </style>
@@ -775,7 +847,7 @@ $('list').onclick=e=>{const b=e.target.closest('.row');if(b)openDetail(b.dataset
 function setTab(t){tab=t;[...$('tabs').children].forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
   $('pToday').hidden=t!=='today';$('pJobs').hidden=t!=='jobs';$('pCal').hidden=t!=='cal';$('searchWrap').hidden=t!=='jobs';
   $('mainScroll').scrollTop=0;render();if(t!=='cal')fit()}
-$('tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)setTab(b.dataset.tab)};
+$('tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;if(isPhone()&&sheetState==='min')setSheet('peek');setTab(b.dataset.tab)};
 
 /* ---------- detail ---------- */
 function setStep(r,k,on,date){
@@ -925,7 +997,7 @@ const cityPoint=city=>{const c=CITIES[city]||CITIES.Toronto;return{lat:c[0]+(Mat
 
 /* ---------- phone sheet ---------- */
 const panel=$('panel');let sheetState='peek';
-function setSheet(s){sheetState=s;panel.classList.toggle('full',s==='full');panel.classList.toggle('min',s==='min')}
+function setSheet(s){sheetState=s;panel.classList.toggle('full',s==='full');panel.classList.toggle('min',s==='min');document.body.classList.toggle('sheet-full',s==='full'&&isPhone())}
 (()=>{let y0=null,moved=false;const h=$('handle');
   h.addEventListener('pointerdown',e=>{y0=e.clientY;moved=false;h.setPointerCapture(e.pointerId)});
   h.addEventListener('pointermove',e=>{if(y0!=null&&Math.abs(e.clientY-y0)>8)moved=true});
