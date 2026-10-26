@@ -1320,9 +1320,9 @@ function openDoc(d,r){docJob=r;
 function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');
   $('docActs').innerHTML=d.status==='accepted'
     ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed Estimate (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>`
-    :`<button type="button" class="primary" data-act="send">${ico('sent')}${d.status==='sent'?'Send Again':'Send to Customer'}</button>
+    :`<button type="button" class="primary" data-act="send">${ico(docJob.email?'mail':'sent')}${d.status==='sent'?'Send Again':'Send to Customer'}${docJob.email?' by Email':''}</button>
       <button type="button" data-act="pdf">${ico('quote')}Preview / PDF</button><button type="button" data-act="copy">Copy Link</button>
-      <button type="button" data-act="mail" ${docJob.email?'':'disabled style="opacity:.4"'}>${ico('mail')}Email</button><button type="button" data-act="wa" ${ph?'':'disabled style="opacity:.4"'}>${ico('msg')}WhatsApp</button>
+      <button type="button" data-act="mail" ${docJob.email?'':'disabled style="opacity:.4" title="Add the customer email first"'}>${ico('mail')}Gmail</button><button type="button" data-act="wa" ${ph?'':'disabled style="opacity:.4"'}>${ico('msg')}WhatsApp</button>
       ${d._new?'':'<button type="button" class="wide danger" data-act="del">Delete Estimate</button>'}`}
 $('d-items').addEventListener('input',e=>{const t=e.target,k=+t.dataset.k;if(!docEdit.items[k])return;docEdit.items[k][t.dataset.f]=t.dataset.f==='a'?(t.value.replace(/[^0-9.]/g,'')||null):t.value;
   if(t.tagName==='TEXTAREA'){t.style.height='auto';t.style.height=t.scrollHeight+'px'}paintTotals()});
@@ -1349,19 +1349,42 @@ $('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-
     db.docs=db.docs.filter(x=>x.id!==docEdit.id);log(docJob,`Estimate ${docEdit.number} deleted`);save();hideModal('docModal');render();if(selId)openDetail(selId);toast('Estimate deleted');return}
   const d=docEdit;
   if(d.status!=='accepted'){const c=calcDoc(Object.assign({},d,{hst:$('d-hst').checked,lump:$('d-lump').value}));if(!c.total&&act!=='pdf'){toast('Add a price before sending');return}}
-  const win=(act==='pdf'||act==='wa')?window.open('about:blank','_blank'):null;
+  const sendVia=act==='send'?(docJob.email?'mail':((docJob.phone||'').replace(/\D/g,'').length>=10?'wa':'share')):act;
+  const win=['pdf','wa','mail'].includes(sendVia)?window.open('about:blank','_blank'):null;
   if(d.status!=='accepted'){storeDoc();if(['send','copy','mail','wa'].includes(act))markSent(docEdit);save()}
   const ok=await flush();
   if(!ok){if(win)win.close();toast('Not saved. Check your connection.');return}
-  const link=docLink(docEdit),first=(docJob.name||'').split(/[\s.]+/).filter(w=>w.length>1)[0]||'';
-  const msg=`Hi ${first||'there'},\n\nThank you for the opportunity. Here is your estimate ${docEdit.number} from NEVACO BUILD${docEdit.title?' for '+docEdit.title:''}: ${money(docEdit.total)} CAD.\n\nYou can review and sign it online here:\n${link}\n\nIf you have any questions, call or text 437-432-2252.\n\nKevin\nNEVACO BUILD`;
-  if(act==='pdf'){if(win)win.location=link+(docEdit.status==='accepted'?'':'');else location.href=link}
-  else if(act==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied')}catch(err){prompt('Copy this link',link)}}
-  else if(act==='mail'){location.href=`mailto:${encodeURIComponent(docJob.email)}?subject=${encodeURIComponent(`Your estimate ${docEdit.number} from NEVACO BUILD`)}&body=${encodeURIComponent(msg)}`}
-  else if(act==='wa'){const ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');const u=`https://wa.me/1${ph}?text=${encodeURIComponent(msg)}`;if(win)win.location=u;else location.href=u}
-  else if(act==='send'){
-    if(navigator.share){try{await navigator.share({title:`Estimate ${docEdit.number}`,text:msg.replace(link,'').trim(),url:link})}catch(err){}}
-    else{try{await navigator.clipboard.writeText(msg);toast('Message with link copied. Paste it in email or text.')}catch(err){prompt('Copy this message',msg)}}}
+  const link=docLink(docEdit),nm=String(docJob.name||'').trim(),w0=nm.split(/\s+/)[0]||'';
+  const hiName=!nm||/^\d/.test(nm)?'':(w0.length>2&&!w0.endsWith('.')?w0:nm);
+  const proj=(docEdit.title||docJob.type||'renovation').trim();
+  const subject=`Your estimate ${docEdit.number} from NEVACO BUILD${proj?' – '+proj:''}`;
+  const msg=`Hi ${hiName||'there'},
+
+Thank you for considering NEVACO BUILD for your ${proj.toLowerCase()} project.
+
+Your estimate ${docEdit.number} is ready. You can review it, download it as a PDF, and accept it with an online signature here:
+${link}
+
+Estimate total: ${money(docEdit.total)} CAD${docEdit.hst?' (including HST)':' (plus HST)'}${docEdit.depositPct?`
+Deposit at signing: ${docEdit.depositPct}%`:''}${docEdit.validUntil?`
+Valid until: ${new Date(docEdit.validUntil+'T12:00').toLocaleDateString('en-CA',{month:'long',day:'numeric',year:'numeric'})}`:''}
+
+If you have any questions or would like to go over the details, just reply to this email or call or text us at 437-432-2252.
+
+Best regards,
+Kevin
+NEVACO BUILD INC.
+437-432-2252 | nevacobuild@gmail.com | nevacobuild.ca`;
+  const waMsg=`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. Your estimate ${docEdit.number} for ${proj.toLowerCase()} is ready (${money(docEdit.total)} CAD). You can review it, download the PDF and sign online here: ${link}`;
+  const gmail=`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(docJob.email||'')}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`;
+  const go=u=>{if(win)win.location=u;else location.href=u};
+  if(sendVia==='pdf')go(link);
+  else if(sendVia==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied')}catch(err){prompt('Copy this link',link)}}
+  else if(sendVia==='mail'){go(gmail);toast('Gmail opened with the estimate email')}
+  else if(sendVia==='wa'){const ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');go(`https://wa.me/1${ph}?text=${encodeURIComponent(waMsg)}`)}
+  else if(sendVia==='share'){
+    if(navigator.share){try{await navigator.share({title:subject,text:waMsg})}catch(err){}}
+    else{try{await navigator.clipboard.writeText(waMsg);toast('Message with link copied')}catch(err){prompt('Copy this message',waMsg)}}}
   render();if(selId)openDetail(selId);docEdit=JSON.parse(JSON.stringify(db.docs.find(x=>x.id===docEdit.id)||docEdit));
   $('docBanner').innerHTML=docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`:$('docBanner').innerHTML;paintDocActs();
 });
