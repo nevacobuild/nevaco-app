@@ -266,7 +266,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .sheet header button{color:var(--blue);font-size:16px;justify-self:start}
 .sheet header button.save{justify-self:end;font-weight:600}
 .sheet header button:disabled{opacity:.4}
-.sheet .body{overflow-y:auto;padding:18px 16px 24px;display:grid;gap:22px}
+.sheet .body{overflow-y:auto;padding:18px 16px 24px;display:grid;gap:22px;grid-auto-rows:max-content;align-content:start}
 .fg{background:var(--card);border-radius:12px;overflow:hidden}
 .fg label{display:flex;align-items:center;gap:12px;padding:0 14px;min-height:46px;position:relative}
 .fg label+label::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
@@ -393,6 +393,30 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .pin.p3 .b{color:#1d1d1f}
 
 #sMap .placebar{position:absolute;z-index:600}
+/* ===== estimates ===== */
+.items .itm{display:flex;gap:10px;align-items:flex-start;padding:8px 10px 8px 14px;position:relative}
+.items .itm+.itm::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
+.items .itm em{font-style:normal;color:var(--label3);font-weight:600;padding-top:9px;width:16px;font-variant-numeric:tabular-nums}
+.items textarea{flex:1;min-width:0;border:0;background:none;outline:none;resize:none;padding:8px 0;min-height:38px;color:var(--label);font:inherit;field-sizing:content}
+.items input{width:96px;border:0;background:var(--card2);border-radius:8px;padding:8px;text-align:right;color:var(--label);margin-top:2px}
+.items .rm{color:var(--label3);padding:9px 2px 0;font-size:18px;line-height:1}
+.addline{color:var(--blue);font-weight:600;font-size:15px;justify-self:start;padding:0 14px;margin-top:-12px}
+.dtotals{background:var(--card);border-radius:12px;padding:12px 14px;display:grid;gap:4px;font-variant-numeric:tabular-nums}
+.dtotals div{display:flex;justify-content:space-between}
+.dtotals .g{font-weight:700;font-size:17px;border-top:.5px solid var(--sep);padding-top:8px;margin-top:4px}
+.dtotals span{color:var(--label2)}
+.docacts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.docacts button{height:46px;border-radius:12px;background:var(--card);font-weight:600;color:var(--blue);display:flex;align-items:center;justify-content:center;gap:8px}
+.docacts button.primary{background:var(--blue);color:#fff;grid-column:1/-1}
+.docacts button.wide{grid-column:1/-1}
+.docacts button svg{width:18px;height:18px}
+.docacts button.danger{color:var(--red)}
+.banner{border-radius:12px;padding:12px 14px;font-weight:600;display:flex;gap:10px;align-items:center}
+.banner.ok{background:color-mix(in srgb,var(--green) 15%,transparent);color:var(--green)}
+.banner.info{background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--blue)}
+.banner.warn{background:color-mix(in srgb,var(--orange) 15%,transparent);color:var(--orange)}
+.docsheet[data-locked="1"] input,.docsheet[data-locked="1"] textarea,.docsheet[data-locked="1"] select{pointer-events:none;opacity:.7}
+.docsheet[data-locked="1"] .addline,.docsheet[data-locked="1"] .rm,.docsheet[data-locked="1"] #docSave{display:none}
 /* ===== detail drawer ===== */
 .detail{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;z-index:40;background:var(--bg);box-shadow:-12px 0 40px rgba(0,0,0,.18);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .45s var(--ease);padding-top:env(safe-area-inset-top);border-left:.5px solid var(--sep)}
 .detail.open{transform:none}
@@ -624,6 +648,35 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   </form>
 </div>
 
+<div class="scrim" id="docModal" hidden>
+  <form class="sheet docsheet" id="docForm" novalidate>
+    <header><button type="button" id="docCancel">Close</button><h3 id="docTitleH">New Estimate</h3><button type="submit" class="save" id="docSave">Save</button></header>
+    <div class="body" id="docBody">
+      <div id="docBanner"></div>
+      <div class="fg">
+        <label><span>Project</span><input id="d-title" placeholder="e.g. Bathroom Renovation"></label>
+        <label><span>Date</span><input id="d-date" type="date"></label>
+        <label><span>Valid for</span><select id="d-valid"><option value="15">15 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select></label>
+      </div>
+      <div class="fghead">Scope of work</div>
+      <div class="fg items" id="d-items"></div>
+      <button type="button" class="addline" id="d-addline">+ Add line</button>
+      <p class="fnote">Leave amounts empty to show the scope without per-line prices, and enter one price below.</p>
+      <div class="fghead">Price</div>
+      <div class="fg">
+        <label id="d-lumprow"><span>Total price</span><input id="d-lump" inputmode="decimal" placeholder="$0"></label>
+        <label class="sw"><span>Add HST (13%)</span><input id="d-hst" type="checkbox"></label>
+        <label><span>Deposit</span><select id="d-dep"><option value="0">No deposit</option><option value="10">10%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="40">40%</option><option value="50">50%</option></select></label>
+      </div>
+      <div class="dtotals" id="d-totals"></div>
+      <div class="fghead">Notes and terms</div>
+      <div class="fg"><label class="ta"><span>Notes</span><textarea id="d-notes" placeholder="e.g. Materials supplied by customer. Timeline 5–7 working days."></textarea></label></div>
+      <div class="fg"><label class="ta"><span>Terms</span><textarea id="d-terms" rows="7"></textarea></label></div>
+      <div class="docacts" id="docActs"></div>
+    </div>
+  </form>
+</div>
+
 <div class="auth" id="auth" hidden>
   <form class="authcard glass" id="authForm" novalidate>
     <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg><i></i></div>
@@ -770,20 +823,24 @@ const authStorage={
   removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
 };
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
-let db={jobs:[],events:[]};
+let db={jobs:[],events:[],docs:[]};let docsReady=false;
 let data=db.jobs;
 let me=null,team=[],loaded=false;
-let synced={jobs:new Map(),payments:new Map(),events:new Map()};
+let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map()};
 const nz=v=>(v===''||v==null)?null:v;
 function jobRow(r){return{id:r.id,name:r.name||'',phone:r.phone||'',email:r.email||'',address:r.address||'',city:r.city||'',type:r.type||'',source:r.source||'',
   value:(r.value==null||r.value==='')?null:Number(r.value),hst:!!r.hst,notes:r.notes||'',lat:r.lat??null,lng:r.lng??null,approx:!!r.approx,
   follow:nz(r.follow),lost:!!r.lost,sample:!!r.sample,stage:stageOf(r),ms:r.ms||{},history:r.history||[]}}
 function payRows(){const out=[];for(const r of db.jobs)for(const p of (r.payments||[])){if(!p.id)p.id=uid();out.push({id:p.id,job_id:r.id,date:p.date,amount:Number(p.amount)||0,note:p.note||''})}return out}
 function evRow(e){if(!e.id)e.id=uid();return{id:e.id,job_id:nz(e.jobId),type:e.type||'task',title:e.title||'',date:e.date,time:e.time||'',notes:e.notes||'',done:!!e.done}}
+function docRow(d){return{id:d.id,job_id:d.jobId,kind:d.kind||'estimate',number:d.number,status:d.status||'draft',date:d.date,valid_until:nz(d.validUntil),title:d.title||'',
+  items:(d.items||[]).map(i=>({d:i.d||'',a:(i.a===''||i.a==null)?null:Number(i.a)})),lump:(d.lump===''||d.lump==null)?null:Number(d.lump),hst:!!d.hst,deposit_pct:Number(d.depositPct)||0,
+  notes:d.notes||'',terms:d.terms||'',subtotal:Number(d.subtotal)||0,tax:Number(d.tax)||0,total:Number(d.total)||0,share_token:d.token,sent_at:nz(d.sentAt)}}
 function setStatus(t,cls){const el=$('syncStatus');if(!el)return;el.textContent=t;el.className=cls||''}
 async function must(q){const{error}=await q;if(error)throw error}
 async function fetchAll(){
-  const[j,p,e]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*')]);
+  const[j,p,e,dc]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
+    sb.from('documents').select('id,job_id,kind,number,status,date,valid_until,title,items,lump,hst,deposit_pct,notes,terms,subtotal,tax,total,share_token,sent_at,accepted_at,accepted_name').order('created_at')]);
   const err=j.error||p.error||e.error;if(err)throw err;
   const jobs=j.data.map(x=>({id:x.id,name:x.name||'',phone:x.phone||'',email:x.email||'',address:x.address||'',city:x.city||'',type:x.type||'',source:x.source||'',
     value:x.value==null?null:Number(x.value),hst:!!x.hst,notes:x.notes||'',lat:x.lat,lng:x.lng,approx:!!x.approx,follow:x.follow||'',lost:!!x.lost,sample:!!x.sample,
@@ -791,8 +848,12 @@ async function fetchAll(){
   const byId=Object.fromEntries(jobs.map(r=>[r.id,r]));
   p.data.forEach(x=>{const r=byId[x.job_id];if(r)r.payments.push({id:x.id,date:x.date,amount:Number(x.amount),note:x.note||''})});
   const events=e.data.map(x=>({id:x.id,jobId:x.job_id||'',type:x.type||'task',title:x.title||'',date:x.date,time:x.time||'',notes:x.notes||'',done:!!x.done}));
-  db={jobs,events};data=db.jobs;
-  synced={jobs:new Map(jobs.map(r=>[r.id,JSON.stringify(jobRow(r))])),payments:new Map(payRows().map(x=>[x.id,JSON.stringify(x)])),events:new Map(events.map(x=>[x.id,JSON.stringify(evRow(x))]))};
+  docsReady=!dc.error;
+  const docs=(dc.data||[]).map(x=>({id:x.id,jobId:x.job_id,kind:x.kind,number:x.number,status:x.status,date:x.date,validUntil:x.valid_until||'',title:x.title||'',items:Array.isArray(x.items)?x.items:[],
+    lump:x.lump==null?null:Number(x.lump),hst:!!x.hst,depositPct:Number(x.deposit_pct)||0,notes:x.notes||'',terms:x.terms||'',subtotal:Number(x.subtotal)||0,tax:Number(x.tax)||0,total:Number(x.total)||0,
+    token:x.share_token,sentAt:x.sent_at||'',acceptedAt:x.accepted_at||'',acceptedName:x.accepted_name||''}));
+  db={jobs,events,docs};data=db.jobs;
+  synced={jobs:new Map(jobs.map(r=>[r.id,JSON.stringify(jobRow(r))])),payments:new Map(payRows().map(x=>[x.id,JSON.stringify(x)])),events:new Map(events.map(x=>[x.id,JSON.stringify(evRow(x))])),documents:new Map(docs.map(x=>[x.id,JSON.stringify(docRow(x))]))};
   loaded=true;
 }
 let syncing=false,again=false,dirty=false,syncT=null;
@@ -802,30 +863,33 @@ async function sync(){
   if(syncing){again=true;return}
   syncing=true;syncT=null;setStatus('Saving…','busy');
   try{
-    const sets={jobs:db.jobs.map(jobRow),payments:payRows(),events:db.events.map(evRow)},plan={};
-    for(const t of ['jobs','payments','events']){
+    const sets={jobs:db.jobs.map(jobRow),payments:payRows(),events:db.events.map(evRow),documents:docsReady?(db.docs||[]).map(docRow):[...synced.documents.keys()].map(id=>({id}))},plan={};
+    for(const t of ['jobs','payments','events','documents']){
       const cur=new Map(sets[t].map(x=>[x.id,x])),changed=[];
       for(const[id,row]of cur){const js=JSON.stringify(row);if(synced[t].get(id)!==js)changed.push([row,js])}
       plan[t]={changed,removed:[...synced[t].keys()].filter(id=>!cur.has(id))};
     }
     if(plan.jobs.changed.length)await must(sb.from('jobs').upsert(plan.jobs.changed.map(([r])=>Object.assign({},r,{updated_by:me.email}))));
-    for(const t of ['payments','events'])if(plan[t].changed.length)await must(sb.from(t).upsert(plan[t].changed.map(([r])=>r)));
-    for(const t of ['payments','events','jobs'])if(plan[t].removed.length)await must(sb.from(t).delete().in('id',plan[t].removed));
-    for(const t of ['jobs','payments','events']){plan[t].changed.forEach(([r,js])=>synced[t].set(r.id,js));plan[t].removed.forEach(id=>synced[t].delete(id))}
+    for(const t of ['payments','events','documents'])if(plan[t].changed.length&&(t!=='documents'||docsReady))await must(sb.from(t).upsert(plan[t].changed.map(([r])=>r)));
+    for(const t of ['payments','events','documents','jobs'])if(plan[t].removed.length&&(t!=='documents'||docsReady))await must(sb.from(t).delete().in('id',plan[t].removed));
+    for(const t of ['jobs','payments','events','documents']){plan[t].changed.forEach(([r,js])=>synced[t].set(r.id,js));plan[t].removed.forEach(id=>synced[t].delete(id))}
     setStatus('Synced');
   }catch(err){console.error(err);setStatus('Not saved · retrying','err');toast('Not saved. Check your connection.');setTimeout(()=>{dirty=true;sync()},8000)}
   syncing=false;
   if(again){again=false;sync()}else dirty=syncT!==null;
 }
+async function flush(){clearTimeout(syncT);syncT=null;while(syncing)await new Promise(r=>setTimeout(r,100));await sync();return !dirty}
 let remoteT=null;
 function onRemote(){clearTimeout(remoteT);remoteT=setTimeout(refreshFromServer,700)}
 async function refreshFromServer(force){
   if(!me)return;
-  if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
-  const before=new Set(data.map(r=>r.id));
+  if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden||!$('docModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
+  const before=new Set(data.map(r=>r.id)),signedBefore=new Set((db.docs||[]).filter(x=>x.status==='accepted').map(x=>x.id));
   try{await fetchAll()}catch(e){console.error(e);return}
   const fresh=data.filter(r=>!before.has(r.id)&&(r.history[0]?.by==='Website'));
   if(fresh.length&&before.size)toast(fresh.length>1?`${fresh.length} new leads from the website`:`New lead: ${fresh[0].name}`);
+  const signed=(db.docs||[]).filter(x=>x.status==='accepted'&&!signedBefore.has(x.id));
+  if(signed.length&&before.size)toast(`Estimate ${signed[0].number} signed by ${signed[0].acceptedName||'customer'}`);
   locateMissing();
   render();if(selId){if(job(selId))openDetail(selId);else closeDetail()}
 }
@@ -905,6 +969,7 @@ function taskRow(i){
    <span class="when ${i.p===1?'p1':''}">${i.time?fmtTime(i.time):(i.date?fmtDate(i.date):PN[i.p]||'')}</span></div>`;
 }
 $('pToday').addEventListener('click',e=>{
+  const rowE=e.target.closest('.task');if(rowE&&!e.target.closest('[data-act="done"]')){const it=window._todo?.[rowE.dataset.k];if(it&&it.key.endsWith('e')&&it.title.startsWith('Send estimate')&&it.job){openDetail(it.job.id,true);setTimeout(()=>openDoc(docsFor(it.job.id)[0]||null,it.job),80);return}}
   const go=e.target.closest('[data-go]');if(go){setTab(go.dataset.go);return}
   const cr=e.target.closest('[data-cal]');if(cr){openCalItem(cr.dataset.cal);return}
   const row=e.target.closest('.task');if(!row)return;const it=window._todo[row.dataset.k];if(!it)return;
@@ -1046,6 +1111,8 @@ function openDetail(id,pan){
       <button class="act" id="dCal">${ico('calp')}Schedule</button>
     </div>
     ${nx&&!r.lost?`<div class="nextcard"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
+    <div class="block"><div class="label">Estimates <button id="newDoc">New Estimate</button></div>
+      <div class="group">${docsFor(r.id).length?docsFor(r.id).map(docListRow).join(''):`<div class="empty" style="padding:16px"><b style="font-size:15px">No estimate yet</b>Create one and send it for online signature.</div>`}</div></div>
     <div class="block"><div class="label">Job Steps <span>${STEPS.filter(s=>stepDone(r,s.k)).length} of ${STEPS.length}</span></div>
       <div class="group journey" id="journey">${STEPS.map(s=>{const on=stepDone(r,s.k),m=r.ms[s.k]||{};
         let sub=on?(m.date?fmtDate(m.date):'Done'):'';
@@ -1089,6 +1156,8 @@ function openDetail(id,pan){
   $('dShowMap').onclick=()=>{if(isPhone())closeDetail();setTab('map');mapSel=r.id;drawPins();renderCards();setTimeout(()=>{if(r.lat!=null)flyTo(r.lat,r.lng,15);scrollCard(r.id)},80)};
   $('dLost').onclick=()=>{snapshot();r.lost=!r.lost;log(r,r.lost?'Marked as lost':'Reopened');save();render();openDetail(r.id);toast(r.lost?'Marked as lost':'Reopened',true)};
   $('addPay').onclick=()=>openPay('extra');
+  $('newDoc').onclick=()=>openDoc(null,r);
+  v.querySelectorAll('[data-doc]').forEach(b=>b.onclick=()=>openDoc((db.docs||[]).find(x=>x.id===b.dataset.doc),r));
   $('journey').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s,on=stepDone(r,k);
     if(SK[k].pay&&!on&&T){openPay(k);return}
     snapshot();if(SK[k].pay&&on&&r.payments.length){if(k==='final'){r.payments.pop()}else{r.payments=[]}log(r,'Payment removed');r.ms[k]={done:false}}else setStep(r,k,!on);
@@ -1105,7 +1174,7 @@ function openDetail(id,pan){
   v.querySelectorAll('[data-delpay]').forEach(b=>b.onclick=()=>{snapshot();const p=r.payments.splice(+b.dataset.delpay,1)[0];log(r,`Payment removed ${money(p.amount)}`);save();render();openDetail(r.id);toast('Payment removed',true)});
   v.querySelectorAll('[data-cal]').forEach(b=>b.onclick=()=>{const e=db.events.find(x=>'e:'+x.id===b.dataset.cal);if(e)openEvent(e)});
   $('dDel').onclick=()=>{$('dConfirm').innerHTML=`<div class="group linkbtns"><div style="padding:14px;text-align:center;color:var(--label2);font-size:13px">Delete ${esc(r.name)}? This can’t be undone.</div><button class="row danger" id="dYes" style="font-weight:600">Delete</button><button class="row" id="dNo">Cancel</button></div>`;
-    $('dYes').onclick=()=>{snapshot();db.jobs=data=data.filter(x=>x.id!==r.id);db.events=db.events.filter(x=>x.jobId!==r.id);save();closeDetail();render();toast('Customer deleted',true)};$('dNo').onclick=()=>$('dConfirm').innerHTML='';$('dConfirm').scrollIntoView({behavior:'smooth',block:'nearest'})};
+    $('dYes').onclick=()=>{snapshot();db.jobs=data=data.filter(x=>x.id!==r.id);db.events=db.events.filter(x=>x.jobId!==r.id);db.docs=(db.docs||[]).filter(x=>x.jobId!==r.id);save();closeDetail();render();toast('Customer deleted',true)};$('dNo').onclick=()=>$('dConfirm').innerHTML='';$('dConfirm').scrollIntoView({behavior:'smooth',block:'nearest'})};
   v.classList.add('open');
   renderList();drawPins();renderCards();
 }
@@ -1212,6 +1281,91 @@ function startPlacing(id){placingId=id;$('vDetail').classList.remove('open');set
 function stopPlacing(){const id=placingId;placingId=null;$('map').classList.remove('placing');$('placebar').hidden=true;return id}
 $('placeCancel').onclick=stopPlacing;
 
+/* ---------- estimates ---------- */
+const DOC_ST={draft:{n:'Draft',c:'--p0'},sent:{n:'Sent · waiting for signature',c:'--s-sent'},accepted:{n:'Signed',c:'--green'},declined:{n:'Declined',c:'--red'}};
+const DEFAULT_TERMS=`1. This estimate is valid until the date shown above.
+2. The work is limited to the scope listed. Any extra work or changes will be priced separately and approved in writing before the work is done.
+3. Prices are in Canadian dollars. HST (13%) is added where shown.
+4. Materials supplied by the customer are the customer's responsibility for quality and on-time delivery.
+5. Payments are due according to the schedule above. The balance is due on completion of the work.`;
+const docsFor=id=>(db.docs||[]).filter(x=>x.jobId===id).sort((a,b)=>String(b.number).localeCompare(String(a.number)));
+function docListRow(d){const st=DOC_ST[d.status]||DOC_ST.draft;
+  return `<button class="row" data-doc="${d.id}"><span class="gl" style="--c:var(${st.c})">${ico(d.status==='accepted'?'sign':'quote')}</span><span class="rt"><b>${esc(d.number)} · ${esc(d.title||'Estimate')}</b><span>${st.n}${d.status==='accepted'&&d.acceptedName?' by '+esc(d.acceptedName):''} · ${fmtDate(d.date)}</span></span><span class="rv"><em>${money(d.total)||'$0'}</em>${ico('chev')}</span></button>`}
+function nextDocNumber(){const n=(db.docs||[]).map(x=>parseInt(String(x.number).replace(/\D/g,''),10)).filter(Number.isFinite);return 'E-'+(n.length?Math.max(...n)+1:1001)}
+const newToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
+function calcDoc(d){const items=(d.items||[]).filter(i=>String(i.d||'').trim()||Number(i.a)>0);const priced=items.some(i=>Number(i.a)>0);
+  const sub=Math.round((priced?items.reduce((t,i)=>t+(Number(i.a)||0),0):(Number(d.lump)||0))*100)/100;const tax=d.hst?Math.round(sub*13)/100:0;
+  return{sub,tax,total:Math.round((sub+tax)*100)/100,priced}}
+let docEdit=null,docJob=null;
+function docLink(d){return location.origin+location.pathname.replace(/[^/]*$/,'')+'doc.html?t='+d.token}
+function itemRow(i,k){return `<div class="itm"><em>${k+1}</em><textarea data-k="${k}" data-f="d" rows="1" placeholder="Describe the work">${esc(i.d||'')}</textarea><input data-k="${k}" data-f="a" inputmode="decimal" placeholder="$" value="${i.a==null?'':i.a}"><button type="button" class="rm" data-rm="${k}" aria-label="Remove line">×</button></div>`}
+function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=$('d-date').value||today();d.validUntil=addDays(d.date,Number($('d-valid').value)||30);
+  d.lump=$('d-lump').value.replace(/[^0-9.]/g,'')||null;d.hst=$('d-hst').checked;d.depositPct=Number($('d-dep').value)||0;d.notes=$('d-notes').value.trim();d.terms=$('d-terms').value.trim();
+  const c=calcDoc(d);d.subtotal=c.sub;d.tax=c.tax;d.total=c.total;return c}
+function paintTotals(){const c=readDocForm(),d=docEdit;$('d-lumprow').hidden=c.priced;
+  const dep=Math.round(d.depositPct*d.total)/100;
+  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':'Contract price'}</span><b>${money(c.sub)||'$0'}</b></div>${d.hst?`<div><span>HST (13%)</span><b>${money(c.tax)}</b></div>`:''}<div class="g"><span style="color:var(--label)">Total</span><b>${money(c.total)||'$0'}</b></div>${d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`}
+function paintItems(){$('d-items').innerHTML=docEdit.items.map(itemRow).join('');$('d-items').querySelectorAll('textarea').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})}
+function openDoc(d,r){docJob=r;
+  if(!d){d={id:uid(),jobId:r.id,kind:'estimate',number:nextDocNumber(),status:'draft',date:today(),validUntil:addDays(today(),30),title:r.type||'',items:[{d:'',a:null},{d:'',a:null}],lump:r.value||null,hst:r.hst!==false,depositPct:30,notes:'',terms:DEFAULT_TERMS,token:newToken(),_new:true}}
+  docEdit=JSON.parse(JSON.stringify(d));if(!docEdit.items.length)docEdit.items=[{d:'',a:null}];
+  $('docTitleH').textContent=`Estimate ${docEdit.number}`;
+  $('d-title').value=docEdit.title;$('d-date').value=docEdit.date;
+  const vd=docEdit.validUntil?dayDiff(docEdit.validUntil,docEdit.date):30;$('d-valid').value=[15,30,60,90].includes(vd)?String(vd):'30';
+  $('d-lump').value=docEdit.lump??'';$('d-hst').checked=!!docEdit.hst;$('d-dep').value=String(docEdit.depositPct||0);if(!$('d-dep').value)$('d-dep').value='30';
+  $('d-notes').value=docEdit.notes;$('d-terms').value=docEdit.terms;
+  const locked=docEdit.status==='accepted';$('docForm').dataset.locked=locked?'1':'0';
+  $('docBanner').innerHTML=locked?`<div class="banner ok">${ico('check')} Signed by ${esc(docEdit.acceptedName||'customer')} on ${fmtDate(String(docEdit.acceptedAt).slice(0,10))}</div>`:docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent ${docEdit.sentAt?fmtDate(String(docEdit.sentAt).slice(0,10)):''} · waiting for the customer to sign</div>`:'';
+  paintItems();paintTotals();paintDocActs();showModal('docModal')}
+function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');
+  $('docActs').innerHTML=d.status==='accepted'
+    ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed Estimate (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>`
+    :`<button type="button" class="primary" data-act="send">${ico('sent')}${d.status==='sent'?'Send Again':'Send to Customer'}</button>
+      <button type="button" data-act="pdf">${ico('quote')}Preview / PDF</button><button type="button" data-act="copy">Copy Link</button>
+      <button type="button" data-act="mail" ${docJob.email?'':'disabled style="opacity:.4"'}>${ico('mail')}Email</button><button type="button" data-act="wa" ${ph?'':'disabled style="opacity:.4"'}>${ico('msg')}WhatsApp</button>
+      ${d._new?'':'<button type="button" class="wide danger" data-act="del">Delete Estimate</button>'}`}
+$('d-items').addEventListener('input',e=>{const t=e.target,k=+t.dataset.k;if(!docEdit.items[k])return;docEdit.items[k][t.dataset.f]=t.dataset.f==='a'?(t.value.replace(/[^0-9.]/g,'')||null):t.value;
+  if(t.tagName==='TEXTAREA'){t.style.height='auto';t.style.height=t.scrollHeight+'px'}paintTotals()});
+$('d-items').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;docEdit.items.splice(+b.dataset.rm,1);if(!docEdit.items.length)docEdit.items.push({d:'',a:null});paintItems();paintTotals()});
+$('d-addline').onclick=()=>{docEdit.items.push({d:'',a:null});paintItems();const ts=$('d-items').querySelectorAll('textarea');ts[ts.length-1].focus()};
+['d-lump','d-hst','d-dep','d-date','d-valid'].forEach(id=>$(id).addEventListener('input',paintTotals));
+function storeDoc(){readDocForm();const d=docEdit;d.items=d.items.filter(i=>String(i.d||'').trim()||Number(i.a)>0);if(!d.items.length)d.items=[{d:'',a:null}];
+  const clean=Object.assign({},d);delete clean._new;
+  const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=clean;else{db.docs.push(clean);log(docJob,`Estimate ${d.number} created`)}
+  d._new=false;return clean}
+function markSent(d){if(d.status==='accepted')return;const r=docJob;
+  if(d.status!=='sent'){d.status='sent';d.sentAt=new Date().toISOString();log(r,`Estimate ${d.number} sent (${money(d.total)})`)}
+  r.value=d.subtotal;r.hst=d.hst;
+  if(!stepDone(r,'contacted'))r.ms.contacted={done:true,date:today()};
+  if(!stepDone(r,'estimate'))setStep(r,'estimate',true);
+  const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d)}
+$('docForm').onsubmit=async e=>{e.preventDefault();if(!docsReady){toast('Run the estimates setup step first');return}
+  const d=storeDoc();if(d.status==='sent'){docJob.value=d.subtotal;docJob.hst=d.hst}save();hideModal('docModal');render();if(selId)openDetail(selId);toast('Estimate saved')};
+$('docCancel').onclick=()=>hideModal('docModal');
+$('docModal').onclick=e=>{if(e.target.id==='docModal')hideModal('docModal')};
+$('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const act=b.dataset.act;
+  if(!docsReady){toast('Run the estimates setup step first');return}
+  if(act==='del'){if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again to delete';return}
+    db.docs=db.docs.filter(x=>x.id!==docEdit.id);log(docJob,`Estimate ${docEdit.number} deleted`);save();hideModal('docModal');render();if(selId)openDetail(selId);toast('Estimate deleted');return}
+  const d=docEdit;
+  if(d.status!=='accepted'){const c=calcDoc(Object.assign({},d,{hst:$('d-hst').checked,lump:$('d-lump').value}));if(!c.total&&act!=='pdf'){toast('Add a price before sending');return}}
+  const win=(act==='pdf'||act==='wa')?window.open('about:blank','_blank'):null;
+  if(d.status!=='accepted'){storeDoc();if(['send','copy','mail','wa'].includes(act))markSent(docEdit);save()}
+  const ok=await flush();
+  if(!ok){if(win)win.close();toast('Not saved. Check your connection.');return}
+  const link=docLink(docEdit),first=(docJob.name||'').split(/[\s.]+/).filter(w=>w.length>1)[0]||'';
+  const msg=`Hi ${first||'there'},\n\nThank you for the opportunity. Here is your estimate ${docEdit.number} from NEVACO BUILD${docEdit.title?' for '+docEdit.title:''}: ${money(docEdit.total)} CAD.\n\nYou can review and sign it online here:\n${link}\n\nIf you have any questions, call or text 437-432-2252.\n\nKevin\nNEVACO BUILD`;
+  if(act==='pdf'){if(win)win.location=link+(docEdit.status==='accepted'?'':'');else location.href=link}
+  else if(act==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied')}catch(err){prompt('Copy this link',link)}}
+  else if(act==='mail'){location.href=`mailto:${encodeURIComponent(docJob.email)}?subject=${encodeURIComponent(`Your estimate ${docEdit.number} from NEVACO BUILD`)}&body=${encodeURIComponent(msg)}`}
+  else if(act==='wa'){const ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');const u=`https://wa.me/1${ph}?text=${encodeURIComponent(msg)}`;if(win)win.location=u;else location.href=u}
+  else if(act==='send'){
+    if(navigator.share){try{await navigator.share({title:`Estimate ${docEdit.number}`,text:msg.replace(link,'').trim(),url:link})}catch(err){}}
+    else{try{await navigator.clipboard.writeText(msg);toast('Message with link copied. Paste it in email or text.')}catch(err){prompt('Copy this message',msg)}}}
+  render();if(selId)openDetail(selId);docEdit=JSON.parse(JSON.stringify(db.docs.find(x=>x.id===docEdit.id)||docEdit));
+  $('docBanner').innerHTML=docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`:$('docBanner').innerHTML;paintDocActs();
+});
+
 /* ---------- event form ---------- */
 let editingEv=null;
 $('e-type').innerHTML=Object.entries(EVTYPES).map(([k,t])=>`<option value="${k}">${t.n}</option>`).join('');
@@ -1236,8 +1390,8 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 
 /* ---------- misc ---------- */
 let tt;function toast(m,canUndo){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:2400)}
-$('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId)closeDetail()}});
+$('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId)closeDetail()}});
 function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>!r.lost&&stageOf(r)!=='done').length||'';if(tab==='jobs'){renderSum();renderList()}if(tab==='cal')renderCal();drawPins();renderCards()}
 let locating=false;
 async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
@@ -1277,7 +1431,7 @@ async function start(session){
   try{await fetchAll();setStatus('Synced')}catch(e){console.error(e);setStatus('Offline','err');toast('Could not load data. Check your connection.')}
   if(!started){started=true;
     channel=sb.channel('nevaco-sync');
-    ['jobs','payments','events'].forEach(t=>channel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));
+    ['jobs','payments','events','documents'].forEach(t=>channel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));
     channel.subscribe();
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshFromServer()});
     window.addEventListener('online',()=>{setStatus('Synced');sync();refreshFromServer()});
