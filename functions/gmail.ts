@@ -331,6 +331,9 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
     const after = `after:${Math.floor(since / 1000)}`;
 
     const { data: partners } = await db.from("partners").select("id,email,name");
+    // never turn our own addresses (team, test emails) into partners
+    const { data: team } = await db.from("team_members").select("email");
+    const ignore = new Set<string>([...(team || []).map((t: any) => String(t.email).toLowerCase()), ...((cfg.ignore_emails || []) as string[]).map((e) => String(e).toLowerCase().trim())]);
     const byEmail = new Map<string, string>();
     (partners || []).forEach((p: any) => { if (p.email) byEmail.set(String(p.email).toLowerCase().trim(), p.id); });
     const { data: known } = await db.from("partner_messages").select("gmail_id,thread_id,partner_id").not("thread_id", "is", null);
@@ -383,7 +386,7 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
         const reply = real || (inbound.has(t.id) ? others[0] : undefined);
         if (!reply) continue; // sent but nobody replied yet
         const a = parseAddr(hdr(reply, "From"));
-        if (!a.email || a.email === ALLOWED || /mailer-daemon|postmaster/i.test(a.email)) continue;
+        if (!a.email || a.email === ALLOWED || ignore.has(a.email) || /mailer-daemon|postmaster/i.test(a.email)) continue;
         if (!inbound.has(t.id) && /no-?reply/i.test(a.email)) continue;
         // another sync may have just created this partner
         const { data: ex } = await db.from("partners").select("id").ilike("email", a.email).limit(1);
