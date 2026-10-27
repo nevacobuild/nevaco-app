@@ -393,6 +393,51 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .pin.p3 .b{color:#1d1d1f}
 
 #sMap .placebar{position:absolute;z-index:600}
+/* ===== partners ===== */
+#sPart .searchbox{margin:0 32px 12px;max-width:820px}
+.demo{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,var(--orange) 14%,transparent);color:var(--label);border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:14px}
+.demo b{color:var(--orange)}
+.pstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.ptype{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:1px 6px;border-radius:5px;margin-left:6px;vertical-align:1px}
+.ptype.re{background:color-mix(in srgb,#5856d6 15%,transparent);color:#5856d6}
+.ptype.pm{background:color-mix(in srgb,#30b0c7 18%,transparent);color:#1a8aa0}
+.pst{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--label);white-space:nowrap;display:inline-flex;gap:5px;align-items:center}
+.pst i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.psnip{display:block;font-size:13px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.psnip.in{color:var(--label);font-weight:500}
+.unread{width:9px;height:9px;border-radius:50%;background:var(--blue);display:inline-block;margin-right:6px;vertical-align:1px}
+.pipe{display:flex;gap:4px;margin:2px 0 16px}
+.pipe div{flex:1;text-align:center;font-size:11px;font-weight:600;color:var(--label3)}
+.pipe div i{display:block;height:5px;border-radius:3px;background:var(--card2);margin-bottom:5px}
+.pipe div.on{color:var(--label)}
+.pipe div.on i{background:var(--c)}
+.thread{display:flex;flex-direction:column;gap:10px;padding:4px 0 8px}
+.tday{align-self:center;font-size:11.5px;color:var(--label2);font-weight:600;margin:6px 0 0}
+.bub{max-width:86%;border-radius:18px;padding:10px 13px;font-size:14px;line-height:1.42;white-space:pre-wrap;word-wrap:break-word;position:relative}
+.bub.out{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:6px}
+.bub.in{align-self:flex-start;background:var(--card);color:var(--label);border-bottom-left-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.bub .subj{display:block;font-weight:700;font-size:12.5px;margin-bottom:4px;opacity:.9}
+.bub .att{display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.18);font-size:12.5px;font-weight:600}
+.bub.in .att{background:var(--card2)}
+.bub .att svg{width:18px;height:18px}
+.bub .meta{display:block;font-size:11px;opacity:.7;margin-top:6px;text-align:right}
+.bub.note{align-self:center;background:transparent;color:var(--label2);font-size:12.5px;padding:2px 8px;text-align:center;box-shadow:none}
+.composer{position:sticky;bottom:0;background:var(--bg);padding:10px 0 calc(10px + env(safe-area-inset-bottom));border-top:.5px solid var(--sep);margin:0 -18px;padding-left:18px;padding-right:18px}
+.tpls{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:8px}
+.tpls::-webkit-scrollbar{display:none}
+.tpls button{flex:none;padding:6px 11px;border-radius:999px;background:var(--card);font-size:12.5px;font-weight:600;color:var(--blue)}
+.cbox{background:var(--card);border-radius:16px;padding:8px 10px;display:grid;gap:6px}
+.cbox input,.cbox textarea{border:0;background:none;outline:none;color:var(--label);font:inherit;width:100%;resize:none}
+.cbox input{font-weight:600;font-size:14px;border-bottom:.5px solid var(--sep);padding:4px 2px 8px}
+.cbox textarea{min-height:64px;font-size:14px;padding:2px}
+.crow2{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.crow2 label{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--label2)}
+.crow2 label input{width:auto;accent-color:var(--blue)}
+.sendbtn{background:var(--blue);color:#fff;border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;display:flex;gap:6px;align-items:center}
+.sendbtn svg{width:16px;height:16px}
+.refrow{display:flex;justify-content:space-between;gap:10px;padding:11px 14px;position:relative;font-size:14px}
+.refrow+.refrow::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
+.refrow small{display:block;color:var(--label2);font-size:12.5px}
 /* ===== customers ===== */
 #sCust .searchbox{margin:0 32px 12px;max-width:820px}
 .cfil{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
@@ -516,7 +561,11 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   .lt h1{font-size:31px}
   .lt .sub{font-size:14px}
   .screen>.scroll{padding:2px 14px calc(96px + env(safe-area-inset-bottom))}
-  #sJobs .searchbox,#sCust .searchbox{margin:0 14px 8px}
+  #sJobs .searchbox,#sCust .searchbox,#sPart .searchbox{margin:0 14px 8px}
+  .pstats{grid-template-columns:repeat(2,1fr)}
+  .tabbar button{font-size:9.5px}
+  .tabbar button svg{width:23px;height:23px}
+  .composer{margin:0 -14px;padding-left:14px;padding-right:14px}
   .tabbar button{font-size:10px}
   .tabbar button svg{width:24px;height:24px}
   .cfil{flex-wrap:nowrap;overflow-x:auto;margin:0 -14px 12px;padding:0 14px;scrollbar-width:none}
@@ -611,6 +660,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   <button class="navbtn" data-tab="today" aria-selected="true"><span class="ni" style="--nc:var(--red)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span>Today<em class="tcount" hidden></em></button>
   <button class="navbtn" data-tab="jobs" aria-selected="false"><span class="ni" style="--nc:var(--blue)"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg></span>Jobs<em id="jobsCount"></em></button>
   <button class="navbtn" data-tab="cust" aria-selected="false"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em id="custCount" hidden></em></button>
+  <button class="navbtn" data-tab="part" aria-selected="false"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em id="partCount" hidden></em></button>
   <button class="navbtn" data-tab="cal" aria-selected="false"><span class="ni" style="--nc:var(--orange)"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>Calendar</button>
   <button class="navbtn" data-tab="map" aria-selected="false"><span class="ni" style="--nc:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>Map</button>
   <button class="newbtn" id="addBtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New Customer</button>
@@ -636,6 +686,12 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <div class="tools ph"><button class="iconbtn dark js-add" aria-label="New customer"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
     <label class="searchbox" id="custSearchWrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="cq" type="search" placeholder="Search name, phone, email, address" aria-label="Search customers"></label>
     <div class="scroll"><div class="wrap" id="pCust"></div></div>
+  </section>
+  <section class="screen" id="sPart" hidden>
+    <header class="lt"><div><h1>Partners</h1><div class="sub" id="partSub">Realtors and property managers</div></div>
+      <div class="tools"><button class="iconbtn dark" id="partAdd" aria-label="Add partner"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
+    <label class="searchbox" id="partSearchWrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="pq" type="search" placeholder="Search name, company, email" aria-label="Search partners"></label>
+    <div class="scroll"><div class="wrap" id="pPart"></div></div>
   </section>
   <section class="screen" id="sCal" hidden>
     <header class="lt"><div><h1 id="calTitle">Calendar</h1></div>
@@ -663,6 +719,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   <button data-tab="today" aria-selected="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>Today<em class="tcount" hidden></em></button>
   <button data-tab="jobs" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>Jobs</button>
   <button data-tab="cust" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg>Customers<em class="ccount" hidden></em></button>
+  <button data-tab="part" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg>Partners<em class="pcount" hidden></em></button>
   <button data-tab="cal" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Calendar</button>
   <button data-tab="map" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Map</button>
 </nav>
@@ -804,7 +861,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.21 (Oct 27)';
+const APP_VERSION='1.22 (Oct 27) · Partners demo';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1059,6 +1116,7 @@ function renderToday(){
   $('pToday').innerHTML=`<div class="prow">${chip(1,'Urgent',g[1].length)}${chip(2,'Today',g[2].length)}${chip(3,'Soon',g[3].length)}${chip(4,'Upcoming',up.length)}</div>
     <div class="money"><div class="mt"><b>${kmoney(out)}</b><span>Quotes out</span></div><div class="mt"><b>${kmoney(owed)}</b><span>To collect</span></div><div class="mt"><b>${active}</b><span>Active jobs</span></div></div>
     ${sect(1,'Urgent',g[1])}${sect(2,'Today',g[2])}${sect(3,'Soon',g[3])}
+    ${(()=>{const pn=partners.filter(p=>p.unread||partState(p)==='follow');return pn.length?`<div class="sect"><div class="secthead"><h3 style="--c:var(--blue)"><i></i>Partners<em>${pn.length}</em></h3><button data-go="part">Partners</button></div><div class="group">${pn.map(p=>`<button class="task" data-gopart="${p.id}" style="--c:var(${p.unread?'--blue':'--p1'})"><span class="gl" style="--c:var(${p.unread?'--blue':'--p1'});width:28px;height:28px">${ico(p.unread?'msg':'mail')}</span><span class="tt"><b>${p.unread?'Reply to':'Follow up with'} ${esc(p.name)}</b><span><u>${esc(p.company)}${p.unread?' · new reply':' · no reply for '+dayDiff(today(),lastMsg(p).d)+' days'}</u></span></span>${ico('chev')}</button>`).join('')}</div></div>`:''})()}
     ${!n?`<div class="sect"><div class="group allclear">${ico('check')}<b>All Done</b>Nothing is due today.</div></div>`:''}
     ${up.length?`<div class="sect"><div class="secthead"><h3 style="--c:var(--p4)"><i></i>Upcoming<em>${up.length}</em></h3><button data-go="cal">Calendar</button></div><div class="group">${up.slice(0,10).map(calRow).join('')}</div></div>`:''}`;
   window._todo=Object.fromEntries(items.map(i=>[i.key,i]));
@@ -1072,6 +1130,7 @@ function taskRow(i){
 $('pToday').addEventListener('click',e=>{
   const rowE=e.target.closest('.task');if(rowE&&!e.target.closest('[data-act="done"]')){const it=window._todo?.[rowE.dataset.k];if(it&&it.key.endsWith('e')&&it.title.startsWith('Send estimate')&&it.job){openDetail(it.job.id,true);setTimeout(()=>openDoc(docsFor(it.job.id)[0]||null,it.job),80);return}}
   const go=e.target.closest('[data-go]');if(go){setTab(go.dataset.go);return}
+  const gp=e.target.closest('[data-gopart]');if(gp){setTab('part');openPartner(gp.dataset.gopart);return}
   const cr=e.target.closest('[data-cal]');if(cr){openCalItem(cr.dataset.cal);return}
   const row=e.target.closest('.task');if(!row)return;const it=window._todo[row.dataset.k];if(!it)return;
   const act=e.target.closest('[data-act]')?.dataset.act;
@@ -1288,10 +1347,109 @@ $('custForm').onsubmit=e=>{e.preventDefault();const c=custEditing;if(!c)return;
   for(const r of c.jobs){if(r.name===c.name)r.name=name;r.phone=phone;r.email=email;log(r,'Contact updated')}
   save();hideModal('custModal');render();const k=custKey(c.jobs[0]);openCustomer(k);toast('Contact saved')};
 
+/* ---------- partners (DEMO: sample data, nothing is saved) ---------- */
+const PST={sent:{n:'Email sent',c:'--p0',k:0},follow:{n:'Follow-up due',c:'--p1',k:0},replied:{n:'Replied',c:'--blue',k:1},meeting:{n:'Meeting',c:'--orange',k:2},partner:{n:'Active partner',c:'--green',k:3},cold:{n:'Not interested',c:'--p0',k:-1}};
+const PDF='NEVACO BUILD - Partnership Program.pdf';
+const dAgo=n=>addDays(today(),-n);
+let partners=[
+ {id:'p1',name:'Sarah Mitchell',company:'Northgate Realty',type:'re',email:'sarah@example.com',phone:'416-555-0141',area:'North York, Thornhill',status:'replied',unread:true,
+  thread:[{dir:'out',d:dAgo(12),subj:'Renovation partner for your listings',t:`Hi Sarah,\n\nI'm Kevin from NEVACO BUILD, a licensed renovation company in the GTA. We help realtors get listings market-ready faster with pre-sale renovations, and we take care of their buyers after closing.\n\nPartners receive a referral commission, paid upfront when the contract is signed. I've attached our partnership program.\n\nWould you be open to a quick call this week?`,att:PDF},
+   {dir:'out',d:dAgo(5),subj:'Re: Renovation partner for your listings',t:`Hi Sarah, just following up on my email last week. Happy to share before and after photos from recent projects in North York.`},
+   {dir:'in',d:dAgo(1),subj:'Re: Renovation partner for your listings',t:`Hi Kevin,\n\nThanks for following up. I have a listing in Thornhill that needs a kitchen refresh and paint before we go to market. Can you take a look this week? Also, how does the commission work exactly?\n\nSarah`}]},
+ {id:'p2',name:'David Chen',company:'Lakeshore Property Management',type:'pm',email:'david@example.com',phone:'647-555-0177',area:'Etobicoke, Mississauga',status:'meeting',meet:addDays(today(),3),
+  thread:[{dir:'out',d:dAgo(16),subj:'Reliable renovation partner for your properties',t:`Hi David,\n\nNEVACO BUILD handles unit turnovers, bathroom and kitchen upgrades and repairs for property managers across the GTA, with fast response times and clear pricing.\n\nOur partnership program is attached. Would you like to meet?`,att:PDF},
+   {dir:'in',d:dAgo(9),subj:'Re: Reliable renovation partner',t:`Hi Kevin, we manage 40 units in Etobicoke and need a dependable contractor for turnovers. Let's meet.`},
+   {dir:'out',d:dAgo(8),subj:'Re: Reliable renovation partner',t:`Great, David. How about ${new Date(addDays(today(),3)+'T12:00').toLocaleDateString('en-CA',{weekday:'long',month:'short',day:'numeric'})} at 10 AM at your office?`},
+   {dir:'in',d:dAgo(7),subj:'Re: Reliable renovation partner',t:`Works for me. See you then.`},
+   {dir:'note',d:dAgo(7),t:'Meeting booked'}]},
+ {id:'p3',name:'Priya Nair',company:'Brightway Homes',type:'re',email:'priya@example.com',phone:'905-555-0119',area:'Vaughan, Richmond Hill',status:'partner',
+  refs:[{job:'Bathroom renovation · Vaughan',value:18500,comm:925,paid:true},{job:'Basement renovation · Richmond Hill',value:42000,comm:2100,paid:false}],
+  thread:[{dir:'out',d:dAgo(40),subj:'Renovation partner for your listings',t:`Hi Priya, I'm Kevin from NEVACO BUILD…`,att:PDF},
+   {dir:'in',d:dAgo(37),subj:'Re: Renovation partner',t:`Hi Kevin, I'd love to work together. I have a buyer who needs a bathroom done after closing.`},
+   {dir:'note',d:dAgo(30),t:'Became a partner · first referral'},
+   {dir:'in',d:dAgo(6),subj:'Another client',t:`Kevin, another client of mine in Richmond Hill wants their basement finished. Can I connect you?`},
+   {dir:'out',d:dAgo(6),subj:'Re: Another client',t:`Absolutely, thank you Priya! Please share their number and I'll book a site visit.`}]},
+ {id:'p4',name:'Tom Reilly',company:'Summit Property Group',type:'pm',email:'tom@example.com',phone:'',area:'Toronto',status:'follow',
+  thread:[{dir:'out',d:dAgo(7),subj:'Reliable renovation partner for your properties',t:`Hi Tom, NEVACO BUILD handles unit turnovers and renovations for property managers…`,att:PDF}]},
+ {id:'p5',name:'Marco Silva',company:'Silva Real Estate Team',type:'re',email:'marco@example.com',phone:'416-555-0190',area:'Mississauga',status:'sent',
+  thread:[{dir:'out',d:dAgo(2),subj:'Renovation partner for your listings',t:`Hi Marco, I'm Kevin from NEVACO BUILD…`,att:PDF}]},
+ {id:'p6',name:'Elena Rossi',company:'Rossi Realty',type:'re',email:'elena@example.com',phone:'',area:'Oakville',status:'cold',
+  thread:[{dir:'out',d:dAgo(20),subj:'Renovation partner for your listings',t:`Hi Elena…`,att:PDF},{dir:'in',d:dAgo(18),subj:'Re: Renovation partner',t:`Thanks Kevin, we already work with a contractor. Not at the moment.`},{dir:'note',d:dAgo(18),t:'Marked not interested'}]}
+];
+const TPL={
+ follow:{n:'Follow-up',s:'Following up: renovation partnership',t:p=>`Hi ${p.name.split(' ')[0]},\n\nJust following up on my last email about partnering with NEVACO BUILD. We help ${p.type==='pm'?'property managers with fast, reliable unit turnovers and repairs':'realtors get listings market-ready and take care of their buyers after closing'}, and partners receive a referral commission paid upfront at contract signing.\n\nWould a quick 10-minute call this week work for you?\n\nKevin\nNEVACO BUILD · 437-432-2252`},
+ thanks:{n:'Thanks for reply',s:'Re: renovation partnership',t:p=>`Hi ${p.name.split(' ')[0]},\n\nThank you for getting back to me. I'd be happy to help.\n\nKevin\nNEVACO BUILD · 437-432-2252`},
+ meet:{n:'Book a meeting',s:'Quick meeting?',t:p=>`Hi ${p.name.split(' ')[0]},\n\nWould you be available for a short meeting this week? I can come to your office or we can do a call, whatever is easier for you.\n\nKevin\nNEVACO BUILD · 437-432-2252`},
+ comm:{n:'How commission works',s:'How our referral commission works',t:p=>`Hi ${p.name.split(' ')[0]},\n\nHere's how it works: you introduce a client, we do a free site visit and estimate, and when the client signs the contract we pay your referral commission upfront, on the same day. Nothing for you to manage after the introduction.\n\nKevin\nNEVACO BUILD · 437-432-2252`},
+ pdf:{n:'Send partnership PDF',s:'NEVACO BUILD partnership program',t:p=>`Hi ${p.name.split(' ')[0]},\n\nAs promised, our partnership program is attached.\n\nKevin\nNEVACO BUILD · 437-432-2252`,att:true}
+};
+function partState(p){if(p.status==='sent'){const last=p.thread.filter(m=>m.dir!=='note').at(-1);if(last&&last.dir==='out'&&dayDiff(today(),last.d)>=5)return 'follow'}return p.status}
+const lastMsg=p=>p.thread.filter(m=>m.dir!=='note').at(-1);
+let partFilter='all',partQuery='';
+function renderPartCount(){const n=partners.filter(p=>p.unread||partState(p)==='follow').length;const e=$('partCount');if(e){e.textContent=n;e.hidden=!n;e.classList.toggle('hot',n>0)}document.querySelectorAll('.pcount').forEach(x=>{x.textContent=n;x.hidden=!n})}
+function renderPartners(){
+  const q=partQuery.toLowerCase();
+  const F=[{k:'all',n:'All'},{k:'todo',n:'Needs reply',f:p=>p.unread||partState(p)==='follow'},{k:'re',n:'Realtors',f:p=>p.type==='re'},{k:'pm',n:'Property managers',f:p=>p.type==='pm'},{k:'partner',n:'Active partners',f:p=>p.status==='partner'}];
+  const fl=F.find(x=>x.k===partFilter);
+  const list=partners.filter(p=>(!fl.f||fl.f(p))&&(!q||[p.name,p.company,p.email,p.area].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>((b.unread?2:0)+(partState(b)==='follow'?1:0))-((a.unread?2:0)+(partState(a)==='follow'?1:0))||String(lastMsg(b)?.d).localeCompare(String(lastMsg(a)?.d)));
+  const cnt=k=>partners.filter(p=>partState(p)===k).length;
+  const refs=partners.flatMap(p=>p.refs||[]);
+  $('partSub').textContent=`${partners.length} contacted · ${partners.filter(p=>['replied','meeting','partner'].includes(p.status)).length} replied · ${cnt('partner')} active`;
+  $('pPart').innerHTML=`<div class="demo">${ico('star')}<span><b>Demo.</b> These partners and emails are examples so you can see how it works. Nothing here is saved or sent yet.</span></div>
+   <div class="pstats"><div class="mt"><b>${partners.length}</b><span>Emails sent</span></div><div class="mt"><b>${partners.filter(p=>p.thread.some(m=>m.dir==='in')).length}</b><span>Replied</span></div><div class="mt"><b>${cnt('meeting')}</b><span>Meetings</span></div><div class="mt"><b>${refs.length}</b><span>Referrals · ${kmoney(refs.reduce((t,r)=>t+r.value,0))}</span></div></div>
+   <div class="cfil">${F.map(f=>`<button data-pf="${f.k}" aria-pressed="${f.k===partFilter}">${f.n}<em>${f.f?partners.filter(f.f).length:partners.length}</em></button>`).join('')}</div>
+   <div class="group">${list.map(p=>{const st=PST[partState(p)],lm=lastMsg(p);return `<button class="row crow" data-partner="${p.id}">
+     <span class="av" style="--c:var(${p.type==='pm'?'--s-visit':'--s-lead'})">${esc(initials(p.name))}</span>
+     <span class="rt"><b>${p.unread?'<span class="unread"></span>':''}${esc(p.name)}<span class="ptype ${p.type}">${p.type==='pm'?'PROPERTY MGMT':'REALTOR'}</span></b><span>${esc(p.company)} · ${esc(p.area)}</span>
+       <span class="psnip${lm?.dir==='in'?' in':''}">${lm?(lm.dir==='in'?'':'You: ')+esc(lm.t.replace(/\s+/g,' ').slice(0,90)):''}</span>
+       <span class="needs"><span class="pst" style="--c:var(${st.c})"><i></i>${p.status==='meeting'&&p.meet?'Meeting '+fmtDate(p.meet):st.n}</span>${p.unread?'<span class="pst" style="--c:var(--blue)"><i></i>New reply</span>':''}</span></span>
+     <span class="rv"><em>${lm?fmtDate(lm.d):''}</em>${ico('chev')}</span></button>`}).join('')}</div>`;
+}
+$('pPart').addEventListener('click',e=>{const f=e.target.closest('[data-pf]');if(f){partFilter=f.dataset.pf;renderPartners();return}const r=e.target.closest('[data-partner]');if(r)openPartner(r.dataset.partner)});
+$('pq').oninput=e=>{partQuery=e.target.value.trim();renderPartners()};
+$('partAdd').onclick=()=>toast('Demo: adding partners comes in the live version');
+let partSel=null;
+function openPartner(id){const p=partners.find(x=>x.id===id);if(!p)return;partSel=id;selId=null;custSel=null;p.unread=false;
+  const st=partState(p),k=PST[st].k,ph=digits(p.phone);
+  let lastDay='';const th=p.thread.map(m=>{let h='';if(m.d!==lastDay){lastDay=m.d;h+=`<div class="tday">${fmtDate(m.d)}</div>`}
+    if(m.dir==='note')return h+`<div class="bub note">${esc(m.t)}</div>`;
+    return h+`<div class="bub ${m.dir}">${m.subj?`<span class="subj">${esc(m.subj)}</span>`:''}${esc(m.t)}${m.att?`<span class="att">${ico('quote')}${esc(m.att)}</span>`:''}<span class="meta">${m.dir==='out'?'Sent from nevacobuild@gmail.com':esc(p.email)}</span></div>`}).join('');
+  const v=$('vDetail');
+  v.innerHTML=`<div class="navbar"><button id="pBack">${ico('back')}${isPhone()?'Partners':'Close'}</button><button id="pMore">${st==='cold'?'Reopen':'Not interested'}</button></div>
+  <div class="scroll" id="pScroll">
+    <div class="cbig"><span class="av" style="--c:var(${p.type==='pm'?'--s-visit':'--s-lead'})">${esc(initials(p.name))}</span><div><h2>${esc(p.name)}</h2><p>${esc(p.company)} · ${p.type==='pm'?'Property management':'Realtor'} · ${esc(p.area)}</p></div></div>
+    <div class="acts">
+      <a class="act primary" target="_blank" rel="noopener" href="https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(p.email)}">${ico('mail')}Gmail</a>
+      <a class="act" href="${ph?'tel:+1'+ph:'#'}" aria-disabled="${!ph}">${ico('call')}Call</a>
+      <a class="act" href="${ph?'sms:+1'+ph:'#'}" aria-disabled="${!ph}">${ico('msg')}Text</a>
+      <button class="act" id="pMeet">${ico('calp')}Meeting</button>
+    </div>
+    <div class="pipe" style="--c:var(${PST[st].c})">${['Contacted','Replied','Meeting','Partner'].map((n,i)=>`<div class="${k>=i&&st!=='cold'?'on':''}"><i></i>${n}</div>`).join('')}</div>
+    ${p.refs?`<div class="block"><div class="label">Referrals & commission <span>${p.refs.length}</span></div><div class="group">${p.refs.map(r=>`<div class="refrow"><span>${esc(r.job)}<small>${money(r.value)} contract</small></span><span style="text-align:right"><b>${money(r.comm)}</b><small style="color:${r.paid?'var(--green)':'var(--orange)'}">${r.paid?'Commission paid':'Pay at signing'}</small></span></div>`).join('')}</div></div>`:''}
+    <div class="label">Conversation</div>
+    <div class="thread">${th}</div>
+    <div class="composer">
+      <div class="tpls">${Object.entries(TPL).map(([k,t])=>`<button data-tpl="${k}">${t.n}</button>`).join('')}</div>
+      <div class="cbox"><input id="pSubj" placeholder="Subject" value="${esc(lastMsg(p)?.subj?('Re: '+lastMsg(p).subj.replace(/^Re:\s*/,'')):'')}"><textarea id="pBody" placeholder="Write a message to ${esc(p.name.split(' ')[0])}…"></textarea>
+        <div class="crow2"><label><input type="checkbox" id="pAtt"> Attach partnership PDF</label><button class="sendbtn" id="pSend">${ico('sent')}Send</button></div></div>
+    </div>
+  </div>`;
+  $('pBack').onclick=()=>{partSel=null;closeDetail()};
+  $('pMore').onclick=()=>{p.status=st==='cold'?'sent':'cold';p.thread.push({dir:'note',d:today(),t:p.status==='cold'?'Marked not interested':'Reopened'});renderPartners();openPartner(p.id)};
+  $('pMeet').onclick=()=>{p.status='meeting';p.meet=addDays(today(),2);p.thread.push({dir:'note',d:today(),t:'Meeting booked for '+fmtDate(p.meet)});toast('Demo: meeting added to Calendar in the live version');renderPartners();openPartner(p.id)};
+  v.querySelectorAll('[data-tpl]').forEach(b=>b.onclick=()=>{const t=TPL[b.dataset.tpl];$('pSubj').value=t.s;$('pBody').value=t.t(p);$('pAtt').checked=!!t.att;$('pBody').focus()});
+  $('pSend').onclick=()=>{const t=$('pBody').value.trim();if(!t){toast('Write a message first');return}
+    p.thread.push({dir:'out',d:today(),subj:$('pSubj').value.trim(),t,att:$('pAtt').checked?PDF:''});if(p.status==='sent'||p.status==='follow')p.status='sent';
+    renderPartners();openPartner(p.id);toast('Demo: in the live version this is sent from nevacobuild@gmail.com')};
+  v.classList.add('open');renderPartCount();
+  setTimeout(()=>{const sc=$('pScroll');if(sc)sc.scrollTop=sc.scrollHeight},30);
+}
+
 /* ---------- tabs ---------- */
 function setTab(t){tab=t;
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  ['today','jobs','cust','cal','map'].forEach(k=>{const el=$({today:'sToday',jobs:'sJobs',cust:'sCust',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
+  ['today','jobs','cust','part','cal','map'].forEach(k=>{const el=$({today:'sToday',jobs:'sJobs',cust:'sCust',part:'sPart',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
   if(t!=='map'&&isPhone()&&selId&&false)closeDetail();
   render();
   if(t==='map'&&map){setTimeout(()=>{map.invalidateSize();if(!mapFitted){mapFitted=true;fit()}},30)}
@@ -1420,7 +1578,7 @@ function openDetail(id,pan){
   v.classList.add('open');
   renderList();drawPins();renderCards();
 }
-function closeDetail(){selId=null;custSel=null;inlinePay=null;$('vDetail').classList.remove('open');render()}
+function closeDetail(){selId=null;custSel=null;partSel=null;inlinePay=null;$('vDetail').classList.remove('open');render()}
 
 /* ---------- map ---------- */
 let map=null;const markers={},seen=new Set();
@@ -1812,7 +1970,7 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 let tt;function toast(m,canUndo){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:2400)}
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];db.files=db.files||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId)closeDetail()}});
-function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>!r.lost&&stageOf(r)!=='done').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();if(tab==='cal')renderCal();drawPins();renderCards()}
+function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>!r.lost&&stageOf(r)!=='done').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();if(tab==='cal')renderCal();drawPins();renderCards()}
 let locating=false;
 async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
 async function locateMissingRun(){const todo=data.filter(r=>r.lat==null);
