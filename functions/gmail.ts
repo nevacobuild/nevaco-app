@@ -16,6 +16,7 @@ const G = "https://gmail.googleapis.com/gmail/v1/users/me";
 const LABEL = "NEVACO Partners";
 const LOGO = `${APP}/logo-dark.png`;
 const BUCKET = "job-files";
+const DEFAULT_INBOUND = '(label:realtor-partnership OR label:property-management OR subject:("Referral Sign-Up" OR "Partner Sign-Up" OR "Partnership Opportunity" OR "Renovation Partner for Your Managed Properties"))';
 
 function serviceKey() {
   const k = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -166,15 +167,22 @@ export function isAutoReply(m: { payload?: Part }) {
   return (/auto-(replied|generated|notified)/i.test(as)) || !!hdr(m, "X-Autoreply") || !!hdr(m, "X-Autorespond") || /^(auto_reply|bulk|junk|list)$/i.test(pr.trim()) ||
     /^\s*(automatic reply|auto[- ]?reply|autoreply|out of (the )?office|away from (the )?office|vacation reply|undeliverable|delivery status notification)/i.test(subj);
 }
+// "Name: Daryl King Phone: 905... Brokerage: ..." sign-up emails
+export function parseSignup(t: string) {
+  const KEYS = "Name|Full name|Phone|Cell|Mobile|Brokerage|Company|Email|Website|Area|City";
+  const grab = (k: string) => { const m = String(t || "").match(new RegExp(`(?:^|\\s)(?:${k})\\s*:\\s*(.+?)(?=\\s+(?:${KEYS})\\s*:|\\n|$)`, "i")); return m ? m[1].replace(/^['"\s]+|['"\s.]+$/g, "").trim() : ""; };
+  const cut = (v: string) => v.replace(/\s*['"]?\s*(sent on behalf|sent from my|thank you|thanks|regards)\b.*$/i, "").replace(/[\s.'"]+$/, "").trim();
+  return { name: cut(grab("Name|Full name")), phone: grab("Phone|Cell|Mobile"), company: cut(grab("Brokerage|Company")) };
+}
 export function msgRow(m: GMsg, partnerId: string, me = ALLOWED) {
   const b = bodies(m.payload);
   const text = b.text || htmlToText(b.html) || m.snippet || "";
   const from = parseAddr(hdr(m, "From"));
   const mine = (m.labelIds || []).includes("SENT") || from.email === me;
   return {
-    partner_id: partnerId, dir: mine ? "out" : "in", gmail_id: m.id, thread_id: m.threadId, rfc_id: hdr(m, "Message-ID") || hdr(m, "Message-Id") || null,
+    partner_id: partnerId, dir: mine ? "out" : isAutoReply(m) ? "auto" : "in", gmail_id: m.id, thread_id: m.threadId, rfc_id: hdr(m, "Message-ID") || hdr(m, "Message-Id") || null,
     subject: hdr(m, "Subject"), body: stripQuoted(text).slice(0, 20000), from_email: from.email, to_email: addrList(hdr(m, "To")).join(", "),
-    attachments: b.att, unread: !mine && (m.labelIds || []).includes("UNREAD"),
+    attachments: b.att, unread: !mine && !isAutoReply(m) && (m.labelIds || []).includes("UNREAD"),
     at: new Date(Number(m.internalDate) || Date.now()).toISOString(), created_by: "gmail",
   };
 }
@@ -242,7 +250,7 @@ async function labelThreads(acc: Acc, tids: string[]) {
 }
 async function settings() {
   const { data } = await db.from("app_settings").select("value").eq("key", "partners").maybeSingle();
-  return { outreach_query: "", import_days: 90, from_name: "NEVACO BUILD", signature: "", pdf_path: "", pdf_name: "", ...(data?.value || {}) } as Record<string, any>;
+  return { outreach_query: "", inbound_query: DEFAULT_INBOUND, import_days: 90, from_name: "NEVACO BUILD", signature: "", pdf_path: "", pdf_name: "", ...(data?.value || {}) } as Record<string, any>;
 }
 
 /* ================= actions ================= */
@@ -329,7 +337,7 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
     const knownIds = new Set((known || []).map((k: any) => k.gmail_id).filter(Boolean));
     const byThread = new Map<string, string>((known || []).map((k: any) => [k.thread_id, k.partner_id]));
 
-    const threads = new Set<string>(); const outreach = new Set<string>();
+    const threads = new Set<string>(); const outreach = new Set<string>(); const inbound = new Set<string>();
     if (opts.email) {
       const e = opts.email.toLowerCase().trim();
       if (!isEmail(e)) throw new HttpError(400, "Not a valid email address.");
@@ -337,6 +345,10 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
     } else {
       const q = String(cfg.outreach_query || "").trim();
       if (q) (await listIds(acc, `in:sent ${q} newer_than:400d`, 3000)).forEach((m) => outreach.add(m.threadId));
+      // labelled conversations and sign-up emails, even when they are not replies to an outreach email
+      const iq = String(cfg.inbound_query || "").trim();
+      if (iq) for (const m of await listIds(acc, `-from:me ${iq} -in:spam -in:trash newer_than:400d`, 2000))
+        if (!knownIds.has(m.id)) { threads.add(m.threadId); inbound.add(m.threadId); }
       for (const m of await listIds(acc, `${after} -in:spam -in:trash -in:drafts -in:chats`, 5000))
         if (!knownIds.has(m.id) && (byThread.has(m.threadId) || outreach.has(m.threadId))) threads.add(m.threadId);
       const emails = [...byEmail.keys()].filter(isEmail);
@@ -348,6 +360,12 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
     }
 
     const rows: any[] = []; const newPartners: string[] = []; const touched = new Set<string>();
+    let labelNames: Record<string, string> | null = null;
+    const labelType = async (ids: string[]) => {
+      if (!labelNames) { labelNames = {}; try { ((await gapi(acc, "/labels")).labels || []).forEach((l: any) => labelNames![l.id] = l.name); } catch { /* optional */ } }
+      const n = ids.map((i) => labelNames![i] || "").join(" ");
+      return /propert|landlord|manag/i.test(n) ? "pm" : /realt|broker|agent/i.test(n) ? "re" : "";
+    };
     const fetched = await pmap([...threads], 5, (t) => gapi(acc, `/threads/${t}?format=full`).catch((e) => { console.warn("thread", t, e.message); return null; }));
     for (const t of fetched) {
       if (!t) continue;
@@ -359,20 +377,26 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
         const other = mine(m) ? [...addrList(hdr(m, "To")), ...addrList(hdr(m, "Cc"))] : [parseAddr(hdr(m, "From")).email];
         const hit = other.find((e) => byEmail.has(e)); if (hit) { pid = byEmail.get(hit); break; }
       }
-      if (!pid && outreach.has(t.id)) {
-        const reply = msgs.find((m) => !mine(m) && !isAutoReply(m));
+      if (!pid && (outreach.has(t.id) || inbound.has(t.id))) {
+        const others = msgs.filter((m) => !mine(m));
+        const real = others.find((m) => !isAutoReply(m));
+        const reply = real || (inbound.has(t.id) ? others[0] : undefined);
         if (!reply) continue; // sent but nobody replied yet
         const a = parseAddr(hdr(reply, "From"));
-        if (!a.email || a.email === ALLOWED || /no-?reply|mailer-daemon|postmaster/i.test(a.email)) continue;
+        if (!a.email || a.email === ALLOWED || /mailer-daemon|postmaster/i.test(a.email)) continue;
+        if (!inbound.has(t.id) && /no-?reply/i.test(a.email)) continue;
         // another sync may have just created this partner
         const { data: ex } = await db.from("partners").select("id").ilike("email", a.email).limit(1);
         if (ex?.length) pid = ex[0].id;
         else {
           const first = msgs.find(mine);
-          const ctx = `${hdr(first || reply, "Subject")} ${first ? bodies(first.payload).text.slice(0, 2000) : ""}`;
+          const ctx = `${hdr(first || reply, "Subject")} ${hdr(reply, "Subject")} ${first ? bodies(first.payload).text.slice(0, 2000) : ""}`;
+          const rb = bodies(reply.payload); const su = parseSignup(rb.text || htmlToText(rb.html));
+          const lt = await labelType(msgs.flatMap((m) => m.labelIds || []));
           const { data: np, error } = await db.from("partners").insert({
-            name: a.name && !a.name.includes("@") ? a.name : nameFromEmail(a.email), email: a.email, company: companyFromEmail(a.email),
-            type: /property\s*manag|landlord|tenant|turnover/i.test(ctx) ? "pm" : "re", status: "replied", source: "gmail", updated_by: "gmail",
+            name: su.name || (a.name && !a.name.includes("@") ? a.name : nameFromEmail(a.email)), email: a.email, phone: su.phone, company: su.company || companyFromEmail(a.email),
+            type: lt || (/brokerage|realt/i.test(su.company + " " + ctx) && !/managed propert|property\s*manag/i.test(ctx) ? "re" : /property\s*manag|managed propert|landlord|tenant|turnover/i.test(ctx) ? "pm" : "re"),
+            status: real ? "replied" : "sent", source: "gmail", updated_by: "gmail",
           }).select("id,name").single();
           if (error) { console.warn("partner insert", error.message); continue; }
           pid = np.id; newPartners.push(np.name);

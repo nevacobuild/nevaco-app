@@ -421,6 +421,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .bub .more{display:block;margin-top:6px;font-weight:700;font-size:13px;color:inherit;opacity:.85}
 .bub.in .more{color:var(--blue);opacity:1}
 .bub .meta a{color:inherit;font-weight:600}
+.bub.auto{opacity:.75}.autotag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--label2);background:var(--card2);border-radius:5px;padding:1px 6px;margin-bottom:5px}
 .attl{cursor:pointer}.attl svg{width:15px;height:15px}.attl.off{opacity:.6}
 .cfoot{margin:6px 4px 0;font-size:11.5px;color:var(--label3);text-align:right}
 .sendbtn:disabled{opacity:.7}
@@ -928,6 +929,8 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <div class="fg"><label class="ta"><span>Gmail search</span><textarea id="ps-query" rows="3" autocapitalize="off" spellcheck="false"></textarea></label></div>
       <p class="fnote">When someone replies to a sent email that matches this search, they are added to Partners automatically. <button type="button" id="psTest">Test search</button></p>
       <p class="testout" id="psTestOut"></p>
+      <div class="fg"><label class="ta"><span>Labels &amp; sign-ups</span><textarea id="ps-inq" rows="3" autocapitalize="off" spellcheck="false"></textarea></label></div>
+      <p class="fnote">Emails you receive that match this search are added too, even if they are not a reply, for example your Gmail labels or “Realtor Referral Sign-Up” emails.</p>
       <div class="fghead">Your emails</div>
       <div class="fg"><label><span>From name</span><input id="ps-from" placeholder="Kevin | NEVACO BUILD"></label><label class="ta"><span>Signature</span><textarea id="ps-sig" rows="4"></textarea></label></div>
       <p class="fnote">Added under every email you send from the app, with the NEVACO logo.</p>
@@ -975,7 +978,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.23 (Oct 27) · Partners + Gmail';
+const APP_VERSION='1.24 (Oct 27) · Partners + Gmail';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1483,7 +1486,7 @@ const drafts={};
 const part=id=>(db.partners||[]).find(p=>p.id===id);
 const firstName=p=>(p.name||'').trim().split(/\s+/)[0]||'there';
 const pmsgs=p=>(db.pmsgs||[]).filter(m=>m.partnerId===p.id);
-const mails=p=>pmsgs(p).filter(m=>m.dir!=='note');
+const mails=p=>pmsgs(p).filter(m=>m.dir==='in'||m.dir==='out');
 const lastMail=p=>mails(p).at(-1);
 const pUnread=p=>pmsgs(p).some(m=>m.dir==='in'&&m.unread);
 const pStatus=p=>PST[p.status]?(p.status==='sent'&&mails(p).some(m=>m.dir==='in')?'replied':p.status):'sent';
@@ -1644,8 +1647,8 @@ function paintPartner(p){
   $('pThread').innerHTML=ms.length?ms.map(m=>{let h='';const dd=ld(m.at);if(dd!==lastDay){lastDay=dd;h+=`<div class="tday">${fmtDate(dd)==='Today'||fmtDate(dd)==='Yesterday'?fmtDate(dd):new Date(dd+'T12:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'})}</div>`}
     if(m.dir==='note')return h+`<div class="bub note">${esc(m.body)}</div>`;
     const long=m.body.length>900,tm=new Date(m.at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    const who=m.dir==='in'&&m.from&&m.from!==(p.email||'').toLowerCase()?esc(m.from)+' · ':'';
-    return h+`<div class="bub ${m.dir}${long?' clip':''}">${m.subject?`<span class="subj">${esc(m.subject)}</span>`:''}<span class="btx">${linkify(esc(m.body))}</span>${long?'<button class="more">Show full email</button>':''}${m.att.map(a=>`<span class="att">${ico(/pdf/i.test(a.mime||a.name)?'quote':/image/i.test(a.mime||'')?'img':'clip')}${esc(a.name)}</span>`).join('')}<span class="meta">${who}${tm}${m.threadId?` · <a href="${gmailUrl(m.threadId)}" target="_blank" rel="noopener">Gmail</a>`:''}</span></div>`}).join('')
+    const who=m.dir!=='out'&&m.from&&m.from!==(p.email||'').toLowerCase()?esc(m.from)+' · ':'';
+    return h+`<div class="bub ${m.dir==='auto'?'in auto':m.dir}${long?' clip':''}">${m.dir==='auto'?'<span class="autotag">Automatic reply</span>':''}${m.subject?`<span class="subj">${esc(m.subject)}</span>`:''}<span class="btx">${linkify(esc(m.body))}</span>${long?'<button class="more">Show full email</button>':''}${m.att.map(a=>`<span class="att">${ico(/pdf/i.test(a.mime||a.name)?'quote':/image/i.test(a.mime||'')?'img':'clip')}${esc(a.name)}</span>`).join('')}<span class="meta">${who}${tm}${m.threadId?` · <a href="${gmailUrl(m.threadId)}" target="_blank" rel="noopener">Gmail</a>`:''}</span></div>`}).join('')
     :`<p class="pnone">No emails yet. ${p.email?'Write the first one below.':'Add an email address with Edit, then write the first one below.'}</p>`;
   $('pThread').querySelectorAll('.more').forEach(b=>b.onclick=()=>{b.parentElement.classList.remove('clip');b.remove()});
   $('pWrite').onclick=()=>{const t=$('pBody');t.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>t.focus(),250)};
@@ -1742,7 +1745,8 @@ function paintPset(){
     d.disabled=true;try{await gm('disconnect');gmailSt={connected:false};paintPset();renderPartners();toast('Gmail disconnected')}catch(e){toast(e.message,false,true);d.disabled=false}};
   $('psUp').onclick=()=>$('psFile').click();
 }
-function openPset(){$('ps-query').value=pset.outreach_query||'';$('ps-from').value=pset.from_name||'';$('ps-sig').value=pset.signature||'';$('psTestOut').textContent='';paintPset();showModal('psetModal')}
+const DEF_INQ='(label:realtor-partnership OR label:property-management OR subject:("Referral Sign-Up" OR "Partner Sign-Up" OR "Partnership Opportunity" OR "Renovation Partner for Your Managed Properties"))';
+function openPset(){$('ps-query').value=pset.outreach_query||'';$('ps-inq').value=pset.inbound_query??DEF_INQ;$('ps-from').value=pset.from_name||'';$('ps-sig').value=pset.signature||'';$('psTestOut').textContent='';paintPset();showModal('psetModal')}
 $('psFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   if(!/pdf$/i.test(f.type)&&!/\.pdf$/i.test(f.name)){toast('Choose a PDF file');return}if(f.size>20*1024*1024){toast('PDF is larger than 20 MB');return}
   const b=$('psUp');b.disabled=true;b.textContent='Uploading…';
@@ -1755,8 +1759,8 @@ $('psTest').onclick=async()=>{const o=$('psTestOut');if(!gmailSt.connected){o.te
   catch(e){o.textContent=e.message}};
 $('psetCancel').onclick=()=>hideModal('psetModal');
 $('psetModal').onclick=e=>{if(e.target.id==='psetModal')hideModal('psetModal')};
-$('psetForm').onsubmit=async e=>{e.preventDefault();const q=$('ps-query').value.trim(),changed=q!==(pset.outreach_query||'');
-  pset=Object.assign({},pset,{outreach_query:q,from_name:$('ps-from').value.trim()||'NEVACO BUILD',signature:$('ps-sig').value.replace(/\s+$/,'')});
+$('psetForm').onsubmit=async e=>{e.preventDefault();const q=$('ps-query').value.trim(),iq=$('ps-inq').value.trim(),changed=q!==(pset.outreach_query||'')||iq!==(pset.inbound_query??DEF_INQ);
+  pset=Object.assign({},pset,{outreach_query:q,inbound_query:iq,from_name:$('ps-from').value.trim()||'NEVACO BUILD',signature:$('ps-sig').value.replace(/\s+$/,'')});
   try{await must(sb.from('app_settings').upsert({key:'partners',value:pset}));hideModal('psetModal');toast('Settings saved');if(changed)checkMail(false)}
   catch(err){console.error(err);toast('Could not save settings',false,true)}};
 
