@@ -170,7 +170,7 @@ export function isAutoReply(m: { payload?: Part }) {
 // "Name: Daryl King Phone: 905... Brokerage: ..." sign-up emails
 export function parseSignup(t: string) {
   const KEYS = "Name|Full name|Phone|Cell|Mobile|Brokerage|Company|Email|Website|Area|City";
-  const grab = (k: string) => { const m = String(t || "").match(new RegExp(`(?:^|\\s)(?:${k})\\s*:\\s*(.+?)(?=\\s+(?:${KEYS})\\s*:|\\n|$)`, "i")); return m ? m[1].replace(/^['"\s]+|['"\s.]+$/g, "").trim() : ""; };
+  const grab = (k: string) => { const m = String(t || "").match(new RegExp(`(?:^|\\s)(?:${k})[ \\t]*:[ \\t]*([^\\n]+?)(?=\\s+(?:${KEYS})\\s*:|\\n|$)`, "i")); return m ? m[1].replace(/^['"\s]+|['"\s.]+$/g, "").trim() : ""; };
   const cut = (v: string) => v.replace(/\s*['"]?\s*(sent on behalf|sent from my|thank you|thanks|regards)\b.*$/i, "").replace(/[\s.'"]+$/, "").trim();
   return { name: cut(grab("Name|Full name")), phone: grab("Phone|Cell|Mobile"), company: cut(grab("Brokerage|Company")) };
 }
