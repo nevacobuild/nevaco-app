@@ -160,6 +160,12 @@ export function stripQuoted(t: string) {
   const out = lines.slice(0, cut).join("\n").replace(/\n{3,}/g, "\n\n").trim();
   return out || String(t || "").trim();
 }
+// Out-of-office and other automatic replies are not real replies
+export function isAutoReply(m: { payload?: Part }) {
+  const as = hdr(m, "Auto-Submitted"), pr = hdr(m, "Precedence"), subj = hdr(m, "Subject");
+  return (/auto-(replied|generated|notified)/i.test(as)) || !!hdr(m, "X-Autoreply") || !!hdr(m, "X-Autorespond") || /^(auto_reply|bulk|junk|list)$/i.test(pr.trim()) ||
+    /^\s*(automatic reply|auto[- ]?reply|autoreply|out of (the )?office|away from (the )?office|vacation reply|undeliverable|delivery status notification)/i.test(subj);
+}
 export function msgRow(m: GMsg, partnerId: string, me = ALLOWED) {
   const b = bodies(m.payload);
   const text = b.text || htmlToText(b.html) || m.snippet || "";
@@ -354,7 +360,7 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
         const hit = other.find((e) => byEmail.has(e)); if (hit) { pid = byEmail.get(hit); break; }
       }
       if (!pid && outreach.has(t.id)) {
-        const reply = msgs.find((m) => !mine(m));
+        const reply = msgs.find((m) => !mine(m) && !isAutoReply(m));
         if (!reply) continue; // sent but nobody replied yet
         const a = parseAddr(hdr(reply, "From"));
         if (!a.email || a.email === ALLOWED || /no-?reply|mailer-daemon|postmaster/i.test(a.email)) continue;
