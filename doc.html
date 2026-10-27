@@ -129,7 +129,7 @@ const items=(d.items||[]).filter(i=>String(i.d||'').trim());
 const priced=items.some(i=>Number(i.a)>0);
 const dep=Math.round((Number(d.deposit_pct)||0)*Number(d.total||0))/100;
 const accepted=d.status==='accepted';
-const place=[c.address,c.city&&!String(c.address||'').toLowerCase().includes(String(c.city).toLowerCase())?c.city:''].filter(Boolean).join(', ');
+const place=[c.address,c.city&&!String(c.address||'').toLowerCase().includes(String(c.city).toLowerCase())?c.city:''].filter(Boolean).join(', ')+(c.postal?', ON '+c.postal:'');
 function render(){
   $('root').innerHTML=`<article class="page">
   <div class="accent"></div>

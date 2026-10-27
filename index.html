@@ -664,6 +664,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <div class="fg">
         <label><span>Address</span><input id="f-address" placeholder="88 Elm Ridge Dr (optional)" autocomplete="street-address"></label>
         <label><span>City</span><select id="f-city"></select></label>
+        <label><span>Postal code</span><input id="f-postal" placeholder="L3T 3T6" autocapitalize="characters" autocomplete="postal-code" maxlength="7"></label>
       </div>
       <p class="fnote">The address is placed on the map automatically.</p>
       <div class="fghead">Project</div>
@@ -787,7 +788,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.17 (Oct 27)';
+const APP_VERSION='1.18 (Oct 27)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -899,12 +900,12 @@ const authStorage={
   removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
 };
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
-let db={jobs:[],events:[],docs:[],files:[]};let docsReady=false,invReady=false,filesReady=false;
+let db={jobs:[],events:[],docs:[],files:[]};let docsReady=false,invReady=false,filesReady=false,postalReady=false;
 let data=db.jobs;
 let me=null,team=[],loaded=false;
 let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map()};
 const nz=v=>(v===''||v==null)?null:v;
-function jobRow(r){return{id:r.id,name:r.name||'',phone:r.phone||'',email:r.email||'',address:r.address||'',city:r.city||'',type:r.type||'',source:r.source||'',
+function jobRow(r){return{id:r.id,name:r.name||'',phone:r.phone||'',email:r.email||'',address:r.address||'',city:r.city||'',...(postalReady?{postal:r.postal||''}:{}),type:r.type||'',source:r.source||'',
   value:(r.value==null||r.value==='')?null:Number(r.value),hst:!!r.hst,notes:r.notes||'',lat:r.lat??null,lng:r.lng??null,approx:!!r.approx,
   follow:nz(r.follow),lost:!!r.lost,sample:!!r.sample,stage:stageOf(r),ms:r.ms||{},history:r.history||[]}}
 function payRows(){const out=[];for(const r of db.jobs)for(const p of (r.payments||[])){if(!p.id)p.id=uid();out.push({id:p.id,job_id:r.id,date:p.date,amount:Number(p.amount)||0,note:p.note||''})}return out}
@@ -921,7 +922,8 @@ async function fetchAll(){
   filesReady=!fl.error;
   if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error}
   const err=j.error||p.error||e.error;if(err)throw err;
-  const jobs=j.data.map(x=>({id:x.id,name:x.name||'',phone:x.phone||'',email:x.email||'',address:x.address||'',city:x.city||'',type:x.type||'',source:x.source||'',
+  postalReady=j.data.length?('postal' in j.data[0]):!(await sb.from('jobs').select('postal').limit(1)).error;
+  const jobs=j.data.map(x=>({id:x.id,name:x.name||'',phone:x.phone||'',email:x.email||'',address:x.address||'',city:x.city||'',postal:x.postal||'',type:x.type||'',source:x.source||'',
     value:x.value==null?null:Number(x.value),hst:!!x.hst,notes:x.notes||'',lat:x.lat,lng:x.lng,approx:!!x.approx,follow:x.follow||'',lost:!!x.lost,sample:!!x.sample,
     ms:x.ms||{},history:Array.isArray(x.history)?x.history:[],date:ld(x.updated_at||x.created_at),payments:[]}));
   const byId=Object.fromEntries(jobs.map(r=>[r.id,r]));
@@ -1165,7 +1167,7 @@ function customers(){
     c.jobs.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
     const main=c.jobs.find(j=>!j.lost)||c.jobs[0];
     c.name=main.name;c.phone=c.jobs.map(j=>j.phone).find(Boolean)||'';c.email=c.jobs.map(j=>j.email).find(Boolean)||'';
-    c.address=main.address;c.city=main.city;
+    c.address=main.address;c.city=main.city;c.postal=main.postal||'';
     c.value=c.jobs.filter(j=>!j.lost).reduce((t,j)=>t+total(j),0);c.paid=c.jobs.reduce((t,j)=>t+paid(j),0);
     c.needs=custNeeds(c);c.rank=Math.min(9,...c.needs.map(n=>n.p));
     out.push(c)}
@@ -1229,7 +1231,7 @@ function openCustomer(key){
   const v=$('vDetail');
   v.innerHTML=`<div class="navbar"><button id="cBack">${ico('back')}${isPhone()?'Back':'Close'}</button><button id="cEdit">Edit</button></div>
   <div class="scroll">
-    <div class="cbig"><span class="av" style="--c:var(${avColor(c.key)})">${esc(initials(c.name))}</span><div><h2>${esc(c.name)}</h2><p>${esc([c.address,c.city].filter(Boolean).join(', '))}</p></div></div>
+    <div class="cbig"><span class="av" style="--c:var(${avColor(c.key)})">${esc(initials(c.name))}</span><div><h2>${esc(c.name)}</h2><p>${esc([c.address,c.city].filter(Boolean).join(', '))}${c.postal?' '+esc(c.postal):''}</p></div></div>
     <div class="acts">
       <a class="act primary" href="${ph?'tel:+1'+ph:'#'}" aria-disabled="${!ph}">${ico('call')}Call</a>
       <a class="act" href="${ph?'sms:+1'+ph:'#'}" aria-disabled="${!ph}">${ico('msg')}Text</a>
@@ -1296,7 +1298,7 @@ function openPay(k){inlinePay=k;if(selId)openDetail(selId);setTimeout(()=>{const
 function openDetail(id,pan){
   const r=job(id);if(!r){closeDetail();return}
   if(selId!==id)inlinePay=null;selId=id;mapSel=id;if(pan&&tab==='map'&&r.lat!=null)flyTo(r.lat,r.lng);
-  const st=STAGES[stageOf(r)],nx=nextStep(r),dest=encodeURIComponent([r.address,r.city&&!r.address.toLowerCase().includes(r.city.toLowerCase())?r.city:'','Ontario','Canada'].filter(Boolean).join(', '));
+  const st=STAGES[stageOf(r)],nx=nextStep(r),dest=encodeURIComponent([r.address,r.city&&!r.address.toLowerCase().includes(r.city.toLowerCase())?r.city:'','ON '+(r.postal||''),'Canada'].filter(Boolean).join(', '));
   const ph=(r.phone||'').replace(/[^0-9+]/g,''),wa=(r.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');
   const T=total(r),P=paid(r),B=balance(r),ps=payStatus(r);
   const nextText=!nx?'All steps complete':nx.k==='visit'&&r.ms.visit?.date?`Site visit ${fmtDate(r.ms.visit.date)}${r.ms.visit.time?' at '+fmtTime(r.ms.visit.time):''}`:nx.k==='start'&&r.ms.start?.date?`Work starts ${fmtDate(r.ms.start.date)}`:nx.k==='final'&&T?`Collect ${money(B)}`:nx.k==='deposit'&&T?`Collect deposit (${money(Math.round(T*.3))} suggested)`:({contacted:'Call the customer',visit:'Book the site visit',estimate:'Send the estimate',contract:'Get the contract signed',deposit:'Collect the deposit',start:'Set a start date',complete:'Finish the work',final:'Collect final payment',review:'Ask for a review'})[nx.k];
@@ -1306,7 +1308,7 @@ function openDetail(id,pan){
   v.innerHTML=`<div class="navbar"><button id="dBack">${ico('back')}${isPhone()?'Back':'Close'}</button><button id="dEdit">Edit</button></div>
   <div class="scroll">
     <div class="dtitle" style="--c:var(${st.c})"><div class="st"><i></i>${st.n}${ps?`<span class="tag ${ps.cls}">${ps.t}</span>`:''}${r.sample?'<span class="tag">Example</span>':''}</div>
-      <h2>${esc(r.name)}</h2><p>${esc(r.address)}, ${esc(r.city)} · ${esc(r.type)}${r.approx?' · <span style="color:var(--orange)">approximate pin</span>':''}</p></div>
+      <h2>${esc(r.name)}</h2><p>${esc(r.address)}, ${esc(r.city)}${r.postal?' '+esc(r.postal):''} · ${esc(r.type)}${r.approx?' · <span style="color:var(--orange)">approximate pin</span>':''}</p></div>
     <div class="acts">
       <a class="act primary" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${dest}">${ico('dir')}Directions</a>
       <a class="act" href="${ph?'tel:'+ph:'#'}" aria-disabled="${!ph}">${ico('call')}Call</a>
@@ -1349,7 +1351,8 @@ function openDetail(id,pan){
     <div class="block group linkbtns">
       <button class="row" id="dShowMap">Show on Map</button>
       <a class="row" target="_blank" rel="noopener" href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${r.lat},${r.lng}">Open Street View</a>
-      <button class="row" id="dPin">Move Pin on Map</button>
+      <button class="row" id="dRelocate">Find on Map Again</button>
+      <button class="row" id="dPin">Move Pin by Hand</button>
       <button class="row" id="dLost">${r.lost?'Reopen Job':'Mark as Lost'}</button>
       <button class="row danger" id="dDel">Delete Customer</button>
     </div>
@@ -1357,6 +1360,12 @@ function openDetail(id,pan){
   </div>`;
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
+  $('dRelocate').onclick=async()=>{if(!r.address&&!r.postal){toast('Add the address and postal code first');openForm(r);return}
+    toast('Finding the address…');let p=null;try{p=await geocode(r.address,r.city,r.postal)}catch(e){}
+    if(!p){toast('Address not found. Check the street and postal code, or move the pin by hand.');return}
+    r.lat=p.lat;r.lng=p.lng;r.approx=!!p.approx;log(r,'Map location updated');save();render();openDetail(r.id);
+    toast(p.approx?'Placed at the postal code area. Move the pin by hand if needed.':'Pin placed at the exact address');
+    if(tab!=='map'&&!isPhone()){}};
   $('dShowMap').onclick=()=>{if(isPhone())closeDetail();setTab('map');mapSel=r.id;drawPins();renderCards();setTimeout(()=>{if(r.lat!=null)flyTo(r.lat,r.lng,15);scrollCard(r.id)},80)};
   $('dLost').onclick=()=>{snapshot();r.lost=!r.lost;log(r,r.lost?'Marked as lost':'Reopened');save();render();openDetail(r.id);toast(r.lost?'Marked as lost':'Reopened',true)};
   $('addPay').onclick=()=>openPay('extra');
@@ -1441,11 +1450,32 @@ if(HAS_MAP){
 
 /* ---------- geocoding ---------- */
 let gq=Promise.resolve();
-function geocode(address,city){
-  const run=async()=>{const q=encodeURIComponent([address,city&&!new RegExp(city,'i').test(address)?city:'','Ontario','Canada'].filter(Boolean).join(', '));
-    const res=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ca&q=${q}`);
-    if(!res.ok)throw new Error('lookup failed');const j=await res.json();await new Promise(r=>setTimeout(r,1100));
-    return j[0]?{lat:+(+j[0].lat).toFixed(6),lng:+(+j[0].lon).toFixed(6)}:null};
+const fmtPostal=v=>{const t=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(t)?t.slice(0,3)+' '+t.slice(3):String(v||'').toUpperCase().trim()};
+const kmBetween=(a,b)=>{const R=6371,t=x=>x*Math.PI/180,dl=t(b.lat-a.lat),dn=t(b.lng-a.lng),h=Math.sin(dl/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+async function nomi(params){
+  const res=await fetch('https://nominatim.openstreetmap.org/search?'+new URLSearchParams(Object.assign({format:'jsonv2',limit:'1',countrycodes:'ca'},params)));
+  await new Promise(r=>setTimeout(r,1100));
+  if(!res.ok)throw new Error('lookup failed');const j=await res.json();
+  return j[0]?{lat:+(+j[0].lat).toFixed(6),lng:+(+j[0].lon).toFixed(6)}:null}
+/* Exact address first (street + city + postal code), checked against the postal code area so a same-named street in another town is never used */
+function geocode(address,city,postal){
+  const run=async()=>{
+    const pc=fmtPostal(postal),valid=/^[A-Z]\d[A-Z] \d[A-Z]\d$/.test(pc);
+    let street=String(address||'').split(',')[0].trim();
+    let area=null;
+    if(valid){try{area=await nomi({postalcode:pc,country:'Canada'})}catch(e){}
+      if(!area){try{area=await nomi({postalcode:pc.slice(0,3),country:'Canada'})}catch(e){}}}
+    const near=p=>!p||!area||kmBetween(p,area)<12;
+    const tries=[];
+    if(street){
+      if(valid)tries.push({street,city:city||'',state:'Ontario',postalcode:pc});
+      tries.push({street,city:city||'',state:'Ontario'});
+      tries.push({q:[street,city,'Ontario',valid?pc:''].filter(Boolean).join(', ')});
+    }
+    for(const t of tries){let p=null;try{p=await nomi(t)}catch(e){}
+      if(p&&near(p))return Object.assign(p,{approx:false})}
+    if(area)return Object.assign(area,{approx:true});
+    return null};
   const p=gq.then(run,run);gq=p.catch(()=>{});return p;
 }
 const cityPoint=city=>{const c=CITIES[city]||CITIES.Toronto;return{lat:c[0]+(Math.random()-.5)*.01,lng:c[1]+(Math.random()-.5)*.014}};
@@ -1455,7 +1485,8 @@ function setSheet(){}
 /* ---------- customer form ---------- */
 $('f-city').innerHTML=Object.keys(CITIES).map(c=>`<option>${c}</option>`).join('');
 $('f-type').innerHTML=TYPES.map(c=>`<option>${c}</option>`).join('');
-const F=['name','phone','email','address','city','type','source','value','follow','notes'];
+const F=['name','phone','email','address','city','postal','type','source','value','follow','notes'];
+$('f-postal').addEventListener('blur',e=>{e.target.value=fmtPostal(e.target.value)});
 function showModal(id){const m=$(id);m.hidden=false;requestAnimationFrame(()=>m.classList.add('show'))}
 function hideModal(id){const m=$(id);m.classList.remove('show');setTimeout(()=>m.hidden=true,300)}
 function openForm(r){editingId=r?r.id:null;
@@ -1479,12 +1510,13 @@ $('form').onsubmit=async e=>{e.preventDefault();
   const vd=$('f-vdate').value,vt=$('f-vtime').value;
   const btn=$('formSave');btn.disabled=true;btn.textContent='Locating…';
   let r,addrChanged=true;const wasEdit=!!editingId;
-  if(editingId){r=job(editingId);addrChanged=r.address!==v.address||r.city!==v.city||r.lat==null;Object.assign(r,v);log(r,'Details edited')}
+  v.postal=fmtPostal(v.postal);
+  if(editingId){r=job(editingId);addrChanged=r.address!==v.address||r.city!==v.city||(r.postal||'')!==v.postal||r.lat==null||r.approx;Object.assign(r,v);log(r,'Details edited')}
   else{r=Object.assign({id:'c'+Date.now(),date:today(),history:[{d:today(),t:'Lead added'}],ms:{},payments:[],lost:false},v);data.push(r)}
   if(vd){r.ms.visit=Object.assign(r.ms.visit||{},{date:vd,time:vt});if(!stepDone(r,'contacted'))r.ms.contacted={done:true,date:today()}}
   let found=null;
-  if(addrChanged){if(v.address)try{found=await geocode(v.address,v.city)}catch(err){}
-    if(found){r.lat=found.lat;r.lng=found.lng;r.approx=false}else{const p=cityPoint(v.city);r.lat=p.lat;r.lng=p.lng;r.approx=true}}
+  if(addrChanged){if(v.address||v.postal)try{found=await geocode(v.address,v.city,v.postal)}catch(err){}
+    if(found){r.lat=found.lat;r.lng=found.lng;r.approx=!!found.approx}else{const p=cityPoint(v.city);r.lat=p.lat;r.lng=p.lng;r.approx=true}}
   save();hideModal('modal');filter=null;render();openDetail(r.id,true);
   if(addrChanged&&!found&&v.address){toast('Address not found. Tap the exact spot.');startPlacing(r.id)}
   else toast(wasEdit?'Saved':'Customer added');
@@ -1732,8 +1764,8 @@ function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePrioritie
 let locating=false;
 async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
 async function locateMissingRun(){const todo=data.filter(r=>r.lat==null);
-  for(const r of todo){let p=null;try{p=await geocode(r.address,r.city)}catch(e){}
-    if(p){r.lat=p.lat;r.lng=p.lng;r.approx=false}else{const c=cityPoint(r.city);r.lat=c.lat;r.lng=c.lng;r.approx=true}save();render()}
+  for(const r of todo){let p=null;try{p=await geocode(r.address,r.city,r.postal)}catch(e){}
+    if(p){r.lat=p.lat;r.lng=p.lng;r.approx=!!p.approx}else{const c=cityPoint(r.city);r.lat=c.lat;r.lng=c.lng;r.approx=true}save();render()}
   if(todo.length)fit(data)}
 /* ---------- auth + boot ---------- */
 let authMode='signin';
