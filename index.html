@@ -787,7 +787,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.15 (Oct 26)';
+const APP_VERSION='1.16 (Oct 26)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1460,6 +1460,7 @@ function showModal(id){const m=$(id);m.hidden=false;requestAnimationFrame(()=>m.
 function hideModal(id){const m=$(id);m.classList.remove('show');setTimeout(()=>m.hidden=true,300)}
 function openForm(r){editingId=r?r.id:null;
   if(r&&r.type&&![...$('f-type').options].some(o=>o.value===r.type)){const o=document.createElement('option');o.textContent=r.type;$('f-type').prepend(o)}
+  if(r&&r.source&&![...$('f-source').options].some(o=>o.value===r.source)){const o=document.createElement('option');o.textContent=r.source;$('f-source').prepend(o)}
   $('formTitle').textContent=r?'Edit Customer':'New Customer';$('formSave').textContent=r?'Done':'Add';
   F.forEach(f=>$('f-'+f).value=r?(r[f]??''):({city:'Toronto',type:'Bathroom renovation',source:'Website form'}[f]||''));
   $('f-hst').checked=r?!!r.hst:true;$('f-vdate').value=r?.ms?.visit?.date||'';$('f-vtime').value=r?.ms?.visit?.time||'';
