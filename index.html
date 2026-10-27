@@ -422,6 +422,17 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .needlist .nrow .rt>span{display:block;font-size:12.5px;color:var(--label2)}
 .needlist .nrow>svg{color:var(--label3)}
 .cstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+/* ===== files ===== */
+.frow{display:flex;align-items:center;position:relative}
+.frow+.frow::before{content:"";position:absolute;top:0;left:58px;right:0;height:.5px;background:var(--sep)}
+.frow .fopen{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:10px 4px 10px 12px;text-align:left}
+.frow .fopen .rt{flex:1;min-width:0}
+.frow .fdel{padding:10px 14px;color:var(--label3);font-size:20px;line-height:1}
+.frow .fdel.sure{color:var(--red);font-size:13px;font-weight:600}
+.ftag{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue);margin-right:4px}
+.upl{padding:12px 14px;font-size:14px;color:var(--label2);display:flex;gap:10px;align-items:center}
+.upl i{width:16px;height:16px;border-radius:50%;border:2px solid var(--card2);border-top-color:var(--blue);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 /* ===== estimates ===== */
 .items .itm{display:flex;gap:10px;align-items:flex-start;padding:8px 10px 8px 14px;position:relative}
 .items .itm+.itm::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
@@ -767,6 +778,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   </div>
 </div>
 
+<input type="file" id="fileInput" multiple hidden accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.heic,.dwg,.zip">
 <div class="toast glass" id="toast"><svg class="i" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span></span><button id="undo" hidden>Undo</button></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -775,7 +787,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.12 (Oct 26)';
+const APP_VERSION='1.13 (Oct 26)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -793,6 +805,8 @@ const IC={
  dir:'<path d="M12 2 4 21l8-4 8 4z"/>',call:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
  msg:'<path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4A8 8 0 1 1 20 11.5z"/>',view:'<circle cx="12" cy="8" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2M3 14c-1 .7-1 1.5 0 2.2M21 14c1 .7 1 1.5 0 2.2"/>',
  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',x:'<path d="M7 7l10 10M17 7 7 17"/>',
+ img:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 8"/>',
+ clip:'<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l9-9a3.3 3.3 0 0 1 4.7 4.7l-9 9a1.7 1.7 0 0 1-2.4-2.4l8.3-8.3"/>',
  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
  tday:'<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>',
  calp:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M12 13v5M9.5 15.5h5"/>'
@@ -831,6 +845,7 @@ const kmoney=v=>v>=1000?'$'+(v/1000).toFixed(v>=100000?0:1).replace(/\.0$/,'')+'
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmtDate=d=>{if(!d)return '';const n=dayDiff(d,today());if(n===0)return 'Today';if(n===1)return 'Tomorrow';if(n===-1)return 'Yesterday';return new Date(d+'T12:00').toLocaleDateString('en-CA',{month:'short',day:'numeric'})};
 const fmtTime=t=>{if(!t)return '';const[h,m]=t.split(':').map(Number);return `${(h%12)||12}:${pad(m)} ${h<12?'AM':'PM'}`};
+const ld=t=>t?iso(new Date(t)):'';
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
 
 const total=r=>(+r.value||0)*(r.hst?1.13:1);
@@ -884,7 +899,7 @@ const authStorage={
   removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
 };
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
-let db={jobs:[],events:[],docs:[]};let docsReady=false,invReady=false;
+let db={jobs:[],events:[],docs:[],files:[]};let docsReady=false,invReady=false,filesReady=false;
 let data=db.jobs;
 let me=null,team=[],loaded=false;
 let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map()};
@@ -901,13 +916,14 @@ function docRow(d){return{id:d.id,job_id:d.jobId,kind:d.kind||'estimate',number:
 function setStatus(t,cls){const el=$('syncStatus');if(!el)return;el.textContent=t;el.className=cls||''}
 async function must(q){const{error}=await q;if(error)throw error}
 async function fetchAll(){
-  const[j,p,e,dc]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
-    sb.from('documents').select('*').order('created_at')]);
+  const[j,p,e,dc,fl]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
+    sb.from('documents').select('*').order('created_at'),sb.from('files').select('*').order('created_at')]);
+  filesReady=!fl.error;
   if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error}
   const err=j.error||p.error||e.error;if(err)throw err;
   const jobs=j.data.map(x=>({id:x.id,name:x.name||'',phone:x.phone||'',email:x.email||'',address:x.address||'',city:x.city||'',type:x.type||'',source:x.source||'',
     value:x.value==null?null:Number(x.value),hst:!!x.hst,notes:x.notes||'',lat:x.lat,lng:x.lng,approx:!!x.approx,follow:x.follow||'',lost:!!x.lost,sample:!!x.sample,
-    ms:x.ms||{},history:Array.isArray(x.history)?x.history:[],date:String(x.updated_at||x.created_at||'').slice(0,10),payments:[]}));
+    ms:x.ms||{},history:Array.isArray(x.history)?x.history:[],date:ld(x.updated_at||x.created_at),payments:[]}));
   const byId=Object.fromEntries(jobs.map(r=>[r.id,r]));
   p.data.forEach(x=>{const r=byId[x.job_id];if(r)r.payments.push({id:x.id,date:x.date,amount:Number(x.amount),note:x.note||''})});
   const events=e.data.map(x=>({id:x.id,jobId:x.job_id||'',type:x.type||'task',title:x.title||'',date:x.date,time:x.time||'',notes:x.notes||'',done:!!x.done}));
@@ -916,7 +932,7 @@ async function fetchAll(){
     lump:x.lump==null?null:Number(x.lump),hst:!!x.hst,depositPct:Number(x.deposit_pct)||0,notes:x.notes||'',terms:x.terms||'',subtotal:Number(x.subtotal)||0,tax:Number(x.tax)||0,total:Number(x.total)||0,
     token:x.share_token,sentAt:x.sent_at||'',acceptedAt:x.accepted_at||'',acceptedName:x.accepted_name||'',
     credit:Number(x.credit)||0,dueDate:x.due_date||'',paidAt:x.paid_at||'',paidMethod:x.paid_method||'',ref:x.ref||''}));
-  db={jobs,events,docs};data=db.jobs;
+  db={jobs,events,docs,files:fl.data||[]};data=db.jobs;
   synced={jobs:new Map(jobs.map(r=>[r.id,JSON.stringify(jobRow(r))])),payments:new Map(payRows().map(x=>[x.id,JSON.stringify(x)])),events:new Map(events.map(x=>[x.id,JSON.stringify(evRow(x))])),documents:new Map(docs.map(x=>[x.id,JSON.stringify(docRow(x))]))};
   loaded=true;
 }
@@ -1000,7 +1016,7 @@ function todoItems(){
     if(stepDone(r,'complete')&&!stepDone(r,'final'))items.push({key:r.id+'p',job:r,ic:'pay',c:'--s-pay',title:`Collect final payment · ${r.name}`,pri:ageOf(r.ms.complete?.date,T)>7?1:2,sub:total(r)?`Balance ${money(balance(r))}`:'Work completed',open:'final'});
     if(stepDone(r,'complete')&&stepDone(r,'final')&&!stepDone(r,'review')&&!r.sample&&dayDiff(T,r.ms.complete?.date||T)<45)items.push({key:r.id+'r',job:r,ic:'star',c:'--s-quote',title:`Ask for a review · ${r.name}`,pri:4,sub:'Google or HomeStars',act:()=>setStep(r,'review',true)});
   }
-  for(const d of (db.docs||[]).filter(x=>isInv(x)&&x.status==='sent')){const r=job(d.jobId);if(!r||r.lost)continue;const age=d.sentAt?dayDiff(T,String(d.sentAt).slice(0,10)):0;
+  for(const d of (db.docs||[]).filter(x=>isInv(x)&&x.status==='sent')){const r=job(d.jobId);if(!r||r.lost)continue;const age=d.sentAt?dayDiff(T,ld(d.sentAt)):0;
     for(let k=items.length-1;k>=0;k--){if(items[k].job===r&&(items[k].key===r.id+'d'||items[k].key===r.id+'p'))items.splice(k,1)}
     items.push({key:'inv'+d.id,job:r,ic:'pay',c:'--s-pay',title:`Payment due · ${r.name}`,sub:`${d.number} · ${money(invDue(d))} · sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}`,pri:age>=7?1:2,doc:d.id})}
   for(const e of db.events){if(e.done||e.date>T)continue;const r=e.jobId&&job(e.jobId);const t=EVTYPES[e.type]||EVTYPES.other;
@@ -1158,10 +1174,10 @@ function customers(){
 function custNeeds(c){
   const T=today(),n=[];
   for(const r of c.jobs){if(r.lost)continue;const tag=c.jobs.length>1?` · ${r.type||r.name}`:'';
-    for(const d of (db.docs||[]).filter(x=>x.jobId===r.id&&x.status==='sent')){const age=d.sentAt?dayDiff(T,String(d.sentAt).slice(0,10)):0;
+    for(const d of (db.docs||[]).filter(x=>x.jobId===r.id&&x.status==='sent')){const age=d.sentAt?dayDiff(T,ld(d.sentAt)):0;
       n.push({k:'sign',p:age>=5?1:2,c:age>=5?'--p1':'--p2',ic:'sign',t:`Sign estimate ${d.number}`,s:`${money(d.total)} · sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}${tag}`,job:r.id,doc:d.id})}
     const openInv=(db.docs||[]).filter(x=>isInv(x)&&x.jobId===r.id&&x.status==='sent');
-    for(const d of openInv){const age=d.sentAt?dayDiff(T,String(d.sentAt).slice(0,10)):0;n.push({k:'pay',p:age>=7?1:2,c:age>=7?'--p1':'--p2',ic:'pay',t:`Pay invoice ${d.number} · ${money(invDue(d))}`,s:`Sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}${tag}`,job:r.id,doc:d.id})}
+    for(const d of openInv){const age=d.sentAt?dayDiff(T,ld(d.sentAt)):0;n.push({k:'pay',p:age>=7?1:2,c:age>=7?'--p1':'--p2',ic:'pay',t:`Pay invoice ${d.number} · ${money(invDue(d))}`,s:`Sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}${tag}`,job:r.id,doc:d.id})}
     if(openInv.length){}else if(stepDone(r,'complete')&&!stepDone(r,'final')&&total(r)>0){const age=ageOf(r.ms.complete?.date,T);
       n.push({k:'pay',p:age>7?1:2,c:age>7?'--p1':'--p2',ic:'pay',t:`Final payment ${money(balance(r))}`,s:`Work completed ${fmtDate(r.ms.complete?.date)}${tag}`,job:r.id})}
     else if(stepDone(r,'contract')&&!stepDone(r,'deposit'))
@@ -1224,6 +1240,7 @@ function openCustomer(key){
     <div class="block"><div class="label">What we need from them <span>${c.needs.length||''}</span></div>
       <div class="group needlist">${c.needs.length?c.needs.map((n,i)=>`<button class="nrow" data-need="${i}"><span class="gl" style="--c:var(${n.c})">${ico(n.ic)}</span><span class="rt"><b>${esc(n.t)}</b><span>${esc(n.s)}</span></span>${ico('chev')}</button>`).join('')
         :`<div class="empty" style="padding:18px"><b style="font-size:15px">Nothing needed</b>This customer is all set.</div>`}</div></div>
+    ${filesBlock(c.jobs.flatMap(j=>filesFor(j.id)).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at))),'attachCust',c.jobs.length>1?(f=>(job(f.job_id)?.type||'')):null)}
     <div class="block"><div class="label">Jobs <span>${c.jobs.length}</span></div>
       <div class="group">${c.jobs.map(r=>{const st=STAGES[stageOf(r)],P=PRIOR.by.get(r.id);return `<button class="row" data-job="${r.id}"><span class="gl" style="--c:var(${P?PC[P.p]:st.c})">${ico(st.ic)}</span><span class="rt"><b>${esc(r.type||r.name)}</b><span>${esc(r.address||r.city||'')} · ${st.n}</span></span><span class="rv"><em>${total(r)?money(total(r)):''}</em>${ico('chev')}</span></button>`}).join('')}</div></div>
     <div class="block group info">
@@ -1234,6 +1251,7 @@ function openCustomer(key){
   </div>`;
   $('cBack').onclick=()=>{custSel=null;closeDetail()};
   $('cEdit').onclick=()=>openCustEdit(c);
+  if($('attachCust'))$('attachCust').onclick=()=>pickFiles((c.jobs.find(j=>!j.lost)||c.jobs[0]).id);
   v.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{custSel=null;openDetail(b.dataset.job,true)});
   v.querySelectorAll('[data-need]').forEach(b=>b.onclick=()=>{const n=c.needs[+b.dataset.need];
     if(n.edit){openCustEdit(c);return}
@@ -1298,6 +1316,7 @@ function openDetail(id,pan){
     ${nx&&!r.lost?`<div class="nextcard"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
     <div class="block"><div class="label">Estimates & Invoices <span><button id="newDoc">+ Estimate</button>&nbsp;&nbsp;<button id="newInv">+ Invoice</button></span></div>
       <div class="group">${docsFor(r.id).length?docsFor(r.id).sort((a,b)=>(isInv(a)-isInv(b))||String(a.number).localeCompare(String(b.number))).map(docListRow).join(''):`<div class="empty" style="padding:16px"><b style="font-size:15px">No estimate yet</b>Create one and send it for online signature.</div>`}</div></div>
+    ${filesBlock(filesFor(r.id),'attachJob')}
     <div class="block"><div class="label">Job Steps <span>${STEPS.filter(s=>stepDone(r,s.k)).length} of ${STEPS.length}</span></div>
       <div class="group journey" id="journey">${STEPS.map(s=>{const on=stepDone(r,s.k),m=r.ms[s.k]||{};
         let sub=on?(m.date?fmtDate(m.date):'Done'):'';
@@ -1342,6 +1361,7 @@ function openDetail(id,pan){
   $('dLost').onclick=()=>{snapshot();r.lost=!r.lost;log(r,r.lost?'Marked as lost':'Reopened');save();render();openDetail(r.id);toast(r.lost?'Marked as lost':'Reopened',true)};
   $('addPay').onclick=()=>openPay('extra');
   $('newDoc').onclick=()=>openDoc(null,r);
+  if($('attachJob'))$('attachJob').onclick=()=>pickFiles(r.id);
   $('newInv').onclick=()=>{if(!invReady){toast('Run the invoices setup step first');return}openDoc(null,r,'invoice')};
   v.querySelectorAll('[data-doc]').forEach(b=>b.onclick=()=>openDoc((db.docs||[]).find(x=>x.id===b.dataset.doc),r));
   $('journey').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s,on=stepDone(r,k);
@@ -1360,7 +1380,7 @@ function openDetail(id,pan){
   v.querySelectorAll('[data-delpay]').forEach(b=>b.onclick=()=>{snapshot();const p=r.payments.splice(+b.dataset.delpay,1)[0];log(r,`Payment removed ${money(p.amount)}`);save();render();openDetail(r.id);toast('Payment removed',true)});
   v.querySelectorAll('[data-cal]').forEach(b=>b.onclick=()=>{const e=db.events.find(x=>'e:'+x.id===b.dataset.cal);if(e)openEvent(e)});
   $('dDel').onclick=()=>{$('dConfirm').innerHTML=`<div class="group linkbtns"><div style="padding:14px;text-align:center;color:var(--label2);font-size:13px">Delete ${esc(r.name)}? This can’t be undone.</div><button class="row danger" id="dYes" style="font-weight:600">Delete</button><button class="row" id="dNo">Cancel</button></div>`;
-    $('dYes').onclick=()=>{snapshot();db.jobs=data=data.filter(x=>x.id!==r.id);db.events=db.events.filter(x=>x.jobId!==r.id);db.docs=(db.docs||[]).filter(x=>x.jobId!==r.id);save();closeDetail();render();toast('Customer deleted',true)};$('dNo').onclick=()=>$('dConfirm').innerHTML='';$('dConfirm').scrollIntoView({behavior:'smooth',block:'nearest'})};
+    $('dYes').onclick=()=>{snapshot();db.jobs=data=data.filter(x=>x.id!==r.id);db.events=db.events.filter(x=>x.jobId!==r.id);db.docs=(db.docs||[]).filter(x=>x.jobId!==r.id);db.files=(db.files||[]).filter(x=>x.job_id!==r.id);save();closeDetail();render();toast('Customer deleted',true)};$('dNo').onclick=()=>$('dConfirm').innerHTML='';$('dConfirm').scrollIntoView({behavior:'smooth',block:'nearest'})};
   v.classList.add('open');
   renderList();drawPins();renderCards();
 }
@@ -1470,6 +1490,46 @@ function startPlacing(id){placingId=id;$('vDetail').classList.remove('open');set
 function stopPlacing(){const id=placingId;placingId=null;$('map').classList.remove('placing');$('placebar').hidden=true;return id}
 $('placeCancel').onclick=stopPlacing;
 
+/* ---------- files ---------- */
+const filesFor=id=>(db.files||[]).filter(f=>f.job_id===id).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+const fmtSize=n=>!n?'':n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';
+const isImgFile=f=>/^image\//.test(f.mime||'')||/\.(jpe?g|png|heic|gif|webp)$/i.test(f.name||'');
+function guessLabel(file){const n=(file.name||'').toLowerCase();
+  if(/contract|agreement|signed/.test(n))return 'Contract';if(/estimate|quote|quotation|proposal/.test(n))return 'Estimate';if(/invoice|receipt/.test(n))return /receipt/.test(n)?'Receipt':'Invoice';
+  if(/permit/.test(n))return 'Permit';if(/drawing|plan|dwg|layout/.test(n))return 'Drawing';if(/^image\//.test(file.type)||/\.(jpe?g|png|heic|webp)$/.test(n))return 'Photo';return ''}
+function fileRow(f,jobTag){return `<div class="frow"><button class="fopen" data-file="${f.id}"><span class="gl" style="--c:var(${isImgFile(f)?'--s-visit':'--s-sent'})">${ico(isImgFile(f)?'img':'quote')}</span><span class="rt"><b>${esc(f.name)}</b><span>${f.label?`<span class="ftag">${esc(f.label)}</span>`:''}${fmtSize(f.size)}${f.created_at?' · '+fmtDate(ld(f.created_at)):''}${jobTag?' · '+esc(jobTag):''}</span></span></button><button class="fdel" data-fdel="${f.id}" aria-label="Delete ${esc(f.name)}">×</button></div>`}
+function filesBlock(list,btnId,jobTagFn){return `<div class="block"><div class="label">Files <span>${filesReady?`<button id="${btnId}">+ Attach File</button>`:''}</span></div>
+  <div class="group" id="${btnId}List">${!filesReady?'<div class="empty" style="padding:16px"><b style="font-size:15px">Files not set up yet</b>Run the files setup step to attach documents.</div>':list.length?list.map(f=>fileRow(f,jobTagFn?jobTagFn(f):'')).join(''):'<div class="empty" style="padding:16px"><b style="font-size:15px">No files yet</b>Attach the contract, photos, permits or drawings.</div>'}</div></div>`}
+let attachJobId=null;
+function pickFiles(jobId){attachJobId=jobId;const i=$('fileInput');i.value='';i.click()}
+$('fileInput').onchange=async e=>{const list=[...e.target.files];const jobId=attachJobId;if(!list.length||!jobId)return;const r=job(jobId);
+  const box=document.querySelector('[id$="List"].group')||null;
+  let ok=0;
+  for(let k=0;k<list.length;k++){const f=list[k];
+    if(f.size>50*1048576){toast(`${f.name} is larger than 50 MB`);continue}
+    toast(list.length>1?`Uploading ${k+1} of ${list.length}…`:`Uploading ${f.name}…`);
+    const safeName=f.name.normalize('NFKD').replace(/[^\w.\-]+/g,'_').slice(-80)||'file';
+    const path=`${jobId}/${Date.now()}-${Math.random().toString(36).slice(2,7)}-${safeName}`;
+    const up=await sb.storage.from('job-files').upload(path,f,{contentType:f.type||undefined,upsert:false});
+    if(up.error){console.error(up.error);toast(`Could not upload ${f.name}`);continue}
+    const row={id:uid(),job_id:jobId,name:f.name,path,size:f.size,mime:f.type||'',label:guessLabel(f),uploaded_by:me?.email||''};
+    const ins=await sb.from('files').insert(row);
+    if(ins.error){console.error(ins.error);await sb.storage.from('job-files').remove([path]);toast(`Could not save ${f.name}`);continue}
+    db.files.push(Object.assign({created_at:new Date().toISOString()},row));ok++;
+    if(r)log(r,`File attached: ${f.name}`)}
+  if(ok){save();render();if(selId)openDetail(selId);else if(custSel)openCustomer(custSel);toast(ok>1?`${ok} files attached`:'File attached')}};
+async function openFileById(id){const f=(db.files||[]).find(x=>x.id===id);if(!f)return;const w=window.open('about:blank','_blank');
+  const{data,error}=await sb.storage.from('job-files').createSignedUrl(f.path,3600);
+  if(error||!data?.signedUrl){if(w)w.close();toast('Could not open the file');return}
+  if(w)w.location=data.signedUrl;else location.href=data.signedUrl}
+async function deleteFileById(id,btn){const f=(db.files||[]).find(x=>x.id===id);if(!f)return;
+  if(!btn.classList.contains('sure')){btn.classList.add('sure');btn.textContent='Delete';setTimeout(()=>{if(btn.isConnected){btn.classList.remove('sure');btn.textContent='×'}},3000);return}
+  const del=await sb.from('files').delete().eq('id',id);if(del.error){toast('Could not delete');return}
+  await sb.storage.from('job-files').remove([f.path]);db.files=db.files.filter(x=>x.id!==id);const r=job(f.job_id);if(r){log(r,`File removed: ${f.name}`);save()}
+  render();if(selId)openDetail(selId);else if(custSel)openCustomer(custSel);toast('File deleted')}
+$('vDetail').addEventListener('click',e=>{const o=e.target.closest('[data-file]');if(o){openFileById(o.dataset.file);return}
+  const d=e.target.closest('[data-fdel]');if(d)deleteFileById(d.dataset.fdel,d)});
+
 /* ---------- estimates ---------- */
 const DOC_ST={draft:{n:'Draft',c:'--p0'},sent:{n:'Sent · waiting for signature',c:'--s-sent'},accepted:{n:'Signed',c:'--green'},declined:{n:'Declined',c:'--red'},paid:{n:'Paid',c:'--green'}};
 const isInv=d=>d&&d.kind==='invoice';
@@ -1482,7 +1542,7 @@ const DEFAULT_TERMS=`1. This estimate is valid until the date shown above.
 5. Payments are due according to the schedule above. The balance is due on completion of the work.`;
 const docsFor=id=>(db.docs||[]).filter(x=>x.jobId===id).sort((a,b)=>String(b.number).localeCompare(String(a.number)));
 function docListRow(d){const inv=isInv(d);let st=DOC_ST[d.status]||DOC_ST.draft;
-  if(inv&&d.status==='sent'){const age=d.sentAt?dayDiff(today(),String(d.sentAt).slice(0,10)):0;st={n:`Sent · ${money(invDue(d))} due${age?' · '+age+' day'+(age>1?'s':'')+' ago':''}`,c:age>=7?'--p1':'--p2'}}
+  if(inv&&d.status==='sent'){const age=d.sentAt?dayDiff(today(),ld(d.sentAt)):0;st={n:`Sent · ${money(invDue(d))} due${age?' · '+age+' day'+(age>1?'s':'')+' ago':''}`,c:age>=7?'--p1':'--p2'}}
   return `<button class="row" data-doc="${d.id}"><span class="gl" style="--c:var(${st.c})">${ico(inv?'pay':(d.status==='accepted'?'sign':'quote'))}</span><span class="rt"><b>${esc(d.number)} · ${esc(d.title||KN(d))}</b><span>${st.n}${d.status==='accepted'&&d.acceptedName?' by '+esc(d.acceptedName):''}${d.status==='paid'&&d.paidMethod?' · '+esc(d.paidMethod):''} · ${fmtDate(d.date)}</span></span><span class="rv"><em>${money(inv?(d.status==='paid'?d.total-d.credit:invDue(d)):d.total)||'$0'}</em>${ico('chev')}</span></button>`}
 function nextDocNumber(kind){const pre=kind==='invoice'?'INV-':'E-';const n=(db.docs||[]).filter(x=>(x.kind||'estimate')===(kind||'estimate')).map(x=>parseInt(String(x.number).replace(/\D/g,''),10)).filter(Number.isFinite);return pre+(n.length?Math.max(...n)+1:1001)}
 function buildInvoice(r){
@@ -1519,7 +1579,7 @@ function openDoc(d,r,kind){docJob=r;
   $('d-lump').value=docEdit.lump??'';$('d-hst').checked=!!docEdit.hst;$('d-dep').value=String(docEdit.depositPct||0);if(!$('d-dep').value)$('d-dep').value='30';
   $('d-notes').value=docEdit.notes;$('d-terms').value=docEdit.terms;
   const locked=docEdit.status==='accepted'||docEdit.status==='paid';$('docForm').dataset.locked=locked?'1':'0';payMode=false;
-  $('docBanner').innerHTML=inv?(docEdit.status==='paid'?`<div class="banner ok">${ico('check')} Paid ${money(docEdit.total-docEdit.credit)} on ${fmtDate(String(docEdit.paidAt).slice(0,10))}${docEdit.paidMethod?' by '+esc(docEdit.paidMethod):''}</div>`:docEdit.status==='sent'?`<div class="banner warn">${ico('pay')} Sent ${docEdit.sentAt?fmtDate(String(docEdit.sentAt).slice(0,10)):''} · ${money(invDue(docEdit))} due</div>`:''):locked?`<div class="banner ok">${ico('check')} Signed by ${esc(docEdit.acceptedName||'customer')} on ${fmtDate(String(docEdit.acceptedAt).slice(0,10))}</div>`:docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent ${docEdit.sentAt?fmtDate(String(docEdit.sentAt).slice(0,10)):''} · waiting for the customer to sign</div>`:'';
+  $('docBanner').innerHTML=inv?(docEdit.status==='paid'?`<div class="banner ok">${ico('check')} Paid ${money(docEdit.total-docEdit.credit)} on ${fmtDate(ld(docEdit.paidAt))}${docEdit.paidMethod?' by '+esc(docEdit.paidMethod):''}</div>`:docEdit.status==='sent'?`<div class="banner warn">${ico('pay')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · ${money(invDue(docEdit))} due</div>`:''):locked?`<div class="banner ok">${ico('check')} Signed by ${esc(docEdit.acceptedName||'customer')} on ${fmtDate(ld(docEdit.acceptedAt))}</div>`:docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · waiting for the customer to sign</div>`:'';
   paintItems();paintTotals();paintDocActs();showModal('docModal')}
 let payMode=false;
 function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,''),inv=isInv(d);
@@ -1663,7 +1723,7 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 
 /* ---------- misc ---------- */
 let tt;function toast(m,canUndo){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:2400)}
-$('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
+$('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];db.files=db.files||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId)closeDetail()}});
 function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>!r.lost&&stageOf(r)!=='done').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();if(tab==='cal')renderCal();drawPins();renderCards()}
 let locating=false;
@@ -1704,7 +1764,7 @@ async function start(session){
   try{await fetchAll();setStatus('Synced')}catch(e){console.error(e);setStatus('Offline','err');toast('Could not load data. Check your connection.')}
   if(!started){started=true;
     channel=sb.channel('nevaco-sync');
-    ['jobs','payments','events','documents'].forEach(t=>channel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));
+    ['jobs','payments','events','documents','files'].forEach(t=>channel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));
     channel.subscribe();
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshFromServer()});
     window.addEventListener('online',()=>{setStatus('Synced');sync();refreshFromServer()});

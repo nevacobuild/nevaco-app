@@ -115,7 +115,7 @@ const $=id=>document.getElementById(id);
 const HST_NO=''; // NEVACO BUILD HST registration number, e.g. '123456789 RT0001'
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const money=v=>'$'+Number(v||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fdate=d=>d?new Date(String(d).slice(0,10)+'T12:00').toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'}):'';
+const fdate=d=>d?(String(d).length>10?new Date(d):new Date(String(d).slice(0,10)+'T12:00')).toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'}):'';
 const qs=new URLSearchParams(location.search),token=qs.get('t')||'';
 if(!token){$('root').innerHTML='<div class="msg"><b>Link not valid</b>Please use the link NEVACO BUILD sent you.</div>';return}
 let d;
