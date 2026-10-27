@@ -787,7 +787,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.13 (Oct 26)';
+const APP_VERSION='1.14 (Oct 26)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -831,7 +831,7 @@ const STEPS=[
 ];
 const SK=Object.fromEntries(STEPS.map((s,i)=>[s.k,Object.assign(s,{i})]));
 const EVTYPES={visit:{n:'Site visit',c:'--s-visit',ic:'visit'},start:{n:'Work start',c:'--s-won',ic:'won'},complete:{n:'Target finish',c:'--s-done',ic:'done'},call:{n:'Call',c:'--s-follow',ic:'follow'},meet:{n:'Meeting',c:'--s-lead',ic:'meet'},pay:{n:'Payment',c:'--s-pay',ic:'pay'},task:{n:'Task',c:'--s-sent',ic:'task'},other:{n:'Other',c:'--s-quote',ic:'calp'}};
-const CITIES={'Toronto':[43.653,-79.383],'North York':[43.768,-79.413],'Scarborough':[43.773,-79.257],'East York':[43.690,-79.330],'Etobicoke':[43.643,-79.540],'York':[43.689,-79.487],'Mississauga':[43.589,-79.644],'Oakville':[43.467,-79.687],'Burlington':[43.326,-79.799],'Brampton':[43.731,-79.762],'Vaughan':[43.837,-79.508],'Richmond Hill':[43.882,-79.440],'Markham':[43.856,-79.337],'Aurora':[44.000,-79.466],'Newmarket':[44.059,-79.461],'King City':[43.928,-79.528],'Stouffville':[43.970,-79.250],'Pickering':[43.838,-79.086],'Ajax':[43.851,-79.020],'Whitby':[43.897,-78.943],'Oshawa':[43.897,-78.865],'Bradford':[44.114,-79.566],'Innisfil':[44.300,-79.611],'Barrie':[44.389,-79.690]};
+const CITIES={'Toronto':[43.653,-79.383],'North York':[43.768,-79.413],'Scarborough':[43.773,-79.257],'East York':[43.690,-79.330],'Etobicoke':[43.643,-79.540],'York':[43.689,-79.487],'Mississauga':[43.589,-79.644],'Oakville':[43.467,-79.687],'Burlington':[43.326,-79.799],'Brampton':[43.731,-79.762],'Vaughan':[43.837,-79.508],'Richmond Hill':[43.882,-79.440],'Markham':[43.856,-79.337],'Aurora':[44.000,-79.466],'Newmarket':[44.059,-79.461],'King City':[43.928,-79.528],'Stouffville':[43.970,-79.250],'Pickering':[43.838,-79.086],'Ajax':[43.851,-79.020],'Whitby':[43.897,-78.943],'Oshawa':[43.897,-78.865],'Bradford':[44.114,-79.566],'Innisfil':[44.300,-79.611],'Barrie':[44.389,-79.690],'New Lowell':[44.468,-80.007],'Collingwood':[44.501,-80.216],'Wasaga Beach':[44.520,-80.016],'Angus':[44.318,-79.881],'Alliston':[44.153,-79.868],'Orillia':[44.608,-79.420],'Guelph':[43.545,-80.248],'Hamilton':[43.256,-79.869],'Milton':[43.518,-79.877],'Caledon':[43.866,-79.858]};
 const TYPES=['Full home renovation','Kitchen renovation','Bathroom renovation','Basement renovation','Home addition','Flooring','Carpentry / millwork','Drywall / framing','Painting','Electrical','Plumbing','Commercial renovation','Other'];
 
 const $=id=>document.getElementById(id);
