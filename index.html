@@ -788,7 +788,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.18 (Oct 27)';
+const APP_VERSION='1.19 (Oct 27)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1351,6 +1351,11 @@ function openDetail(id,pan){
     <div class="block group linkbtns">
       <button class="row" id="dShowMap">Show on Map</button>
       <a class="row" target="_blank" rel="noopener" href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${r.lat},${r.lng}">Open Street View</a>
+      <button class="row" id="dGpin">Set Pin from Google Maps</button>
+      <div id="gpinBox" hidden style="padding:12px 14px;border-top:.5px solid var(--sep)">
+        <div style="font-size:13px;color:var(--label2);margin-bottom:8px">1. Tap <b>Open in Google Maps</b>. 2. Press and hold (or right-click) the exact spot and copy the numbers, like <b>43.8152, -79.4245</b>. 3. Paste them here.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn gray" id="gpinOpen" target="_blank" rel="noopener">Open in Google Maps</a><input id="gpinIn" placeholder="Paste coordinates or a Google Maps link" style="flex:1;min-width:180px;border:0;background:var(--card2);border-radius:9px;padding:9px 10px"><button class="btn" id="gpinOk">Set Pin</button></div>
+      </div>
       <button class="row" id="dRelocate">Find on Map Again</button>
       <button class="row" id="dPin">Move Pin by Hand</button>
       <button class="row" id="dLost">${r.lost?'Reopen Job':'Mark as Lost'}</button>
@@ -1360,6 +1365,10 @@ function openDetail(id,pan){
   </div>`;
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
+  $('dGpin').onclick=()=>{const b=$('gpinBox');b.hidden=!b.hidden;$('gpinOpen').href='https://www.google.com/maps/search/?api=1&query='+dest;if(!b.hidden)setTimeout(()=>$('gpinIn').focus(),50)};
+  const setG=()=>{const ll=parseLatLng($('gpinIn').value);if(!ll){toast('Paste the two numbers from Google Maps, like 43.8152, -79.4245');return}
+    r.lat=ll.lat;r.lng=ll.lng;r.approx=false;log(r,'Pin set from Google Maps');save();render();openDetail(r.id);toast('Pin set at the exact spot')};
+  $('gpinOk').onclick=setG;$('gpinIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();setG()}};
   $('dRelocate').onclick=async()=>{if(!r.address&&!r.postal){toast('Add the address and postal code first');openForm(r);return}
     toast('Finding the address…');let p=null;try{p=await geocode(r.address,r.city,r.postal)}catch(e){}
     if(!p){toast('Address not found. Check the street and postal code, or move the pin by hand.');return}
@@ -1451,6 +1460,9 @@ if(HAS_MAP){
 /* ---------- geocoding ---------- */
 let gq=Promise.resolve();
 const fmtPostal=v=>{const t=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(t)?t.slice(0,3)+' '+t.slice(3):String(v||'').toUpperCase().trim()};
+/* accepts "43.8152, -79.4245", "@43.8152,-79.4245,17z", "!3d43.81!4d-79.42" or "q=43.81,-79.42" */
+function parseLatLng(t){t=String(t||'').trim();if(!t)return null;let m=t.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/)||t.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/)||t.match(/(-?\d{1,2}\.\d{3,})\s*[, ]\s*(-?\d{1,3}\.\d{3,})/);
+  if(!m)return null;const lat=+m[1],lng=+m[2];if(!(lat>41&&lat<57&&lng<-74&&lng>-96))return null;return{lat:+lat.toFixed(6),lng:+lng.toFixed(6)}}
 const kmBetween=(a,b)=>{const R=6371,t=x=>x*Math.PI/180,dl=t(b.lat-a.lat),dn=t(b.lng-a.lng),h=Math.sin(dl/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
 async function nomi(params){
   const res=await fetch('https://nominatim.openstreetmap.org/search?'+new URLSearchParams(Object.assign({format:'jsonv2',limit:'1',countrycodes:'ca'},params)));
