@@ -422,6 +422,22 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .needlist .nrow .rt>span{display:block;font-size:12.5px;color:var(--label2)}
 .needlist .nrow>svg{color:var(--label3)}
 .cstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+/* ===== notes ===== */
+.notes{background:var(--card);border-radius:14px;padding:4px 14px 10px}
+.notes .nsec{padding:10px 0;border-bottom:.5px solid var(--sep)}
+.notes .nsec:last-of-type{border-bottom:0}
+.notes .nsec.more{display:none}
+.notes.open .nsec.more{display:block}
+.notes h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--label2);font-weight:700}
+.notes p{margin:0 0 6px;font-size:14px;line-height:1.45}
+.notes p:last-child{margin-bottom:0}
+.notes ul{margin:0;padding:0 0 0 18px;display:grid;gap:4px;font-size:14px;line-height:1.4}
+.notes li::marker{color:var(--label3)}
+.notes .nkv{display:flex;justify-content:space-between;gap:14px;font-size:14px;padding:3px 0}
+.notes .nkv span:first-child{color:var(--label2)}
+.notes .nkv span:last-child{text-align:right}
+.notes .nmoney{font-weight:600;font-variant-numeric:tabular-nums}
+.notes .nmore{color:var(--blue);font-weight:600;font-size:14px;padding:8px 0 2px}
 /* ===== files ===== */
 .frow{display:flex;align-items:center;position:relative}
 .frow+.frow::before{content:"";position:absolute;top:0;left:58px;right:0;height:.5px;background:var(--sep)}
@@ -788,7 +804,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.20 (Oct 27)';
+const APP_VERSION='1.21 (Oct 27)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1344,8 +1360,8 @@ function openDetail(id,pan){
         <div class="r"><span>Phone</span><b>${esc(r.phone)||'—'}</b></div>
         <div class="r"><span>Email</span><b>${esc(r.email)||'—'}</b></div>
         <div class="r"><span>Follow-up</span><b>${r.follow?fmtDate(r.follow):'—'}</b></div>
-        ${r.notes?`<div class="r note"><span>Notes</span><b>${esc(r.notes)}</b></div>`:''}
       </div></div>
+    ${r.notes?`<div class="block"><div class="label">Notes <button id="dNotesEdit">Edit</button></div>${renderNotes(r.notes)}</div>`:''}
     <div class="block"><div class="label">Activity</div>
       <div class="hist">${[...r.history].reverse().slice(0,12).map(h=>`<div><i></i><span>${esc(h.t)}<small>${fmtDate(h.d)}${h.by?' · '+esc(h.by):''}</small></span></div>`).join('')}</div></div>
     <div class="block group linkbtns">
@@ -1365,6 +1381,8 @@ function openDetail(id,pan){
   </div>`;
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
+  if($('dNotesEdit'))$('dNotesEdit').onclick=()=>{openForm(r);setTimeout(()=>$('f-notes').focus(),300)};
+  v.querySelectorAll('.nmore').forEach(b=>b.onclick=()=>{const c=b.closest('.notes');c.classList.toggle('open');b.textContent=c.classList.contains('open')?'Show less':'Show more'});
   $('dGpin').onclick=()=>{const b=$('gpinBox');b.hidden=!b.hidden;$('gpinOpen').href='https://www.google.com/maps/search/?api=1&query='+dest;if(!b.hidden)setTimeout(()=>$('gpinIn').focus(),50)};
   const setG=()=>{const ll=parseLatLng($('gpinIn').value);if(!ll){toast('Paste the two numbers from Google Maps, like 43.8152, -79.4245');return}
     r.lat=ll.lat;r.lng=ll.lng;r.approx=false;log(r,'Pin set from Google Maps');save();render();openDetail(r.id);toast('Pin set at the exact spot')};
@@ -1536,6 +1554,28 @@ $('form').onsubmit=async e=>{e.preventDefault();
 function startPlacing(id){placingId=id;$('vDetail').classList.remove('open');setTab('map');$('map').classList.add('placing');$('placebar').hidden=false;const r=job(id);if(r&&r.lat!=null)setTimeout(()=>flyTo(r.lat,r.lng,16),60)}
 function stopPlacing(){const id=placingId;placingId=null;$('map').classList.remove('placing');$('placebar').hidden=true;return id}
 $('placeCancel').onclick=stopPlacing;
+
+/* ---------- notes: turn plain text into tidy sections ---------- */
+function renderNotes(text){
+  const lines=String(text||'').replace(/\r/g,'').split('\n');const blocks=[];let cur=null;
+  const push=()=>{if(cur&&(cur.items.length||cur.title))blocks.push(cur);cur=null};
+  const start=t=>{push();cur={title:t,items:[]}};
+  for(let raw of lines){const l=raw.trim();
+    if(!l){if(cur&&cur.items.length)push();continue}
+    if(!cur)cur={title:'',items:[]};
+    let m;
+    if(/^[-•*]\s+/.test(l)){cur.items.push({t:'li',v:l.replace(/^[-•*]\s+/,'')});continue}
+    if(/:$/.test(l)&&l.length<70){start(l.slice(0,-1));continue}
+    if((m=l.match(/^([A-Z][A-Za-z0-9 /&()'.-]{1,38}):\s+(.{1,160})$/))&&!/^https?$/i.test(m[1])){cur.items.push({t:'kv',k:m[1],v:m[2]});continue}
+    if(/^[A-Z0-9 ()/&.-]{6,}(\s*\(.*\))?$/.test(l)&&l===l.toUpperCase()){start(l.charAt(0)+l.slice(1).toLowerCase());continue}
+    cur.items.push({t:'p',v:l})}
+  push();
+  const money=v=>esc(v).replace(/(\$[\d,]+(?:\.\d{2})?)/g,'<b class="nmoney">$1</b>');
+  const html=blocks.map((b,i)=>{let lis=[],out='';const flush=()=>{if(lis.length){out+=`<ul>${lis.join('')}</ul>`;lis=[]}};
+    for(const it of b.items){if(it.t==='li'){lis.push(`<li>${money(it.v)}</li>`);continue}flush();
+      out+=it.t==='kv'?`<div class="nkv"><span>${esc(it.k)}</span><span>${money(it.v)}</span></div>`:`<p>${money(it.v)}</p>`}
+    flush();return `<section class="nsec${i>1?' more':''}">${b.title?`<h4>${esc(b.title)}</h4>`:''}${out}</section>`}).join('');
+  return `<div class="notes">${html}${blocks.length>2?'<button class="nmore">Show more</button>':''}</div>`}
 
 /* ---------- files ---------- */
 const filesFor=id=>(db.files||[]).filter(f=>f.job_id===id).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
