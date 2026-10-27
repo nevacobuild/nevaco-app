@@ -788,7 +788,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.19 (Oct 27)';
+const APP_VERSION='1.20 (Oct 27)';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1591,7 +1591,7 @@ const docsFor=id=>(db.docs||[]).filter(x=>x.jobId===id).sort((a,b)=>String(b.num
 function docListRow(d){const inv=isInv(d);let st=DOC_ST[d.status]||DOC_ST.draft;
   if(inv&&d.status==='sent'){const age=d.sentAt?dayDiff(today(),ld(d.sentAt)):0;st={n:`Sent · ${money(invDue(d))} due${age?' · '+age+' day'+(age>1?'s':'')+' ago':''}`,c:age>=7?'--p1':'--p2'}}
   return `<button class="row" data-doc="${d.id}"><span class="gl" style="--c:var(${st.c})">${ico(inv?'pay':(d.status==='accepted'?'sign':'quote'))}</span><span class="rt"><b>${esc(d.number)} · ${esc(d.title||KN(d))}</b><span>${st.n}${d.status==='accepted'&&d.acceptedName?' by '+esc(d.acceptedName):''}${d.status==='paid'&&d.paidMethod?' · '+esc(d.paidMethod):''} · ${fmtDate(d.date)}</span></span><span class="rv"><em>${money(inv?(d.status==='paid'?d.total-d.credit:invDue(d)):d.total)||'$0'}</em>${ico('chev')}</span></button>`}
-function nextDocNumber(kind){const pre=kind==='invoice'?'INV-':'E-';const n=(db.docs||[]).filter(x=>(x.kind||'estimate')===(kind||'estimate')).map(x=>parseInt(String(x.number).replace(/\D/g,''),10)).filter(Number.isFinite);return pre+(n.length?Math.max(...n)+1:1001)}
+function nextDocNumber(kind){const pre=kind==='invoice'?'INV-':'E-';const re=new RegExp('^'+pre+'(\\d{1,6})$');const n=(db.docs||[]).filter(x=>(x.kind||'estimate')===(kind||'estimate')).map(x=>{const m=String(x.number).match(re);return m?parseInt(m[1],10):NaN}).filter(Number.isFinite);return pre+(n.length?Math.max(...n)+1:1001)}
 function buildInvoice(r){
   const ests=docsFor(r.id).filter(x=>!isInv(x)&&x.status!=='draft');const est=ests.find(x=>x.status==='accepted')||ests[0]||null;
   const title=(est?.title||r.type||'Renovation').trim();const sub=Number(r.value)||est?.subtotal||0;const hst=est?est.hst:r.hst!==false;
