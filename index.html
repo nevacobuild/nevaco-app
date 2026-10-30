@@ -510,6 +510,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .opp .ot{flex:1;min-width:0}.opp .ot b{display:block;font-size:15px}.opp .ot>span{display:block;color:var(--label2);font-size:13px;margin-top:2px}
 .opp .ob{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}.opp .ob em{font-style:normal;font-size:12px;color:var(--label3);margin-left:auto}
 .opp .oa{display:flex;flex-direction:column;gap:6px;flex:none}.opp .oa .btn{padding:6px 12px;font-size:13px;text-align:center;text-decoration:none}
+.gico.fb{background:linear-gradient(135deg,#1877f2,#d62976)}
 .pushcard{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:12px 12px 12px 14px;margin-bottom:16px}
 .pushcard>svg{width:26px;height:26px;color:#5856d6;flex:none}
 .pushcard>div{flex:1;min-width:0}.pushcard b{display:block;font-size:15px}.pushcard span{display:block;font-size:13px;color:var(--label2)}
@@ -1024,7 +1025,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.25 (Oct 30) · Leads';
+const APP_VERSION='1.26 (Oct 30) · Leads + Facebook';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1842,6 +1843,18 @@ function leadState(r){if(r.lost)return 'lost';const lm=jmails(r).at(-1);
 const leadNeeds=r=>isLead(r)&&['reply','new'].includes(leadState(r));
 const LST={new:{n:'New · not contacted',c:'--p1'},reply:{n:'Needs reply',c:'--blue'},replied:{n:'Replied',c:'--green'},lost:{n:'Lost',c:'--p0'}};
 let leadSrc='all',leadFilter='all',leadQuery='',leadView='list';
+let metaSt=null,metaLoading=false;
+async function loadMeta(){if(metaLoading||!gmailSt.connected&&!partReady)return;metaLoading=true;try{metaSt=await gm('meta_status')}catch(e){metaSt={error:e.message,pages:[]}}metaLoading=false;if(tab==='leads')renderLeads()}
+function metaBar(){
+  if(!metaSt){loadMeta();return ''}
+  const pages=metaSt.pages||[];
+  if(!pages.length)return `<div class="gcard metacard"><span class="gico fb">${ico('lead')}</span><div><b>Connect Facebook &amp; Instagram lead forms</b><p>Leads from your ads come in here the moment someone submits the form, with their answers.</p>${metaSt.configured?'<button class="btn" id="metaConn">Connect Facebook</button>':'<p class="gerr">One-time setup needed on Facebook (Meta app).</p>'}</div></div>`;
+  if(!['facebook','instagram'].includes(leadSrc))return '';
+  const err=pages.find(p=>p.last_error);
+  return `<div class="gbar${err?' warn':''}"><span class="gdot"></span><span class="gt">${err?esc(err.last_error):`<b>Facebook &amp; Instagram connected</b> · ${esc(pages.map(p=>p.name).join(', '))}${pages.some(p=>p.last_lead_at)?' · last lead '+ago(pages.map(p=>p.last_lead_at).filter(Boolean).sort().at(-1)):''}`}</span><button id="metaSync">Check now</button></div>`;
+}
+async function metaConnect(b){b.disabled=true;b.textContent='Opening Facebook…';try{const r=await gm('meta_start');location.href=r.url}catch(e){toast(e.message,false,true);b.disabled=false;b.textContent='Connect Facebook'}}
+async function metaSync(b,days){if(b){b.disabled=true;b.textContent='Checking…'}try{const r=await gm('meta_backfill',{days:days||30});await refreshFromServer();toast(r.added?.length?`${r.added.length} new lead${r.added.length>1?'s':''} from Facebook/Instagram`:r.errors?.length?r.errors[0]:'No new Facebook/Instagram leads',false,!!r.errors?.length);metaSt=null}catch(e){toast(e.message,false,true)}if(tab==='leads')renderLeads()}
 function renderLeadCount(){const n=data.filter(leadNeeds).length;document.querySelectorAll('.lcount').forEach(x=>{x.textContent=n;x.hidden=!n;x.classList.toggle('hot',n>0)})}
 function renderLeads(){
   const L=data.filter(isLead),q=leadQuery.toLowerCase();
@@ -1858,8 +1871,9 @@ function renderLeads(){
   $('leadsSub').textContent=`${L.filter(r=>!r.lost).length} open · ${L.filter(leadNeeds).length} need you`;
   const tabs=`<div class="srctabs">${S.map(s=>{const n=s.k==='all'?L.filter(r=>!r.lost).length:L.filter(r=>!r.lost&&srcKey(r)===s.k).length;return `<button data-src="${s.k}" aria-pressed="${leadView==='list'&&leadSrc===s.k}" style="--c:${s.k==='all'?'var(--label)':SRC[s.k].c}">${s.k!=='all'?'<i></i>':''}${s.n}${n?`<em>${n}</em>`:''}</button>`}).join('')}<button data-src="opps" aria-pressed="${leadView==='opps'}" style="--c:#f26722">${ico('star')}Opportunities${opps.length?`<em>${opps.length}</em>`:''}</button></div>`;
   if(leadView==='opps'){$('pLeads').innerHTML=tabs+oppsHtml(opps);return}
+  const mb=metaBar();
   const est=base.filter(r=>!r.lost&&stageOf(r)==='sent');
-  $('pLeads').innerHTML=tabs+`<div class="pstats"><div class="mt"><b>${base.filter(leadNeeds).length}</b><span>Need you</span></div><div class="mt"><b>${base.filter(r=>(r.date||'')>=wk||String(r.history?.[0]?.d||'')>=wk).length}</b><span>New this week</span></div><div class="mt"><b>${base.filter(r=>!r.lost&&['visit','quote'].includes(stageOf(r))).length}</b><span>Site visits</span></div><div class="mt"><b>${est.length}</b><span>Estimates${est.length?' · '+kmoney(est.reduce((t,r)=>t+total(r),0)):''}</span></div></div>
+  $('pLeads').innerHTML=mb+tabs+`<div class="pstats"><div class="mt"><b>${base.filter(leadNeeds).length}</b><span>Need you</span></div><div class="mt"><b>${base.filter(r=>(r.date||'')>=wk||String(r.history?.[0]?.d||'')>=wk).length}</b><span>New this week</span></div><div class="mt"><b>${base.filter(r=>!r.lost&&['visit','quote'].includes(stageOf(r))).length}</b><span>Site visits</span></div><div class="mt"><b>${est.length}</b><span>Estimates${est.length?' · '+kmoney(est.reduce((t,r)=>t+total(r),0)):''}</span></div></div>
     <div class="cfil">${F.filter(f=>['all','needs'].includes(f.k)||base.some(f.f)).map(f=>`<button data-lf="${f.k}" aria-pressed="${f.k===fl.k}">${f.n}<em>${base.filter(f.f).length}</em></button>`).join('')}</div>
     ${list.length?`<div class="group">${list.map(leadRow).join('')}</div>`:`<div class="pempty">${ico('lead','i big')}<b>${leadFilter==='needs'?'All caught up':'No leads here'}</b><p>${leadFilter==='needs'?'Every lead has an answer from you.':'New leads from your website, HomeStars and ads show up here automatically.'}</p></div>`}`;
 }
@@ -1884,6 +1898,8 @@ function oppsHtml(opps){
     <div class="label">HomeStars leads in your area · last 14 days</div><div class="opps">${area.map(card).join('')}</div>`;
 }
 $('pLeads').addEventListener('click',async e=>{
+  if(e.target.id==='metaConn'){metaConnect(e.target);return}
+  if(e.target.id==='metaSync'){metaSync(e.target,7);return}
   const s=e.target.closest('[data-src]');if(s){if(s.dataset.src==='opps'){leadView='opps'}else{leadView='list';leadSrc=s.dataset.src}renderLeads();return}
   const f=e.target.closest('[data-lf]');if(f){leadFilter=f.dataset.lf;renderLeads();return}
   const x=e.target.closest('[data-oppx]');if(x){const o=(db.opps||[]).find(y=>y.id===x.dataset.oppx);if(o){o.status='dismissed';renderLeads();renderLeadCount();sb.from('opportunities').update({status:'dismissed'}).eq('id',o.id).then(()=>{},()=>{})}return}
@@ -2565,6 +2581,8 @@ async function start(session){
   const qp=new URLSearchParams(location.search);
   if(qp.get('gmail')){const ok=qp.get('gmail')==='connected';gmailFlash=ok?'':(qp.get('msg')||'Could not connect Gmail.');history.replaceState(null,'',location.pathname);setTab('part');
     if(ok){toast('Gmail connected. Looking for partner replies…',false,true);checkMail(true)}else toast(gmailFlash,false,true)}
+  if(qp.get('meta')){const ok=qp.get('meta')==='connected';history.replaceState(null,'',location.pathname);leadSrc='facebook';setTab('leads');
+    if(ok){toast('Facebook connected. Bringing in your form leads…',false,true);metaSync(null,90)}else toast(qp.get('msg')||'Could not connect Facebook.',false,true)}
   const lid=qp.get('lead'),pid=qp.get('partner'),tb=qp.get('tab');
   if(lid||pid||tb){history.replaceState(null,'',location.pathname);
     if(lid&&job(lid)){setTab(isLead(job(lid))?'leads':'jobs');openDetail(lid,true)}

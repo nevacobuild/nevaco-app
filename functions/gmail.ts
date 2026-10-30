@@ -657,6 +657,150 @@ async function notifyJob(id: string) {
   return sendPush(`New lead · ${j.source || "Lead"}`, [j.name, j.type, j.city].filter(Boolean).join(" · "), `/?lead=${j.id}`, "lead-" + j.id);
 }
 // Hourly: nudge about leads and replies that are waiting on you (8 AM to 8 PM Toronto time)
+/* ---------- Facebook & Instagram lead forms (Meta Lead Ads) ---------- */
+const META_APP_ID = (Deno.env.get("META_APP_ID") || "").trim();
+const META_APP_SECRET = (Deno.env.get("META_APP_SECRET") || "").trim();
+const GRAPH = "https://graph.facebook.com/v25.0";
+const META_REDIRECT = `${PROJECT_URL}/functions/v1/gmail/meta_callback`;
+const META_SCOPES = "pages_show_list,pages_read_engagement,pages_manage_metadata,pages_manage_ads,leads_retrieval,business_management";
+
+async function graph(path: string, token: string, init: RequestInit = {}) {
+  const u = new URL(path.startsWith("http") ? path : GRAPH + path);
+  u.searchParams.set("access_token", token);
+  const r = await fetch(u.toString(), init);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || j.error) throw new HttpError(r.status >= 500 ? 502 : 400, j.error?.message || `Facebook error ${r.status}`);
+  return j;
+}
+async function metaVerifyToken() {
+  const { data } = await db.from("private_config").select("meta_verify").eq("id", 1).maybeSingle();
+  if (data?.meta_verify) return data.meta_verify as string;
+  const v = crypto.randomUUID().replace(/-/g, "");
+  await db.from("private_config").update({ meta_verify: v }).eq("id", 1);
+  return v;
+}
+async function metaStart(user: string) {
+  if (!META_APP_ID || !META_APP_SECRET) throw new HttpError(500, "Facebook is not set up yet (META_APP_ID and META_APP_SECRET are missing).");
+  const state = "meta" + crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+  await db.from("gmail_oauth_states").insert({ state, email: user });
+  const u = new URL("https://www.facebook.com/v25.0/dialog/oauth");
+  Object.entries({ client_id: META_APP_ID, redirect_uri: META_REDIRECT, state, scope: META_SCOPES, response_type: "code", auth_type: "rerequest" }).forEach(([k, v]) => u.searchParams.set(k, v));
+  return { url: u.toString() };
+}
+async function metaCallback(url: URL) {
+  const back = (q: Record<string, string>) => new Response(null, { status: 302, headers: { Location: `${APP}/?${new URLSearchParams(q)}` } });
+  if (url.searchParams.get("error")) return back({ meta: "error", msg: url.searchParams.get("error_description") || "Facebook access was not allowed." });
+  const state = url.searchParams.get("state") || "", code = url.searchParams.get("code") || "";
+  const { data: st } = await db.from("gmail_oauth_states").select("*").eq("state", state).maybeSingle();
+  if (!st || !state.startsWith("meta") || Date.now() - Date.parse(st.created_at) > 3600e3) return back({ meta: "error", msg: "This sign-in link expired. Tap Connect Facebook again." });
+  await db.from("gmail_oauth_states").delete().eq("state", state);
+  try {
+    const t1 = await (await fetch(`${GRAPH}/oauth/access_token?${new URLSearchParams({ client_id: META_APP_ID, client_secret: META_APP_SECRET, redirect_uri: META_REDIRECT, code })}`)).json();
+    if (!t1.access_token) return back({ meta: "error", msg: t1.error?.message || "Facebook sign-in failed." });
+    const t2 = await (await fetch(`${GRAPH}/oauth/access_token?${new URLSearchParams({ grant_type: "fb_exchange_token", client_id: META_APP_ID, client_secret: META_APP_SECRET, fb_exchange_token: t1.access_token })}`)).json();
+    const userToken = t2.access_token || t1.access_token;
+    const pages = (await graph("/me/accounts?fields=id,name,access_token,tasks&limit=100", userToken)).data || [];
+    if (!pages.length) return back({ meta: "error", msg: "No Facebook Page was shared. Tap Connect again and select the NEVACO BUILD page." });
+    let ok = 0;
+    for (const p of pages) {
+      await db.from("meta_pages").upsert({ page_id: p.id, name: p.name, token: p.access_token, connected_at: new Date().toISOString(), last_error: null }, { onConflict: "page_id" });
+      try { await graph(`/${p.id}/subscribed_apps?subscribed_fields=leadgen`, p.access_token, { method: "POST" }); ok++; }
+      catch (e) { await db.from("meta_pages").update({ last_error: (e as Error).message }).eq("page_id", p.id); }
+    }
+    return back({ meta: "connected", pages: String(ok) });
+  } catch (e) { return back({ meta: "error", msg: (e as Error).message }); }
+}
+const fieldVal = (fd: any[], ...names: string[]) => {
+  for (const n of names) { const f = (fd || []).find((x: any) => String(x.name).toLowerCase() === n); if (f && f.values?.length) return String(f.values[0]).trim(); }
+  return "";
+};
+export function leadFromMeta(l: any, formName = "") {
+  const fd = l.field_data || [];
+  const known = ["full_name", "first_name", "last_name", "email", "phone_number", "phone", "city", "post_code", "zip_code", "postal_code", "street_address", "province", "state", "country"];
+  const name = fieldVal(fd, "full_name") || [fieldVal(fd, "first_name"), fieldVal(fd, "last_name")].filter(Boolean).join(" ") || "Facebook lead";
+  const answers = fd.filter((f: any) => !known.includes(String(f.name).toLowerCase())).map((f: any) => `${String(f.name).replace(/_/g, " ").replace(/\?$/, "")}: ${(f.values || []).join(", ")}`);
+  const ig = String(l.platform || "").toLowerCase() === "ig";
+  const pc = fieldVal(fd, "post_code", "zip_code", "postal_code");
+  const notes = [formName ? `${ig ? "Instagram" : "Facebook"} lead form: ${formName}` : "", l.ad_name ? `Ad: ${l.ad_name}` : "", l.campaign_name ? `Campaign: ${l.campaign_name}` : "", ...answers].filter(Boolean).join("\n");
+  return {
+    id: "fb" + l.id, ext_ref: "FB-" + l.id, name, email: fieldVal(fd, "email").toLowerCase(), phone: fieldVal(fd, "phone_number", "phone"),
+    address: fieldVal(fd, "street_address"), city: fieldVal(fd, "city"), postal: fmtPostal(pc), type: hsType(`${formName} ${answers.join(" ")}`),
+    source: ig ? "Instagram ad" : "Facebook ad", value: null, hst: true, notes, stage: "lead", ms: {},
+    history: [{ d: new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto" }).format(new Date(l.created_time || Date.now())), t: `New lead from ${ig ? "Instagram" : "Facebook"}`, by: ig ? "Instagram" : "Facebook" }],
+    updated_by: "meta",
+  };
+}
+const formNames = new Map<string, string>();
+async function importMetaLead(pageId: string, leadId: string, token?: string) {
+  const { data: ex } = await db.from("jobs").select("id").eq("ext_ref", "FB-" + leadId).maybeSingle();
+  if (ex) return null;
+  if (!token) { const { data: p } = await db.from("meta_pages").select("token").eq("page_id", pageId).maybeSingle(); token = p?.token; }
+  if (!token) throw new HttpError(400, "This Facebook Page is not connected.");
+  const l = await graph(`/${leadId}?fields=id,created_time,field_data,ad_name,campaign_name,form_id,platform`, token);
+  let fn = l.form_id ? formNames.get(l.form_id) : "";
+  if (l.form_id && fn === undefined) { try { fn = (await graph(`/${l.form_id}?fields=name`, token)).name || ""; } catch { fn = ""; } formNames.set(l.form_id, fn!); }
+  const row = leadFromMeta(l, fn || "");
+  const { error } = await db.from("jobs").upsert(row, { onConflict: "id", ignoreDuplicates: true });
+  if (error) throw new HttpError(500, error.message);
+  await db.from("meta_pages").update({ last_lead_at: new Date().toISOString() }).eq("page_id", pageId);
+  return row.name;
+}
+// Webhook from Facebook: a new lead form was submitted
+async function metaWebhook(req: Request, raw: string) {
+  const sig = req.headers.get("x-hub-signature-256") || "";
+  const key = await crypto.subtle.importKey("raw", enc.encode(META_APP_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = Array.from(new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(raw)))).map((b) => b.toString(16).padStart(2, "0")).join("");
+  if (!META_APP_SECRET || sig !== "sha256=" + mac) return new Response("bad signature", { status: 401 });
+  const body = JSON.parse(raw || "{}");
+  for (const e of body.entry || []) for (const c of e.changes || []) {
+    if (c.field !== "leadgen" || !c.value?.leadgen_id) continue;
+    try { await importMetaLead(String(c.value.page_id || e.id), String(c.value.leadgen_id)); } catch (err) { console.error("meta lead", (err as Error).message); }
+  }
+  return new Response("ok", { status: 200 });
+}
+// Pull recent leads from every form (first connect, and an hourly safety net)
+async function metaBackfill(days = 90) {
+  const { data: pages } = await db.from("meta_pages").select("*");
+  const out = { pages: (pages || []).length, forms: 0, added: [] as string[], errors: [] as string[] };
+  const since = Math.floor((Date.now() - days * 864e5) / 1000);
+  for (const p of pages || []) {
+    try {
+      const forms = (await graph(`/${p.page_id}/leadgen_forms?fields=id,name,status&limit=100`, p.token)).data || [];
+      out.forms += forms.length;
+      for (const f of forms) {
+        formNames.set(f.id, f.name || "");
+        let next = `/${f.id}/leads?fields=id,created_time,field_data,ad_name,campaign_name,form_id,platform&limit=100&filtering=${encodeURIComponent(JSON.stringify([{ field: "time_created", operator: "GREATER_THAN", value: since }]))}`;
+        for (let i = 0; next && i < 10; i++) {
+          const j = await graph(next, p.token);
+          for (const l of j.data || []) {
+            const { data: ex } = await db.from("jobs").select("id").eq("ext_ref", "FB-" + l.id).maybeSingle();
+            if (ex) continue;
+            const row = leadFromMeta(l, f.name || "");
+            const { error } = await db.from("jobs").upsert(row, { onConflict: "id", ignoreDuplicates: true });
+            if (!error) out.added.push(row.name);
+          }
+          next = j.paging?.next || "";
+        }
+      }
+      await db.from("meta_pages").update({ last_error: null, last_sync_at: new Date().toISOString() }).eq("page_id", p.page_id);
+    } catch (e) {
+      out.errors.push(`${p.name}: ${(e as Error).message}`);
+      await db.from("meta_pages").update({ last_error: (e as Error).message }).eq("page_id", p.page_id);
+    }
+  }
+  return out;
+}
+async function metaStatus() {
+  const { data: pages } = await db.from("meta_pages").select("page_id,name,connected_at,last_lead_at,last_sync_at,last_error");
+  return { configured: !!(META_APP_ID && META_APP_SECRET), pages: pages || [], webhook: `${PROJECT_URL}/functions/v1/gmail/meta`, verify: await metaVerifyToken(), redirect: META_REDIRECT };
+}
+async function metaDisconnect() {
+  const { data: pages } = await db.from("meta_pages").select("page_id,token");
+  for (const p of pages || []) await graph(`/${p.page_id}/subscribed_apps`, p.token, { method: "DELETE" }).catch(() => null);
+  await db.from("meta_pages").delete().neq("page_id", "");
+  return { ok: true };
+}
+
 async function remind() {
   const hour = Number(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto", hour: "2-digit", hour12: false }).format(new Date())) % 24;
   if (hour < 8 || hour >= 20) return { skipped: "night" };
@@ -774,6 +918,14 @@ if (typeof Deno !== "undefined" && (Deno as any).serve && !(globalThis as any)._
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   const url = new URL(req.url);
   try {
+    if (url.pathname.endsWith("/meta")) {
+      if (req.method === "GET") {
+        const ok = url.searchParams.get("hub.mode") === "subscribe" && url.searchParams.get("hub.verify_token") === await metaVerifyToken();
+        return new Response(ok ? url.searchParams.get("hub.challenge") || "" : "forbidden", { status: ok ? 200 : 403, headers: { "Content-Type": "text/plain" } });
+      }
+      return await metaWebhook(req, await req.text());
+    }
+    if (req.method === "GET" && url.pathname.endsWith("/meta_callback")) return await metaCallback(url);
     if (req.method === "GET" && url.pathname.endsWith("/callback")) return await callback(url);
     if (req.method === "GET") return json({ ok: true, service: "nevaco-gmail" });
     const body = await req.json().catch(() => ({}));
@@ -781,7 +933,11 @@ if (typeof Deno !== "undefined" && (Deno as any).serve && !(globalThis as any)._
     if (cron) {
       await checkCron(cron);
       if (body.action === "notify_job") return json(await notifyJob(String(body.id || "")));
-      if (body.action === "remind") return json(await remind());
+      if (body.action === "remind") {
+        const r = await remind();
+        let meta = null; try { const { data: mp } = await db.from("meta_pages").select("page_id").limit(1); if (mp?.length) meta = await metaBackfill(3); } catch (e) { console.warn("meta backfill", (e as Error).message); }
+        return json({ ...r, meta });
+      }
       return json(await sync({}));
     }
     const user = await teamUser(req);
@@ -792,6 +948,10 @@ if (typeof Deno !== "undefined" && (Deno as any).serve && !(globalThis as any)._
       case "push_sub": return json(await pushSubscribe(user, body));
       case "push_unsub": await db.from("push_subs").delete().eq("endpoint", String(body.endpoint || "")); return json({ ok: true });
       case "push_test": return json(await sendPush("Test notification", "Notifications from NEVACO Job Map are working.", "/", "test"));
+      case "meta_start": return json(await metaStart(user));
+      case "meta_status": return json(await metaStatus());
+      case "meta_backfill": return json(await metaBackfill(Number(body.days) || 90));
+      case "meta_disconnect": return json(await metaDisconnect());
       case "send": return json(await send(user, body));
       case "read": return json(await markRead(body));
       case "preview": return json(await preview(body));
