@@ -540,6 +540,11 @@ async function homeStars(acc: Acc, jobs: any[], knownIds: Set<string>, rows: any
     if (p.kind === "lead") {
       const ref = p.job ? "HS-" + p.job : "";
       let j = ref ? jobs.find((x) => x.ext_ref === ref) : undefined;
+      // a HomeStars customer already added by hand: link it instead of making a second lead
+      if (!j && p.name) {
+        const same = hsJobs.find((x) => !x.ext_ref && String(x.name || "").toLowerCase().trim() === p.name.toLowerCase().trim());
+        if (same) { j = same; if (ref) { same.ext_ref = ref; await db.from("jobs").update({ ext_ref: ref }).eq("id", same.id); } }
+      }
       if (!j) {
         const id = p.job ? "hs" + p.job : "hs" + m.id;
         const notes = [`HomeStars job${p.job ? " #" + p.job : ""}: ${p.title}`, p.fee ? `Lead fee: $${p.fee} + tax` : "", p.url ? `Phone and email on HomeStars: ${p.url}` : ""].filter(Boolean).join("\n");
@@ -553,7 +558,12 @@ async function homeStars(acc: Acc, jobs: any[], knownIds: Set<string>, rows: any
         body: `${p.name || "The customer"} wants to get in touch about: ${p.title}${p.url ? "\nOpen HomeStars to see their phone and email." : ""}`,
         from_email: "homestars", to_email: "", attachments: p.url ? [{ name: "Open on HomeStars", url: p.url }] : [], unread: true, at, created_by: "homestars" });
       // the invite / area lead for this person is now taken
-      if (p.name) await db.from("opportunities").update({ status: "taken" }).ilike("customer", p.name).eq("status", "new");
+      if (p.name) {
+        const { data: inv } = await db.from("opportunities").select("id,customer").eq("status", "new").eq("kind", "invite");
+        const nm = p.name.toLowerCase().trim();
+        const hit = (inv || []).filter((o: any) => { const c = String(o.customer || "").toLowerCase().trim(); return c && (c === nm || nm.startsWith(c + " ")); });
+        if (hit.length) await db.from("opportunities").update({ status: "taken" }).in("id", hit.map((o: any) => o.id));
+      }
       await db.from("opportunities").update({ status: "taken" }).eq("title", p.title).eq("status", "new").ilike("city", p.city || "-");
     } else if (p.kind === "message") {
       const j = p.name ? findJob(p.name) : undefined;
