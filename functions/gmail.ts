@@ -174,18 +174,77 @@ export function parseSignup(t: string) {
   const cut = (v: string) => v.replace(/\s*['"]?\s*(sent on behalf|sent from my|thank you|thanks|regards)\b.*$/i, "").replace(/[\s.'"]+$/, "").trim();
   return { name: cut(grab("Name|Full name")), phone: grab("Phone|Cell|Mobile"), company: cut(grab("Brokerage|Company")) };
 }
-export function msgRow(m: GMsg, partnerId: string, me = ALLOWED) {
+export function msgRow(m: GMsg, owner: string, me = ALLOWED) {
+  const own = owner.startsWith("j:") ? { partner_id: null, job_id: owner.slice(2) } : { partner_id: owner.replace(/^p:/, ""), job_id: null };
   const b = bodies(m.payload);
   const text = b.text || htmlToText(b.html) || m.snippet || "";
   const from = parseAddr(hdr(m, "From"));
   const mine = (m.labelIds || []).includes("SENT") || from.email === me;
   return {
-    partner_id: partnerId, dir: mine ? "out" : isAutoReply(m) ? "auto" : "in", gmail_id: m.id, thread_id: m.threadId, rfc_id: hdr(m, "Message-ID") || hdr(m, "Message-Id") || null,
+    ...own, dir: mine ? "out" : isAutoReply(m) ? "auto" : "in", gmail_id: m.id, thread_id: m.threadId, rfc_id: hdr(m, "Message-ID") || hdr(m, "Message-Id") || null,
     subject: hdr(m, "Subject"), body: stripQuoted(text).slice(0, 20000), from_email: from.email, to_email: addrList(hdr(m, "To")).join(", "),
     attachments: b.att, unread: !mine && !isAutoReply(m) && (m.labelIds || []).includes("UNREAD"),
     at: new Date(Number(m.internalDate) || Date.now()).toISOString(), created_by: "gmail",
   };
 }
+/* ---------- HomeStars emails ---------- */
+export function links(html: string) {
+  const out: { href: string; text: string }[] = [];
+  for (const m of String(html || "").matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi))
+    out.push({ href: m[1].replace(/&amp;/g, "&"), text: htmlToText(m[2]).replace(/\s+/g, " ").trim() });
+  return out;
+}
+export const fmtPostal = (p: string) => { const c = String(p || "").toUpperCase().replace(/\s+/g, ""); return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(c) ? c.slice(0, 3) + " " + c.slice(3) : String(p || "").toUpperCase(); };
+export function hsType(t: string) {
+  t = String(t || "").toLowerCase();
+  if (/kitchen|countertop|cabinet/.test(t)) return "Kitchen renovation";
+  if (/basement/.test(t)) return "Basement renovation";
+  if (/bathroom|shower|\bbath\b|vanity|tub/.test(t)) return "Bathroom renovation";
+  if (/faucet|toilet|plumb|leak|pipe/.test(t)) return "Plumbing";
+  if (/electric|circuit|light|wiring|panel|heat cable/.test(t)) return "Electrical";
+  if (/drywall|plaster|framing|partition/.test(t)) return "Drywall / framing";
+  if (/floor|tile/.test(t)) return "Flooring";
+  if (/paint/.test(t)) return "Painting";
+  if (/deck|stair|carpent|door|shed|furniture|trim|millwork/.test(t)) return "Carpentry / millwork";
+  if (/commercial|office|gym|retail|restaurant/.test(t)) return "Commercial renovation";
+  if (/addition|new building/.test(t)) return "Home addition";
+  if (/renovat|general contractor|repairs and upkeep/.test(t)) return "Full home renovation";
+  return "Other";
+}
+// Classify one HomeStars email and pull out what we need
+export function parseHomeStars(subject: string, text: string, html: string) {
+  const s = String(subject || "").trim(), t = String(text || "");
+  const L = links(html);
+  const link = (re: RegExp) => (L.find((l) => re.test(l.text)) || { href: "" }).href;
+  let m = s.match(/start the conversation for (.+)$/i);
+  if (m) {
+    const name = (t.match(/(?:^|\n)\s*([^\n]+?), the customer who posted the job/i) || [])[1] || "";
+    const loc = t.match(/\b([A-Z]\d[A-Z]\s?\d[A-Z]\d)\s*,\s*([^\n]+)/);
+    return { kind: "lead" as const, title: m[1].trim(), name: name.trim(), job: (t.match(/Job number:\s*(\d+)/i) || [])[1] || "",
+      postal: loc ? fmtPostal(loc[1]) : "", city: loc ? loc[2].trim() : "", fee: (t.match(/Lead fee:\s*\$?([\d,.]+\d)/i) || [])[1] || "",
+      url: link(/view contact/i) || link(/contact|conversation|message/i) };
+  }
+  m = s.match(/^New message about (.+)$/i);
+  if (m) {
+    const nm = t.match(/(?:^|\n|,)\s*([^\n,]+?) sent you a new message/i);
+    let body = (t.split(/sent you a new message/i)[1] || "").split(/Reply to this message|Do not share this email|Please don.t reply/i)[0].trim();
+    if (!body) body = "(sent a message on HomeStars)";
+    return { kind: "message" as const, title: m[1].trim(), name: nm ? nm[1].trim() : "", body, url: link(/reply|view|message/i) };
+  }
+  m = s.match(/new invites? in ([A-Z]\d[A-Z]\s?\d[A-Z]\d)/i);
+  if (m) {
+    const nm = t.match(/(?:^|\n|!)\s*([^\n!.]+?) viewed your profile/i);
+    let title = (t.match(/discuss this lead with you\.?\s*\n+\s*([^\n]+)/i) || [])[1] || "";
+    if (/^(view|see|accept|reply|open)\b/i.test(title.trim())) title = "";
+    return { kind: "invite" as const, title: title.trim(), name: nm ? nm[1].trim() : "", postal: fmtPostal(m[1]), url: link(/invite|view|see|accept/i) };
+  }
+  m = s.match(/^(.+),\s*([^,]+),\s*(\d+)\s*km\s*$/i);
+  if (m && !/new leads in your/i.test(s)) {
+    return { kind: "area" as const, title: m[1].trim(), city: m[2].trim(), km: Number(m[3]), hired: /hired on HomeStars before/i.test(t), url: link(/see more details|view lead|see details|view/i) };
+  }
+  return null;
+}
+
 async function pmap<T, R>(items: T[], n: number, fn: (x: T) => Promise<R>) {
   const out: R[] = new Array(items.length); let i = 0;
   await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => { while (i < items.length) { const k = i++; out[k] = await fn(items[k]); } }));
@@ -313,9 +372,9 @@ async function disconnect() {
   return { connected: false };
 }
 
-// Bring new partner emails into the app.
-// opts.email: import past emails with one address (used right after adding a partner).
-async function sync(opts: { email?: string; partner_id?: string; days?: number }) {
+// Bring new emails into the app: partner conversations, lead/customer emails and HomeStars.
+// opts.email: import past emails with one address (used right after adding a partner or a lead).
+async function sync(opts: { email?: string; partner_id?: string; job_id?: string; days?: number }) {
   const acc = await account();
   if (!acc) return { connected: false };
   const started = new Date();
@@ -324,6 +383,7 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
   const { data: lock } = await db.from("gmail_account").update({ sync_started_at: started.toISOString() }).eq("id", 1)
     .or(`sync_started_at.is.null,sync_started_at.lt."${stale}"`).select("id");
   if (!lock?.length) return { connected: true, busy: true };
+  const firstRun = !acc.last_sync_at;
   try {
     const cfg = await settings();
     const days = Number(opts.days || cfg.import_days || 90);
@@ -331,16 +391,21 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
     const after = `after:${Math.floor(since / 1000)}`;
 
     const { data: partners } = await db.from("partners").select("id,email,name");
+    const { data: jobs } = await db.from("jobs").select("id,email,name,source,stage,lost,created_at,ext_ref").order("created_at", { ascending: true });
     // never turn our own addresses (team, test emails) into partners
     const { data: team } = await db.from("team_members").select("email");
     const ignore = new Set<string>([...(team || []).map((t: any) => String(t.email).toLowerCase()), ...((cfg.ignore_emails || []) as string[]).map((e) => String(e).toLowerCase().trim())]);
-    const byEmail = new Map<string, string>();
-    (partners || []).forEach((p: any) => { if (p.email) byEmail.set(String(p.email).toLowerCase().trim(), p.id); });
-    const { data: known } = await db.from("partner_messages").select("gmail_id,thread_id,partner_id").not("thread_id", "is", null);
+    const byEmail = new Map<string, string>(); // email -> "p:ID" or "j:ID"
+    (jobs || []).forEach((j: any) => { const e = String(j.email || "").toLowerCase().trim(); if (isEmail(e) && !ignore.has(e) && e !== ALLOWED) byEmail.set(e, "j:" + j.id); }); // newest job wins
+    (partners || []).forEach((p: any) => { if (p.email) byEmail.set(String(p.email).toLowerCase().trim(), "p:" + p.id); });
+    const names = new Map<string, string>([...(partners || []).map((p: any) => ["p:" + p.id, p.name] as [string, string]), ...(jobs || []).map((j: any) => ["j:" + j.id, j.name] as [string, string])]);
+    const { data: known } = await db.from("partner_messages").select("gmail_id,thread_id,partner_id,job_id").not("gmail_id", "is", null);
     const knownIds = new Set((known || []).map((k: any) => k.gmail_id).filter(Boolean));
-    const byThread = new Map<string, string>((known || []).map((k: any) => [k.thread_id, k.partner_id]));
+    const byThread = new Map<string, string>();
+    (known || []).forEach((k: any) => { if (k.thread_id && k.thread_id !== "homestars") byThread.set(k.thread_id, k.partner_id ? "p:" + k.partner_id : "j:" + k.job_id); });
 
     const threads = new Set<string>(); const outreach = new Set<string>(); const inbound = new Set<string>();
+    const forcedOwner = opts.email ? (opts.partner_id ? "p:" + opts.partner_id : opts.job_id ? "j:" + opts.job_id : "") : "";
     if (opts.email) {
       const e = opts.email.toLowerCase().trim();
       if (!isEmail(e)) throw new HttpError(400, "Not a valid email address.");
@@ -352,7 +417,7 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
       const iq = String(cfg.inbound_query || "").trim();
       if (iq) for (const m of await listIds(acc, `-from:me ${iq} -in:spam -in:trash newer_than:400d`, 2000))
         if (!knownIds.has(m.id)) { threads.add(m.threadId); inbound.add(m.threadId); }
-      for (const m of await listIds(acc, `${after} -in:spam -in:trash -in:drafts -in:chats`, 5000))
+      for (const m of await listIds(acc, `${after} -in:spam -in:trash -in:drafts -in:chats -from:homestars.com`, 5000))
         if (!knownIds.has(m.id) && (byThread.has(m.threadId) || outreach.has(m.threadId))) threads.add(m.threadId);
       const emails = [...byEmail.keys()].filter(isEmail);
       for (let i = 0; i < emails.length; i += 30) {
@@ -360,6 +425,16 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
         for (const m of await listIds(acc, `${after} (from:(${grp}) OR to:(${grp})) -in:spam -in:trash -in:drafts`, 1000))
           if (!knownIds.has(m.id)) threads.add(m.threadId);
       }
+      // a lead's older emails, once, when the lead first gets an email address
+      const { data: done } = await db.from("notify_state").select("key").like("key", "jm:%");
+      const doneSet = new Set((done || []).map((d: any) => d.key));
+      const fresh = (jobs || []).filter((j: any) => isEmail(String(j.email || "").trim()) && !doneSet.has("jm:" + j.id) && !j.lost).slice(-15);
+      for (const j of fresh) {
+        const e = String(j.email).toLowerCase().trim();
+        if (byEmail.get(e) !== "j:" + j.id) continue;
+        try { for (const m of await listIds(acc, `(from:${e} OR to:${e}) -in:spam -in:trash -in:drafts newer_than:180d`, 200)) if (!knownIds.has(m.id)) threads.add(m.threadId); } catch { /* next time */ }
+      }
+      if (fresh.length) await db.from("notify_state").upsert(fresh.map((j: any) => ({ key: "jm:" + j.id, at: new Date().toISOString() })), { onConflict: "key" });
     }
 
     const rows: any[] = []; const newPartners: string[] = []; const touched = new Set<string>();
@@ -375,22 +450,22 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
       const msgs: GMsg[] = (t.messages || []).filter((m: GMsg) => !(m.labelIds || []).includes("DRAFT"))
         .sort((a: GMsg, b: GMsg) => Number(a.internalDate) - Number(b.internalDate));
       const mine = (m: GMsg) => (m.labelIds || []).includes("SENT") || parseAddr(hdr(m, "From")).email === ALLOWED;
-      let pid = opts.partner_id && opts.email ? opts.partner_id : byThread.get(t.id);
-      if (!pid) for (const m of msgs) {
+      let owner = forcedOwner || byThread.get(t.id) || "";
+      if (!owner) for (const m of msgs) {
         const other = mine(m) ? [...addrList(hdr(m, "To")), ...addrList(hdr(m, "Cc"))] : [parseAddr(hdr(m, "From")).email];
-        const hit = other.find((e) => byEmail.has(e)); if (hit) { pid = byEmail.get(hit); break; }
+        const hit = other.find((e) => byEmail.has(e)); if (hit) { owner = byEmail.get(hit)!; break; }
       }
-      if (!pid && (outreach.has(t.id) || inbound.has(t.id))) {
+      if (!owner && (outreach.has(t.id) || inbound.has(t.id))) {
         const others = msgs.filter((m) => !mine(m));
         const real = others.find((m) => !isAutoReply(m));
         const reply = real || (inbound.has(t.id) ? others[0] : undefined);
         if (!reply) continue; // sent but nobody replied yet
         const a = parseAddr(hdr(reply, "From"));
-        if (!a.email || a.email === ALLOWED || ignore.has(a.email) || /mailer-daemon|postmaster/i.test(a.email)) continue;
+        if (!a.email || a.email === ALLOWED || ignore.has(a.email) || /mailer-daemon|postmaster|homestars\.com/i.test(a.email)) continue;
         if (!inbound.has(t.id) && /no-?reply/i.test(a.email)) continue;
         // another sync may have just created this partner
         const { data: ex } = await db.from("partners").select("id").ilike("email", a.email).limit(1);
-        if (ex?.length) pid = ex[0].id;
+        if (ex?.length) owner = "p:" + ex[0].id;
         else {
           const first = msgs.find(mine);
           const ctx = `${hdr(first || reply, "Subject")} ${hdr(reply, "Subject")} ${first ? bodies(first.payload).text.slice(0, 2000) : ""}`;
@@ -402,43 +477,225 @@ async function sync(opts: { email?: string; partner_id?: string; days?: number }
             status: real ? "replied" : "sent", source: "gmail", updated_by: "gmail",
           }).select("id,name").single();
           if (error) { console.warn("partner insert", error.message); continue; }
-          pid = np.id; newPartners.push(np.name);
+          owner = "p:" + np.id; newPartners.push(np.name); names.set(owner, np.name);
         }
-        byEmail.set(a.email, pid!);
+        byEmail.set(a.email, owner);
       }
-      if (!pid) continue;
-      byThread.set(t.id, pid);
-      for (const m of msgs) if (!knownIds.has(m.id)) { rows.push(msgRow(m, pid)); knownIds.add(m.id); touched.add(t.id); }
+      if (!owner) continue;
+      byThread.set(t.id, owner);
+      for (const m of msgs) if (!knownIds.has(m.id)) { rows.push(msgRow(m, owner)); knownIds.add(m.id); if (owner.startsWith("p:")) touched.add(t.id); }
     }
+
+    // HomeStars: new leads, messages from customers, invites and leads in your area
+    const hs = opts.email ? { leads: [] as string[], messages: 0, invites: [] as string[], area: 0 } : await homeStars(acc, jobs || [], knownIds, rows, firstRun);
+
     for (let i = 0; i < rows.length; i += 200) {
       const { error } = await db.from("partner_messages").upsert(rows.slice(i, i + 200), { onConflict: "gmail_id", ignoreDuplicates: true });
       if (error) throw new HttpError(500, error.message);
     }
     await labelThreads(acc, [...touched]);
     await db.from("gmail_account").update({ ...(opts.email ? {} : { last_sync_at: started.toISOString() }), last_error: null, sync_started_at: null }).eq("id", 1);
-    return { connected: true, added: rows.length, replies: rows.filter((r) => r.dir === "in").length, newPartners };
+
+    // push: new replies (not on the very first import)
+    const fresh = rows.filter((r) => r.dir === "in" && r.unread && Date.now() - Date.parse(r.at) < 6 * 3600e3);
+    if (!firstRun && !opts.email && fresh.length) {
+      const who = [...new Set(fresh.map((r) => names.get(r.partner_id ? "p:" + r.partner_id : "j:" + r.job_id) || r.from_email))];
+      const one = fresh[fresh.length - 1];
+      const url = one.partner_id ? `/?partner=${one.partner_id}` : `/?lead=${one.job_id}`;
+      await sendPush(fresh.length > 1 ? `${fresh.length} new replies` : `New reply from ${who[0]}`,
+        fresh.length > 1 ? who.slice(0, 4).join(", ") : String(one.body || one.subject || "").replace(/\s+/g, " ").slice(0, 140), url, "reply");
+    }
+    if (!firstRun && hs.invites.length) await sendPush(`HomeStars invite`, `${hs.invites.join(", ")} wants to talk about a job. Accept it on HomeStars.`, "/?tab=leads&view=opps", "invite");
+
+    return { connected: true, added: rows.length, replies: rows.filter((r) => r.dir === "in").length, newPartners, homestars: hs };
   } catch (e) {
     await db.from("gmail_account").update({ sync_started_at: null, ...(e instanceof HttpError && e.status === 409 ? {} : { last_error: String((e as Error).message || e) }) }).eq("id", 1);
     throw e;
   }
 }
 
+async function homeStars(acc: Acc, jobs: any[], knownIds: Set<string>, rows: any[], firstRun: boolean) {
+  const out = { leads: [] as string[], messages: 0, invites: [] as string[], area: 0 };
+  const { data: st } = await db.from("notify_state").select("at").eq("key", "hs_sync").maybeSingle();
+  const since = st?.at ? Date.parse(st.at) - 20 * 60e3 : Date.now() - 21 * 864e5;
+  const startedAt = new Date().toISOString();
+  const ids = await listIds(acc, `from:homestars.com after:${Math.floor(since / 1000)}`, 400);
+  if (!ids.length) { await db.from("notify_state").upsert({ key: "hs_sync", at: startedAt }); return out; }
+  const { data: doneOpp } = await db.from("opportunities").select("gmail_id").in("gmail_id", ids.map((m) => m.id));
+  const { data: doneHs } = await db.from("notify_state").select("key").in("key", ids.map((m) => "hs:" + m.id));
+  const skip = new Set([...(doneOpp || []).map((o: any) => o.gmail_id), ...(doneHs || []).map((d: any) => d.key.slice(3)), ...knownIds]);
+  const todo = ids.filter((m) => !skip.has(m.id));
+  const full: GMsg[] = (await pmap(todo, 5, (m) => gapi(acc, `/messages/${m.id}?format=full`).catch(() => null))).filter(Boolean) as GMsg[];
+  full.sort((a, b) => Number(a.internalDate) - Number(b.internalDate));
+  const hsJobs = jobs.filter((j) => j.source === "HomeStars");
+  const findJob = (name: string) => { const n = name.toLowerCase().trim(); return [...hsJobs].reverse().find((j) => String(j.name || "").toLowerCase().trim() === n); };
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto" }).format(new Date());
+  const processed: string[] = [];
+  for (const m of full) {
+    const b = bodies(m.payload); const text = b.text || htmlToText(b.html);
+    const p = parseHomeStars(hdr(m, "Subject"), text, b.html);
+    const at = new Date(Number(m.internalDate) || Date.now()).toISOString();
+    processed.push(m.id);
+    if (!p) continue;
+    if (p.kind === "lead") {
+      const ref = p.job ? "HS-" + p.job : "";
+      let j = ref ? jobs.find((x) => x.ext_ref === ref) : undefined;
+      if (!j) {
+        const id = p.job ? "hs" + p.job : "hs" + m.id;
+        const notes = [`HomeStars job${p.job ? " #" + p.job : ""}: ${p.title}`, p.fee ? `Lead fee: $${p.fee} + tax` : "", p.url ? `Phone and email on HomeStars: ${p.url}` : ""].filter(Boolean).join("\n");
+        const row = { id, ext_ref: ref || null, name: p.name || "HomeStars lead", phone: "", email: "", address: "", city: p.city || "", postal: p.postal || "", type: hsType(p.title),
+          source: "HomeStars", value: null, hst: true, notes, stage: "lead", ms: {}, history: [{ d: today, t: "New lead from HomeStars", by: "HomeStars" }], updated_by: "homestars" };
+        const { error } = await db.from("jobs").upsert(row, { onConflict: "id", ignoreDuplicates: true });
+        if (error) { console.warn("hs job", error.message); continue; }
+        j = { ...row, created_at: at }; jobs.push(j); hsJobs.push(j); out.leads.push(row.name);
+      }
+      rows.push({ partner_id: null, job_id: j.id, dir: "in", gmail_id: m.id, thread_id: "homestars", subject: p.title,
+        body: `${p.name || "The customer"} wants to get in touch about: ${p.title}${p.url ? "\nOpen HomeStars to see their phone and email." : ""}`,
+        from_email: "homestars", to_email: "", attachments: p.url ? [{ name: "Open on HomeStars", url: p.url }] : [], unread: true, at, created_by: "homestars" });
+      // the invite / area lead for this person is now taken
+      if (p.name) await db.from("opportunities").update({ status: "taken" }).ilike("customer", p.name).eq("status", "new");
+      await db.from("opportunities").update({ status: "taken" }).eq("title", p.title).eq("status", "new").ilike("city", p.city || "-");
+    } else if (p.kind === "message") {
+      const j = p.name ? findJob(p.name) : undefined;
+      if (!j) continue;
+      rows.push({ partner_id: null, job_id: j.id, dir: "in", gmail_id: m.id, thread_id: "homestars", subject: `HomeStars · ${p.title}`, body: p.body,
+        from_email: "homestars", to_email: "", attachments: p.url ? [{ name: "Reply on HomeStars", url: p.url }] : [], unread: true, at, created_by: "homestars" });
+      out.messages++;
+    } else if (p.kind === "invite") {
+      await db.from("opportunities").upsert({ source: "HomeStars", kind: "invite", title: p.title, customer: p.name, postal: p.postal, url: p.url, gmail_id: m.id, at, status: "new" }, { onConflict: "gmail_id", ignoreDuplicates: true });
+      if (Date.now() - Date.parse(at) < 6 * 3600e3 && p.name) out.invites.push(p.name);
+    } else if (p.kind === "area") {
+      await db.from("opportunities").upsert({ source: "HomeStars", kind: "area", title: p.title, city: p.city, km: p.km, hired_before: p.hired, url: p.url, gmail_id: m.id, at, status: "new" }, { onConflict: "gmail_id", ignoreDuplicates: true });
+      out.area++;
+    }
+  }
+  if (processed.length) await db.from("notify_state").upsert(processed.map((id) => ({ key: "hs:" + id, at: startedAt })), { onConflict: "key", ignoreDuplicates: true });
+  await db.from("notify_state").upsert({ key: "hs_sync", at: startedAt }, { onConflict: "key" });
+  // keep the opportunities list short: anything older than 14 days goes away
+  await db.from("opportunities").delete().lt("at", new Date(Date.now() - 14 * 864e5).toISOString()).neq("status", "taken");
+  if (firstRun) out.invites = [];
+  return out;
+}
+
+/* ---------- push notifications (Web Push, works on iPhone/iPad home-screen apps and Mac) ---------- */
+const concatB = (...a: Uint8Array[]) => { const o = new Uint8Array(a.reduce((t, x) => t + x.length, 0)); let i = 0; for (const x of a) { o.set(x, i); i += x.length; } return o; };
+const fromB64url = (s: string) => { s = s.replace(/-/g, "+").replace(/_/g, "/"); s += "===".slice((s.length + 3) % 4); const b = atob(s); return Uint8Array.from(b, (c) => c.charCodeAt(0)); };
+async function hkdf(salt: Uint8Array, ikm: Uint8Array, info: Uint8Array, len: number) {
+  const k = await crypto.subtle.importKey("raw", ikm, "HKDF", false, ["deriveBits"]);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: "HKDF", hash: "SHA-256", salt, info }, k, len * 8));
+}
+// RFC 8291 (aes128gcm) payload encryption
+export async function encryptPush(payload: Uint8Array, p256dh: string, auth: string, salt = crypto.getRandomValues(new Uint8Array(16)), asKeys?: CryptoKeyPair) {
+  const ua = fromB64url(p256dh), authS = fromB64url(auth);
+  const as = asKeys || await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const asPub = new Uint8Array(await crypto.subtle.exportKey("raw", as.publicKey));
+  const uaKey = await crypto.subtle.importKey("raw", ua, { name: "ECDH", namedCurve: "P-256" }, false, []);
+  const shared = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: uaKey }, as.privateKey, 256));
+  const ikm = await hkdf(authS, shared, concatB(enc.encode("WebPush: info\0"), ua, asPub), 32);
+  const cek = await hkdf(salt, ikm, enc.encode("Content-Encoding: aes128gcm\0"), 16);
+  const nonce = await hkdf(salt, ikm, enc.encode("Content-Encoding: nonce\0"), 12);
+  const key = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, key, concatB(payload, new Uint8Array([2]))));
+  const rs = new Uint8Array([0, 0, 16, 0]);
+  return concatB(salt, rs, new Uint8Array([asPub.length]), asPub, ct);
+}
+async function vapidKeys() {
+  const { data } = await db.from("private_config").select("vapid_public,vapid_private").eq("id", 1).maybeSingle();
+  if (data?.vapid_public && data?.vapid_private) return { pub: data.vapid_public as string, jwk: JSON.parse(data.vapid_private) };
+  const kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+  const pub = b64url(new Uint8Array(await crypto.subtle.exportKey("raw", kp.publicKey)));
+  const jwk = await crypto.subtle.exportKey("jwk", kp.privateKey);
+  await db.from("private_config").update({ vapid_public: pub, vapid_private: JSON.stringify(jwk) }).eq("id", 1);
+  return { pub, jwk };
+}
+async function vapidAuth(endpoint: string, v: { pub: string; jwk: JsonWebKey }) {
+  const aud = new URL(endpoint).origin;
+  const h = b64url(enc.encode(JSON.stringify({ typ: "JWT", alg: "ES256" })));
+  const c = b64url(enc.encode(JSON.stringify({ aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: "mailto:" + ALLOWED })));
+  const key = await crypto.subtle.importKey("jwk", v.jwk, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, enc.encode(`${h}.${c}`)));
+  return `vapid t=${h}.${c}.${b64url(sig)}, k=${v.pub}`;
+}
+async function sendPush(title: string, body: string, url = "/", tag = "nevaco") {
+  const { data: subs } = await db.from("push_subs").select("*");
+  if (!subs?.length) return { sent: 0 };
+  const v = await vapidKeys();
+  const payload = enc.encode(JSON.stringify({ title, body, url, tag }));
+  let sent = 0;
+  await pmap(subs, 4, async (s: any) => {
+    try {
+      const r = await fetch(s.endpoint, { method: "POST", body: await encryptPush(payload, s.p256dh, s.auth),
+        headers: { Authorization: await vapidAuth(s.endpoint, v), "Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream", TTL: "86400", Urgency: "high" } });
+      if (r.status === 404 || r.status === 410) await db.from("push_subs").delete().eq("endpoint", s.endpoint);
+      else if (r.ok) { sent++; await db.from("push_subs").update({ last_ok: new Date().toISOString() }).eq("endpoint", s.endpoint); }
+      else console.warn("push", r.status, await r.text().catch(() => ""));
+    } catch (e) { console.warn("push", (e as Error).message); }
+  });
+  return { sent };
+}
+async function pushSubscribe(user: string, b: any) {
+  const s = b.subscription || {};
+  if (!s.endpoint || !s.keys?.p256dh || !s.keys?.auth) throw new HttpError(400, "Notifications could not be turned on.");
+  await db.from("push_subs").upsert({ endpoint: s.endpoint, p256dh: s.keys.p256dh, auth: s.keys.auth, email: user, device: String(b.device || "").slice(0, 80) }, { onConflict: "endpoint" });
+  if (b.test !== false) await sendPush("Notifications are on", "You'll hear about new leads and replies here.", "/", "welcome");
+  return { ok: true };
+}
+const LEADS_TAB: Record<string, string> = { "Website form": "website", "HomeStars": "homestars", "Facebook": "facebook", "Instagram": "instagram", "Instagram / Facebook ad": "facebook" };
+async function notifyJob(id: string) {
+  const { data: j } = await db.from("jobs").select("id,name,type,city,source,updated_by").eq("id", id).maybeSingle();
+  if (!j || String(j.updated_by || "").includes("@")) return { skipped: true };
+  return sendPush(`New lead · ${j.source || "Lead"}`, [j.name, j.type, j.city].filter(Boolean).join(" · "), `/?lead=${j.id}`, "lead-" + j.id);
+}
+// Hourly: nudge about leads and replies that are waiting on you (8 AM to 8 PM Toronto time)
+async function remind() {
+  const hour = Number(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto", hour: "2-digit", hour12: false }).format(new Date())) % 24;
+  if (hour < 8 || hour >= 20) return { skipped: "night" };
+  const { data: jobs } = await db.from("jobs").select("id,name,source,ms,lost,stage,created_at").eq("lost", false).in("stage", ["lead", "visit", "quote"]);
+  const { data: msgs } = await db.from("partner_messages").select("partner_id,job_id,dir,at").in("dir", ["in", "out"]).gte("at", new Date(Date.now() - 30 * 864e5).toISOString()).order("at");
+  const { data: partners } = await db.from("partners").select("id,name,status");
+  const last = new Map<string, any>();
+  (msgs || []).forEach((m: any) => last.set(m.partner_id ? "p:" + m.partner_id : "j:" + m.job_id, m));
+  const waiting: { key: string; label: string }[] = [];
+  const now = Date.now();
+  for (const j of jobs || []) {
+    const lm = last.get("j:" + j.id);
+    if (lm && lm.dir === "in" && now - Date.parse(lm.at) > 2 * 3600e3) waiting.push({ key: "j:" + j.id, label: `${j.name} (${j.source || "lead"})` });
+    else if (!lm && !(j.ms || {}).contacted?.done && j.stage === "lead" && now - Date.parse(j.created_at) > 3600e3 && now - Date.parse(j.created_at) < 14 * 864e5)
+      waiting.push({ key: "j:" + j.id, label: `${j.name} (${j.source || "lead"}) · not contacted` });
+  }
+  for (const p of partners || []) {
+    const lm = last.get("p:" + p.id);
+    if (p.status !== "cold" && lm && lm.dir === "in" && now - Date.parse(lm.at) > 3 * 3600e3) waiting.push({ key: "p:" + p.id, label: `${p.name} (partner)` });
+  }
+  if (!waiting.length) return { waiting: 0 };
+  const { data: st } = await db.from("notify_state").select("key,at").in("key", waiting.map((w) => "rem:" + w.key));
+  const recent = new Set((st || []).filter((x: any) => now - Date.parse(x.at) < 4 * 3600e3).map((x: any) => x.key.slice(4)));
+  const due = waiting.filter((w) => !recent.has(w.key));
+  if (!due.length) return { waiting: waiting.length, sent: 0 };
+  await sendPush(waiting.length > 1 ? `${waiting.length} leads are waiting for you` : "A lead is waiting for you", waiting.slice(0, 4).map((w) => w.label).join(", ") + (waiting.length > 4 ? "…" : ""), "/?tab=leads&view=reply", "remind");
+  await db.from("notify_state").upsert(due.map((w) => ({ key: "rem:" + w.key, at: new Date().toISOString() })), { onConflict: "key" });
+  return { waiting: waiting.length, sent: due.length };
+}
+
 async function send(user: string, b: any) {
   const acc = await account();
   if (!acc) throw new HttpError(409, "Connect Gmail first.");
   const cfg = await settings();
-  const { data: p } = await db.from("partners").select("*").eq("id", String(b.partner_id || "")).maybeSingle();
-  if (!p) throw new HttpError(404, "Partner not found.");
+  const isJob = !!b.job_id;
+  const { data: p } = isJob ? await db.from("jobs").select("id,name,email").eq("id", String(b.job_id)).maybeSingle()
+    : await db.from("partners").select("*").eq("id", String(b.partner_id || "")).maybeSingle();
+  if (!p) throw new HttpError(404, isJob ? "Customer not found." : "Partner not found.");
+  const ownCol = isJob ? "job_id" : "partner_id";
   const to = String(b.to || p.email || "").trim().toLowerCase();
-  if (!isEmail(to)) throw new HttpError(400, `Add a valid email for ${p.name || "this partner"} first.`);
+  if (!isEmail(to)) throw new HttpError(400, `Add a valid email for ${p.name || "this contact"} first.`);
   const body = String(b.body || "").trim();
   if (!body) throw new HttpError(400, "Write a message first.");
   const subject = clean(b.subject) || "NEVACO BUILD";
 
   // continue the conversation when the subject matches the last email
   let threadId: string | null = null, inReplyTo: string | null = null, references: string | null = null;
-  const { data: prev } = await db.from("partner_messages").select("thread_id,rfc_id,subject,at").eq("partner_id", p.id).neq("dir", "note")
-    .not("thread_id", "is", null).order("at", { ascending: false }).limit(40);
+  const { data: prev } = await db.from("partner_messages").select("thread_id,rfc_id,subject,at").eq(ownCol, p.id).neq("dir", "note")
+    .not("thread_id", "is", null).neq("thread_id", "homestars").order("at", { ascending: false }).limit(40);
   const same = (prev || []).find((m: any) => normSubj(m.subject) === normSubj(subject));
   if (same) {
     threadId = same.thread_id;
@@ -467,11 +724,11 @@ async function send(user: string, b: any) {
   }
   let rfc: string | null = null;
   try { const meta = await gapi(acc, `/messages/${sent.id}?format=metadata&metadataHeaders=Message-ID`); rfc = hdr(meta, "Message-ID") || null; } catch { /* not needed to succeed */ }
-  const row = { partner_id: p.id, dir: "out", gmail_id: sent.id, thread_id: sent.threadId, rfc_id: rfc, subject, body, from_email: acc.email, to_email: to,
+  const row = { partner_id: isJob ? null : p.id, job_id: isJob ? p.id : null, dir: "out", gmail_id: sent.id, thread_id: sent.threadId, rfc_id: rfc, subject, body, from_email: acc.email, to_email: to,
     attachments: attachments.map((a) => ({ name: a.name, size: a.bytes.length, mime: a.mime })), unread: false, at: new Date().toISOString(), created_by: user };
   const { data: saved, error } = await db.from("partner_messages").upsert(row, { onConflict: "gmail_id" }).select("*").single();
   if (error) console.warn("save sent", error.message);
-  await labelThreads(acc, [sent.threadId]);
+  if (!isJob) await labelThreads(acc, [sent.threadId]);
   return { ok: true, message: saved || row };
 }
 
@@ -511,11 +768,20 @@ if (typeof Deno !== "undefined" && (Deno as any).serve && !(globalThis as any)._
     if (req.method === "GET") return json({ ok: true, service: "nevaco-gmail" });
     const body = await req.json().catch(() => ({}));
     const cron = req.headers.get("x-cron-secret");
-    if (cron) { await checkCron(cron); return json(await sync({})); }
+    if (cron) {
+      await checkCron(cron);
+      if (body.action === "notify_job") return json(await notifyJob(String(body.id || "")));
+      if (body.action === "remind") return json(await remind());
+      return json(await sync({}));
+    }
     const user = await teamUser(req);
     switch (body.action) {
       case "start": return json(await start(user));
-      case "sync": return json(await sync({ email: body.email, partner_id: body.partner_id, days: body.days }));
+      case "sync": return json(await sync({ email: body.email, partner_id: body.partner_id, job_id: body.job_id, days: body.days }));
+      case "vapid": return json({ key: (await vapidKeys()).pub });
+      case "push_sub": return json(await pushSubscribe(user, body));
+      case "push_unsub": await db.from("push_subs").delete().eq("endpoint", String(body.endpoint || "")); return json({ ok: true });
+      case "push_test": return json(await sendPush("Test notification", "Notifications from NEVACO Job Map are working.", "/", "test"));
       case "send": return json(await send(user, body));
       case "read": return json(await markRead(body));
       case "preview": return json(await preview(body));

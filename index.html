@@ -479,6 +479,42 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .refrow{display:flex;justify-content:space-between;gap:10px;padding:11px 14px;position:relative;font-size:14px}
 .refrow+.refrow::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
 .refrow small{display:block;color:var(--label2);font-size:12.5px}
+/* ===== leads ===== */
+#sLeads .searchbox{margin:0 32px 12px;max-width:820px}
+.srctabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -2px 14px;padding:0 2px}
+.srctabs::-webkit-scrollbar{display:none}
+.srctabs button{flex:none;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--card);font-weight:600;font-size:13.5px;color:var(--label)}
+.srctabs button i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.srctabs button svg{width:15px;height:15px;color:var(--c)}
+.srctabs button em{font-style:normal;color:var(--label2);font-variant-numeric:tabular-nums;font-size:12.5px}
+.srctabs button[aria-pressed="true"]{background:var(--label);color:var(--bg)}
+.srctabs button[aria-pressed="true"] em{color:var(--bg);opacity:.75}
+.srctabs button[aria-pressed="true"] i{box-shadow:0 0 0 2px var(--bg)}
+.stag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:1px 6px;border-radius:5px;margin-left:6px;vertical-align:1px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.lstate{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;background:color-mix(in srgb,var(--c) 10%,var(--card));border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.lstate>i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.lstate>b{font-size:14px;flex:1;min-width:150px}
+.lstate .qa{display:flex;gap:6px;flex-wrap:wrap}
+.lstate .btn{padding:6px 11px;font-size:13px}
+.composer.inline{border-top:0;padding:8px 0 0!important;background:none;display:block!important}
+.cto{font-size:12px;color:var(--label2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.bub.note.done{display:flex;align-items:center;gap:6px;color:var(--green);font-weight:600}
+.bub.note.done svg{width:14px;height:14px}
+.bub.hs{border-left:3px solid #f26722}
+.autotag.hs{color:#f26722;background:color-mix(in srgb,#f26722 14%,transparent)}
+.att.lnk{text-decoration:none;color:inherit}
+.bub.in .att.lnk{color:var(--blue)}
+.opps{display:grid;gap:8px;margin-bottom:18px}
+.opp{background:var(--card);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center}
+.opp.inv{box-shadow:inset 3px 0 0 #f26722}
+.opp .ot{flex:1;min-width:0}.opp .ot b{display:block;font-size:15px}.opp .ot>span{display:block;color:var(--label2);font-size:13px;margin-top:2px}
+.opp .ob{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}.opp .ob em{font-style:normal;font-size:12px;color:var(--label3);margin-left:auto}
+.opp .oa{display:flex;flex-direction:column;gap:6px;flex:none}.opp .oa .btn{padding:6px 12px;font-size:13px;text-align:center;text-decoration:none}
+.pushcard{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:12px 12px 12px 14px;margin-bottom:16px}
+.pushcard>svg{width:26px;height:26px;color:#5856d6;flex:none}
+.pushcard>div{flex:1;min-width:0}.pushcard b{display:block;font-size:15px}.pushcard span{display:block;font-size:13px;color:var(--label2)}
+.pushcard .px{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--label3)}.pushcard .px svg{width:14px;height:14px}
+.lcount{margin-left:auto}
 /* ===== customers ===== */
 #sCust .searchbox{margin:0 32px 12px;max-width:820px}
 .cfil{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
@@ -602,7 +638,8 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   .lt h1{font-size:31px}
   .lt .sub{font-size:14px}
   .screen>.scroll{padding:2px 14px calc(96px + env(safe-area-inset-bottom))}
-  #sJobs .searchbox,#sCust .searchbox,#sPart .searchbox{margin:0 14px 8px}
+  #sJobs .searchbox,#sCust .searchbox,#sPart .searchbox,#sLeads .searchbox{margin:0 14px 8px}
+  .opp{flex-direction:column;align-items:stretch}.opp .oa{flex-direction:row}.opp .oa .btn{flex:1}
   .pstats{grid-template-columns:repeat(2,1fr)}
   .tabbar button{font-size:9.5px}
   .tabbar button svg{width:23px;height:23px}
@@ -700,6 +737,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 <nav class="side" aria-label="Sections">
   <div class="brand"><button class="logo acctbtn" id="acctBtn" aria-label="Account"><svg class="i" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg><i></i></button><div><h1>Job Map</h1><small id="syncStatus">NEVACO BUILD</small></div></div>
   <button class="navbtn" data-tab="today" aria-selected="true"><span class="ni" style="--nc:var(--red)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg></span>Today<em class="tcount" hidden></em></button>
+  <button class="navbtn" data-tab="leads" aria-selected="false"><span class="ni" style="--nc:#5856d6"><svg class="i" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5l1.5-3h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg></span>Leads<em class="lcount" hidden></em></button>
   <button class="navbtn" data-tab="jobs" aria-selected="false"><span class="ni" style="--nc:var(--blue)"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg></span>Jobs<em id="jobsCount"></em></button>
   <button class="navbtn" data-tab="cust" aria-selected="false"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em id="custCount" hidden></em></button>
   <button class="navbtn" data-tab="part" aria-selected="false"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em id="partCount" hidden></em></button>
@@ -712,6 +750,12 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
     <header class="lt"><div><h1>Today</h1><div class="sub" id="todaySub"></div></div>
       <div class="tools ph"><button class="iconbtn js-acct" aria-label="Account"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button><button class="iconbtn dark js-add" aria-label="New customer"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
     <div class="scroll"><div class="wrap" id="pToday"></div></div>
+  </section>
+  <section class="screen" id="sLeads" hidden>
+    <header class="lt"><div><h1>Leads</h1><div class="sub" id="leadsSub">New customers</div></div>
+      <div class="tools"><button class="iconbtn dark" id="leadAdd" aria-label="Add lead"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
+    <label class="searchbox" id="leadSearchWrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lq" type="search" placeholder="Search name, phone, email, city" aria-label="Search leads"></label>
+    <div class="scroll"><div class="wrap" id="pLeads"></div></div>
   </section>
   <section class="screen" id="sJobs" hidden>
     <header class="lt"><div><h1>Jobs</h1><div class="sub" id="jobsSub"></div></div>
@@ -759,6 +803,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 <aside class="detail" id="vDetail" aria-live="polite"></aside>
 <nav class="tabbar" aria-label="Sections">
   <button data-tab="today" aria-selected="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>Today<em class="tcount" hidden></em></button>
+  <button data-tab="leads" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5l1.5-3h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg>Leads<em class="lcount" hidden></em></button>
   <button data-tab="jobs" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>Jobs</button>
   <button data-tab="cust" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg>Customers<em class="ccount" hidden></em></button>
   <button data-tab="part" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg>Partners<em class="pcount" hidden></em></button>
@@ -785,7 +830,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <div class="fghead">Project</div>
       <div class="fg">
         <label><span>Type</span><select id="f-type"></select></label>
-        <label><span>Source</span><select id="f-source"><option>Website form</option><option>WhatsApp</option><option>Instagram / Facebook ad</option><option>HomeStars</option><option>Google</option><option>Realtor referral</option><option>Property manager referral</option><option>Repeat client</option><option>Other</option></select></label>
+        <label><span>Source</span><select id="f-source"><option>Website form</option><option>WhatsApp</option><option>Facebook ad</option><option>Instagram ad</option><option>HomeStars</option><option>Google</option><option>Realtor referral</option><option>Property manager referral</option><option>Repeat client</option><option>Other</option></select></label>
         <label id="f-partnerRow" hidden><span>Referred by</span><select id="f-partner"></select></label>
         <label><span>Contract price</span><input id="f-value" inputmode="decimal" placeholder="$0"></label>
         <label class="sw"><span>Plus HST (13%)</span><input id="f-hst" type="checkbox"></label>
@@ -959,6 +1004,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
     <header><span></span><h3>Account</h3><button type="button" class="save" id="acctClose">Done</button></header>
     <div class="body">
       <div class="who"><b id="acctName"></b><span id="acctEmail"></span><span style="display:block;font-size:12px;color:var(--label3);margin-top:4px">App version <span id="appVer"></span></span></div>
+      <div class="group"><div class="frow" id="acctPush"></div></div>
       <div><div class="label">Team</div><div class="group" id="acctTeam"></div></div>
       <div class="group linkbtns">
         <button class="row" id="acctExport">Export Jobs to Excel (CSV)</button>
@@ -978,7 +1024,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.24 (Oct 27) · Partners + Gmail';
+const APP_VERSION='1.25 (Oct 30) · Leads';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1111,7 +1157,7 @@ async function must(q){const{error}=await q;if(error)throw error}
 async function fetchAll(){
   const[j,p,e,dc,fl]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
     sb.from('documents').select('*').order('created_at'),sb.from('files').select('*').order('created_at')]);
-  const[pt,pm,ps]=await Promise.all([sb.from('partners').select('*').order('created_at'),sb.from('partner_messages').select('*').order('at'),sb.from('app_settings').select('*').eq('key','partners')]);
+  const[pt,pm,ps,op]=await Promise.all([sb.from('partners').select('*').order('created_at'),sb.from('partner_messages').select('*').order('at'),sb.from('app_settings').select('*').eq('key','partners'),sb.from('opportunities').select('*').order('at',{ascending:false}).limit(300)]);
   partReady=!pt.error&&!pm.error;if(partReady){pset=(ps.data&&ps.data[0]&&ps.data[0].value)||{};await loadGmailStatus()}
   filesReady=!fl.error;
   if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error}
@@ -1130,7 +1176,7 @@ async function fetchAll(){
     token:x.share_token,sentAt:x.sent_at||'',acceptedAt:x.accepted_at||'',acceptedName:x.accepted_name||'',
     credit:Number(x.credit)||0,dueDate:x.due_date||'',paidAt:x.paid_at||'',paidMethod:x.paid_method||'',ref:x.ref||''}));
   const partners=partReady?pt.data.map(mapPartner):[],pmsgsL=partReady?pm.data.map(mapMsg):[];
-  db={jobs,events,docs,files:fl.data||[],partners,pmsgs:pmsgsL};data=db.jobs;
+  db={jobs,events,docs,files:fl.data||[],partners,pmsgs:pmsgsL,opps:(op&&!op.error&&op.data)||[]};data=db.jobs;
   synced={jobs:new Map(jobs.map(r=>[r.id,JSON.stringify(jobRow(r))])),payments:new Map(payRows().map(x=>[x.id,JSON.stringify(x)])),events:new Map(events.map(x=>[x.id,JSON.stringify(evRow(x))])),documents:new Map(docs.map(x=>[x.id,JSON.stringify(docRow(x))])),partners:new Map(partners.map(x=>[x.id,JSON.stringify(partRow(x))]))};
   loaded=true;ensurePartChannel();
 }
@@ -1166,15 +1212,16 @@ async function refreshFromServer(force){
   const inBefore=new Set((db.pmsgs||[]).filter(m=>m.dir==='in').map(m=>m.id)),hadMsgs=(db.pmsgs||[]).length>0;
   const before=new Set(data.map(r=>r.id)),signedBefore=new Set((db.docs||[]).filter(x=>x.status==='accepted').map(x=>x.id));
   try{await fetchAll()}catch(e){console.error(e);return}
-  const fresh=data.filter(r=>!before.has(r.id)&&(r.history[0]?.by==='Website'));
-  if(fresh.length&&before.size)toast(fresh.length>1?`${fresh.length} new leads from the website`:`New lead: ${fresh[0].name}`);
+  const fresh=data.filter(r=>!before.has(r.id)&&['Website','HomeStars','Facebook','Instagram'].includes(r.history[0]?.by));
+  if(fresh.length&&before.size)toast(fresh.length>1?`${fresh.length} new leads`:`New lead: ${fresh[0].name} · ${fresh[0].source}`);
   const signed=(db.docs||[]).filter(x=>x.status==='accepted'&&!signedBefore.has(x.id));
   if(signed.length&&before.size)toast(`Estimate ${signed[0].number} signed by ${signed[0].acceptedName||'customer'}`);
   const newIn=(db.pmsgs||[]).filter(m=>m.dir==='in'&&!inBefore.has(m.id)&&m.unread);
-  if(newIn.length&&hadMsgs){const p=part(newIn.at(-1).partnerId);if(p&&partSel!==p.id)toast(newIn.length>1?`${newIn.length} new partner replies`:`New reply from ${p.name}`)}
+  if(newIn.length&&hadMsgs){const lm=newIn.at(-1),p=lm.partnerId?part(lm.partnerId):job(lm.jobId);if(p&&partSel!==p.id&&selId!==p.id)toast(newIn.length>1?`${newIn.length} new replies`:`New message from ${p.name}`)}
+  if(selId&&job(selId)){const ids=newIn.filter(m=>m.jobId===selId);if(ids.length&&document.visibilityState==='visible')markLeadRead(job(selId))}
   if(partSel&&part(partSel)){const ids=newIn.filter(m=>m.partnerId===partSel);if(ids.length&&document.visibilityState==='visible'){ids.forEach(m=>m.unread=false);sb.from('partner_messages').update({unread:false}).in('id',ids.map(m=>m.id)).then(()=>{},()=>{});const g=ids.map(m=>m.gmailId).filter(Boolean);if(g.length&&gmailSt.connected)gm('read',{gmail_ids:g}).catch(()=>{})}}
   locateMissing();
-  render();if(selId){if(job(selId))openDetail(selId);else closeDetail()}else if(custSel)openCustomer(custSel);else if(partSel){if(part(partSel))refreshPartnerView();else{partSel=null;closeDetail()}}
+  render();if(selId){if(job(selId)){if(leadComposing())refreshLeadThread(job(selId));else openDetail(selId)}else closeDetail()}else if(custSel)openCustomer(custSel);else if(partSel){if(part(partSel))refreshPartnerView();else{partSel=null;closeDetail()}}
 }
 const me_name=()=>me?.name||(me?.email||'').split('@')[0];
 
@@ -1244,6 +1291,10 @@ function renderToday(){
   $('pToday').innerHTML=`<div class="prow">${chip(1,'Urgent',g[1].length)}${chip(2,'Today',g[2].length)}${chip(3,'Soon',g[3].length)}${chip(4,'Upcoming',up.length)}</div>
     <div class="money"><div class="mt"><b>${kmoney(out)}</b><span>Quotes out</span></div><div class="mt"><b>${kmoney(owed)}</b><span>To collect</span></div><div class="mt"><b>${active}</b><span>Active jobs</span></div></div>
     ${sect(1,'Urgent',g[1])}${sect(2,'Today',g[2])}${sect(3,'Soon',g[3])}
+    ${(()=>{const ps=pushState();const off=ps==='off'||ps==='install';if(!off||safe(()=>localStorage.getItem('nv-push-hide'))==='1')return '';
+      return `<div class="pushcard">${ico('msg')}<div><b>Get notified about new leads</b><span>${ps==='install'?'On iPhone/iPad: Share › Add to Home Screen, then open the app from there.':'New leads, replies and reminders on this '+deviceName()+'.'}</span></div>${ps==='off'?'<button class="btn" data-pushon>Turn on</button>':''}<button class="px" data-pushhide aria-label="Hide">${ico('x')}</button></div>`})()}
+    ${(()=>{const ln=data.filter(r=>isLead(r)&&leadState(r)==='reply');return ln.length?`<div class="sect"><div class="secthead"><h3 style="--c:#5856d6"><i></i>Leads waiting for a reply<em>${ln.length}</em></h3><button data-go="leads">Leads</button></div><div class="group">${ln.map(r=>{const lm=jmails(r).at(-1),sk=srcKey(r);
+      return `<button class="task" data-golead="${r.id}" style="--c:${SRC[sk].c}"><span class="gl" style="--c:${SRC[sk].c};width:28px;height:28px">${ico('msg')}</span><span class="tt"><b>Reply to ${esc(r.name)}</b><span><u>${SRC[sk].n} · ${esc(String(lm?.body||'').replace(/\s+/g,' ').slice(0,70))}</u></span></span><span class="when">${whenShort(lm?.at)}</span></button>`}).join('')}</div></div>`:''})()}
     ${(()=>{const pn=(db.partners||[]).filter(pNeeds).sort((a,b)=>(pUnread(b)?1:0)-(pUnread(a)?1:0));return pn.length?`<div class="sect"><div class="secthead"><h3 style="--c:var(--blue)"><i></i>Partners<em>${pn.length}</em></h3><button data-go="part">Partners</button></div><div class="group">${pn.map(p=>{const a=pAction(p),un=pUnread(p),c=un||a?.k==='reply'?'--blue':a?.k==='meet'?'--orange':'--p1';
       const t=un||a?.k==='reply'?'Reply to':a?.k==='meet'?a.n+' ·':'Follow up with';const lm=lastMail(p);
       return `<button class="task" data-gopart="${p.id}" style="--c:var(${c})"><span class="gl" style="--c:var(${c});width:28px;height:28px">${ico(un||a?.k==='reply'?'msg':a?.k==='meet'?'meet':'mail')}</span><span class="tt"><b>${t} ${esc(p.name)}</b><span><u>${esc(p.company||PTYPE[p.type]||'')}${un?' · new reply':a?.k==='follow'&&lm?' · no reply for '+dayDiff(today(),ld(lm.at))+' days':a?.k==='meet'&&p.meetTime?' · '+fmtTime(p.meetTime):''}</u></span></span>${ico('chev')}</button>`}).join('')}</div></div>`:''})()}
@@ -1261,6 +1312,9 @@ $('pToday').addEventListener('click',e=>{
   const rowE=e.target.closest('.task');if(rowE&&!e.target.closest('[data-act="done"]')){const it=window._todo?.[rowE.dataset.k];if(it&&it.key.endsWith('e')&&it.title.startsWith('Send estimate')&&it.job){openDetail(it.job.id,true);setTimeout(()=>openDoc(docsFor(it.job.id)[0]||null,it.job),80);return}}
   const go=e.target.closest('[data-go]');if(go){setTab(go.dataset.go);return}
   const gp=e.target.closest('[data-gopart]');if(gp){setTab('part');openPartner(gp.dataset.gopart);return}
+  const gl=e.target.closest('[data-golead]');if(gl){setTab('leads');openDetail(gl.dataset.golead,true);return}
+  if(e.target.closest('[data-pushon]')){enablePush(e.target.closest('[data-pushon]'));return}
+  if(e.target.closest('[data-pushhide]')){safe(()=>localStorage.setItem('nv-push-hide','1'));renderToday();return}
   const cr=e.target.closest('[data-cal]');if(cr){openCalItem(cr.dataset.cal);return}
   const row=e.target.closest('.task');if(!row)return;const it=window._todo[row.dataset.k];if(!it)return;
   const act=e.target.closest('[data-act]')?.dataset.act;
@@ -1322,20 +1376,18 @@ $('pCal').addEventListener('click',e=>{const d=e.target.closest('.day,.mcell');i
   const c=e.target.closest('[data-cal]');if(c)openCalItem(c.dataset.cal)});
 
 /* ---------- jobs list ---------- */
+const isJob=r=>['won','done'].includes(stageOf(r));
 const FILTERS=[
- {k:'leads',n:'Leads',s:['lead','visit'],ic:'lead',c:'--s-lead'},
- {k:'quote',n:'To Quote',s:['quote'],ic:'quote',c:'--s-quote'},
- {k:'sent',n:'Quotes Out',s:['sent'],ic:'sent',c:'--s-sent',sum:r=>total(r)},
  {k:'won',n:'Active',s:['won'],ic:'won',c:'--s-won',sum:r=>total(r)},
  {k:'done',n:'Completed',s:['done'],ic:'done',c:'--s-done'},
  {k:'owed',n:'To Collect',test:r=>!r.lost&&(stepDone(r,'contract')||stepDone(r,'complete'))&&balance(r)>0.5,ic:'pay',c:'--s-pay',sum:r=>balance(r)}
 ];
 const inFilter=(r,f)=>{if(!f)return true;const F=FILTERS.find(x=>x.k===f);return F.test?F.test(r):F.s.includes(stageOf(r))};
 const matches=r=>!query||[r.name,r.address,r.city,r.type,r.notes,r.phone,r.email].join(' ').toLowerCase().includes(query.toLowerCase());
-const visible=()=>tab==='jobs'?data.filter(r=>inFilter(r,filter)&&matches(r)):data.filter(r=>!r.lost);
+const visible=()=>tab==='jobs'?data.filter(r=>isJob(r)&&inFilter(r,filter)&&matches(r)):data.filter(r=>!r.lost);
 const needsAttention=r=>todoItems().some(i=>i.job===r&&i.date&&i.date<=today());
 function renderSum(){
-  $('sum').innerHTML=FILTERS.map(f=>{const rs=data.filter(r=>inFilter(r,f.k));const v=f.sum?kmoney(rs.reduce((t,r)=>t+f.sum(r),0)):rs.length;
+  $('sum').innerHTML=FILTERS.map(f=>{const rs=data.filter(r=>isJob(r)&&inFilter(r,f.k));const v=f.sum?kmoney(rs.reduce((t,r)=>t+f.sum(r),0)):rs.length;
     return `<button class="tile" style="--c:var(${f.c})" data-f="${f.k}" aria-pressed="${filter===f.k}"><div class="top"><b>${v}</b><span class="ic">${ico(f.ic)}</span></div><span>${f.n}${f.sum?' · '+rs.length:''}</span></button>`}).join('');
 }
 $('sum').onclick=e=>{const b=e.target.closest('.tile');if(!b)return;filter=filter===b.dataset.f?null:b.dataset.f;render();fit()};
@@ -1343,17 +1395,17 @@ $('clearFilter').onclick=()=>{filter=null;render();fit()};
 let qt;$('q').oninput=e=>{query=e.target.value.trim();clearTimeout(qt);renderList();drawPins();qt=setTimeout(()=>{if(query)fit()},500)};
 const PRI={lead:0,visit:1,quote:2,sent:3,won:4,done:5,lost:6};
 function renderList(){
-  const f=FILTERS.find(x=>x.k===filter);$('listTitle').textContent=f?f.n:(query?'Results':'All Jobs');$('clearFilter').hidden=!filter;
+  const f=FILTERS.find(x=>x.k===filter);$('listTitle').textContent=f?f.n:(query?'Results':'All Jobs · signed contracts');$('clearFilter').hidden=!filter;
   const pr=id=>PRIOR.by.get(id)?.rank??9999;
-  const rows=data.filter(r=>inFilter(r,filter)&&matches(r)).sort((a,b)=>pr(a.id)-pr(b.id)||(PRI[stageOf(a)]-PRI[stageOf(b)])||String(b.date).localeCompare(a.date));
-  $('jobsSub').textContent=`${data.filter(r=>!r.lost&&stageOf(r)!=='done').length} open · ${data.filter(r=>stageOf(r)==='done').length} completed`;
+  const rows=data.filter(r=>isJob(r)&&inFilter(r,filter)&&matches(r)).sort((a,b)=>pr(a.id)-pr(b.id)||(PRI[stageOf(a)]-PRI[stageOf(b)])||String(b.date).localeCompare(a.date));
+  $('jobsSub').textContent=`${data.filter(r=>stageOf(r)==='won').length} active · ${data.filter(r=>stageOf(r)==='done').length} completed · leads are in Leads`;
   $('list').innerHTML=rows.length?rows.map(r=>{const st=STAGES[stageOf(r)],ps=payStatus(r),P=PRIOR.by.get(r.id);
     return `<button class="row${r.id===selId?' sel':''}" data-id="${r.id}">
     <span class="gl" style="--c:var(${P?PC[P.p]:st.c})">${ico(st.ic)}</span>
     <span class="rt"><b>${esc(r.name)}${P&&P.p<4?`<span class="ptag" style="--c:var(${PC[P.p]})">${PN[P.p]}</span>`:''}${r.sample?'<span class="tag">Example</span>':''}</b><span>${esc(r.address===r.name?r.city:r.address+', '+r.city)} · ${esc(r.type)}</span>
       <span class="mini" style="--c:var(${st.c})">${STEPS.map(s=>`<i class="${stepDone(r,s.k)?'on':''}" title="${s.n}"></i>`).join('')}${ps?`<span class="tag ${ps.cls} pp">${ps.t}</span>`:''}</span></span>
     <span class="rv"><em>${total(r)?money(total(r)):''}</em>${ico('chev')}</span></button>`}).join('')
-    :`<div class="empty"><b>${query?'No Results':'Nothing Here'}</b>${query?'Try a different name or street.':'Tap + to add a customer.'}</div>`;
+    :`<div class="empty"><b>${query?'No Results':'No Jobs Yet'}</b>${query?'Try a different name or street.':'A lead moves here when the contract is signed.'}</div>`;
 }
 $('list').onclick=e=>{const b=e.target.closest('.row');if(b)openDetail(b.dataset.id,true)};
 
@@ -1506,7 +1558,7 @@ const whenShort=t=>{if(!t)return '';const d=ld(t);if(d===today())return new Date
 const ago=t=>{if(!t)return 'not yet';const m=Math.round((Date.now()-Date.parse(t))/60000);if(m<1)return 'just now';if(m<60)return m+' min ago';if(m<1440)return Math.round(m/60)+' h ago';return fmtDate(ld(t))};
 const gmailUrl=tid=>`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}#all/${tid}`;
 const linkify=s=>s.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]])/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
-const mapMsg=x=>({id:x.id,partnerId:x.partner_id,dir:x.dir,gmailId:x.gmail_id||'',threadId:x.thread_id||'',subject:x.subject||'',body:x.body||'',from:x.from_email||'',to:x.to_email||'',
+const mapMsg=x=>({id:x.id,partnerId:x.partner_id,jobId:x.job_id||'',dir:x.dir,gmailId:x.gmail_id||'',threadId:x.thread_id||'',subject:x.subject||'',body:x.body||'',from:x.from_email||'',to:x.to_email||'',
   att:Array.isArray(x.attachments)?x.attachments:[],unread:!!x.unread,at:x.at||new Date().toISOString()});
 const mapPartner=x=>({id:x.id,name:x.name||'',company:x.company||'',type:x.type||'re',email:x.email||'',phone:x.phone||'',area:x.area||'',status:x.status||'sent',
   meet:x.meet||'',meetTime:x.meet_time||'',follow:x.follow||'',notes:x.notes||'',source:x.source||'app',createdAt:x.created_at||''});
@@ -1643,13 +1695,7 @@ function paintPartner(p){
         <button class="rr" data-fee="${r.id}"><b>${r.refFee?money(r.refFee):'Set fee'}</b><small style="color:${r.refFee?(r.refPaid?'var(--green)':'var(--orange)'):'var(--label2)'}">${r.refFee?(r.refPaid?'Commission paid':'Commission to pay'):'Commission'}</small></button></div>`).join('')}</div>`
       :`<p class="pnone left">When ${esc(firstName(p))} sends you a client, add them here so you can track the job and the commission.</p>`}</div>
     ${p.notes?`<div class="block"><div class="label">Notes</div>${renderNotes(p.notes)}</div>`:''}`;
-  const ms=pmsgs(p);let lastDay='';
-  $('pThread').innerHTML=ms.length?ms.map(m=>{let h='';const dd=ld(m.at);if(dd!==lastDay){lastDay=dd;h+=`<div class="tday">${fmtDate(dd)==='Today'||fmtDate(dd)==='Yesterday'?fmtDate(dd):new Date(dd+'T12:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'})}</div>`}
-    if(m.dir==='note')return h+`<div class="bub note">${esc(m.body)}</div>`;
-    const long=m.body.length>900,tm=new Date(m.at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-    const who=m.dir!=='out'&&m.from&&m.from!==(p.email||'').toLowerCase()?esc(m.from)+' · ':'';
-    return h+`<div class="bub ${m.dir==='auto'?'in auto':m.dir}${long?' clip':''}">${m.dir==='auto'?'<span class="autotag">Automatic reply</span>':''}${m.subject?`<span class="subj">${esc(m.subject)}</span>`:''}<span class="btx">${linkify(esc(m.body))}</span>${long?'<button class="more">Show full email</button>':''}${m.att.map(a=>`<span class="att">${ico(/pdf/i.test(a.mime||a.name)?'quote':/image/i.test(a.mime||'')?'img':'clip')}${esc(a.name)}</span>`).join('')}<span class="meta">${who}${tm}${m.threadId?` · <a href="${gmailUrl(m.threadId)}" target="_blank" rel="noopener">Gmail</a>`:''}</span></div>`}).join('')
-    :`<p class="pnone">No emails yet. ${p.email?'Write the first one below.':'Add an email address with Edit, then write the first one below.'}</p>`;
+  $('pThread').innerHTML=threadHtml(pmsgs(p),p.email,`No emails yet. ${p.email?'Write the first one below.':'Add an email address with Edit, then write the first one below.'}`);
   $('pThread').querySelectorAll('.more').forEach(b=>b.onclick=()=>{b.parentElement.classList.remove('clip');b.remove()});
   $('pWrite').onclick=()=>{const t=$('pBody');t.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>t.focus(),250)};
   $('pMeet').onclick=()=>openMeet(p);const m2=$('pMeet2');if(m2)m2.onclick=()=>openMeet(p);
@@ -1764,10 +1810,180 @@ $('psetForm').onsubmit=async e=>{e.preventDefault();const q=$('ps-query').value.
   try{await must(sb.from('app_settings').upsert({key:'partners',value:pset}));hideModal('psetModal');toast('Settings saved');if(changed)checkMail(false)}
   catch(err){console.error(err);toast('Could not save settings',false,true)}};
 
+/* ---------- shared: email thread rendering (partners and leads) ---------- */
+function threadHtml(ms,email,emptyText){
+  let lastDay='';
+  if(!ms.length)return `<p class="pnone">${emptyText||'No messages yet.'}</p>`;
+  return ms.map(m=>{let h='';const dd=ld(m.at);if(dd!==lastDay){lastDay=dd;h+=`<div class="tday">${fmtDate(dd)==='Today'||fmtDate(dd)==='Yesterday'?fmtDate(dd):new Date(dd+'T12:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'})}</div>`}
+    if(m.dir==='note')return h+`<div class="bub note">${esc(m.body)}</div>`;
+    const tm=new Date(m.at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    if(m.dir==='out'&&(m.from==='homestars'||m.from==='phone'))return h+`<div class="bub note done">${ico('check')}${esc(m.body)} · ${tm}</div>`;
+    const long=m.body.length>900;
+    const hs=m.threadId==='homestars';
+    const who=m.dir!=='out'&&m.from&&!hs&&m.from!==(email||'').toLowerCase()?esc(m.from)+' · ':'';
+    const atts=m.att.map(a=>a.url?`<a class="att lnk" href="${esc(a.url)}" target="_blank" rel="noopener">${ico('dir')}${esc(a.name)}</a>`:`<span class="att">${ico(/pdf/i.test(a.mime||a.name)?'quote':/image/i.test(a.mime||'')?'img':'clip')}${esc(a.name)}</span>`).join('');
+    return h+`<div class="bub ${m.dir==='auto'?'in auto':m.dir}${long?' clip':''}${hs?' hs':''}">${m.dir==='auto'?'<span class="autotag">Automatic reply</span>':''}${hs?'<span class="autotag hs">HomeStars</span>':''}${m.subject&&!hs?`<span class="subj">${esc(m.subject)}</span>`:''}<span class="btx">${linkify(esc(m.body))}</span>${long?'<button class="more">Show full email</button>':''}${atts}<span class="meta">${who}${tm}${m.threadId&&!hs?` · <a href="${gmailUrl(m.threadId)}" target="_blank" rel="noopener">Gmail</a>`:''}</span></div>`}).join('');
+}
+function bindThread(el){el.querySelectorAll('.more').forEach(b=>b.onclick=()=>{b.parentElement.classList.remove('clip');b.remove()})}
+
+/* ---------- leads ---------- */
+const SRC={website:{n:'Website',c:'var(--s-sent)'},facebook:{n:'Facebook',c:'#1877f2'},instagram:{n:'Instagram',c:'#d62976'},homestars:{n:'HomeStars',c:'#f26722'},other:{n:'Other',c:'var(--s-quote)'}};
+function srcKey(r){const s=String(r.source||'').toLowerCase();
+  if(s.includes('homestars'))return 'homestars';if(s.includes('website'))return 'website';
+  if(s.includes('instagram')&&!s.includes('facebook'))return 'instagram';if(s.includes('facebook')||s.includes('instagram'))return 'facebook';return 'other'}
+const isLead=r=>!['won','done'].includes(stageOf(r));
+const jmsgs=r=>(db.pmsgs||[]).filter(m=>m.jobId===r.id);
+const jmails=r=>jmsgs(r).filter(m=>m.dir==='in'||m.dir==='out');
+const jUnread=r=>jmsgs(r).some(m=>m.dir==='in'&&m.unread);
+function leadState(r){if(r.lost)return 'lost';const lm=jmails(r).at(-1);
+  if(lm&&lm.dir==='in')return 'reply';
+  if(!stepDone(r,'contacted')&&!(lm&&lm.dir==='out'))return 'new';
+  return 'replied'}
+const leadNeeds=r=>isLead(r)&&['reply','new'].includes(leadState(r));
+const LST={new:{n:'New · not contacted',c:'--p1'},reply:{n:'Needs reply',c:'--blue'},replied:{n:'Replied',c:'--green'},lost:{n:'Lost',c:'--p0'}};
+let leadSrc='all',leadFilter='all',leadQuery='',leadView='list';
+function renderLeadCount(){const n=data.filter(leadNeeds).length;document.querySelectorAll('.lcount').forEach(x=>{x.textContent=n;x.hidden=!n;x.classList.toggle('hot',n>0)})}
+function renderLeads(){
+  const L=data.filter(isLead),q=leadQuery.toLowerCase();
+  const opps=(db.opps||[]).filter(o=>o.status==='new');
+  const S=[{k:'all',n:'All'},...Object.entries(SRC).map(([k,v])=>({k,n:v.n}))];
+  const inSrc=r=>leadSrc==='all'||srcKey(r)===leadSrc;
+  const F=[{k:'all',n:'Open',f:r=>!r.lost},{k:'needs',n:'Needs you',f:leadNeeds},{k:'new',n:'New',f:r=>leadState(r)==='new'},{k:'reply',n:'Needs reply',f:r=>leadState(r)==='reply'},{k:'replied',n:'Replied',f:r=>!r.lost&&leadState(r)==='replied'&&stageOf(r)==='lead'},
+    {k:'visit',n:'Site visit',f:r=>!r.lost&&['visit','quote'].includes(stageOf(r))},{k:'estimate',n:'Estimate sent',f:r=>!r.lost&&stageOf(r)==='sent'},{k:'lost',n:'Lost',f:r=>r.lost}];
+  const fl=F.find(x=>x.k===leadFilter)||F[0];
+  const base=L.filter(inSrc);
+  const list=base.filter(r=>fl.f(r)&&(!q||[r.name,r.email,r.phone,r.city,r.address,r.type,r.notes].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>((leadNeeds(b)?2:0)+(jUnread(b)?1:0))-((leadNeeds(a)?2:0)+(jUnread(a)?1:0))||String(leadAt(b)).localeCompare(String(leadAt(a))));
+  const wk=addDays(today(),-7);
+  $('leadsSub').textContent=`${L.filter(r=>!r.lost).length} open · ${L.filter(leadNeeds).length} need you`;
+  const tabs=`<div class="srctabs">${S.map(s=>{const n=s.k==='all'?L.filter(r=>!r.lost).length:L.filter(r=>!r.lost&&srcKey(r)===s.k).length;return `<button data-src="${s.k}" aria-pressed="${leadView==='list'&&leadSrc===s.k}" style="--c:${s.k==='all'?'var(--label)':SRC[s.k].c}">${s.k!=='all'?'<i></i>':''}${s.n}${n?`<em>${n}</em>`:''}</button>`}).join('')}<button data-src="opps" aria-pressed="${leadView==='opps'}" style="--c:#f26722">${ico('star')}Opportunities${opps.length?`<em>${opps.length}</em>`:''}</button></div>`;
+  if(leadView==='opps'){$('pLeads').innerHTML=tabs+oppsHtml(opps);return}
+  const est=base.filter(r=>!r.lost&&stageOf(r)==='sent');
+  $('pLeads').innerHTML=tabs+`<div class="pstats"><div class="mt"><b>${base.filter(leadNeeds).length}</b><span>Need you</span></div><div class="mt"><b>${base.filter(r=>(r.date||'')>=wk||String(r.history?.[0]?.d||'')>=wk).length}</b><span>New this week</span></div><div class="mt"><b>${base.filter(r=>!r.lost&&['visit','quote'].includes(stageOf(r))).length}</b><span>Site visits</span></div><div class="mt"><b>${est.length}</b><span>Estimates${est.length?' · '+kmoney(est.reduce((t,r)=>t+total(r),0)):''}</span></div></div>
+    <div class="cfil">${F.filter(f=>['all','needs'].includes(f.k)||base.some(f.f)).map(f=>`<button data-lf="${f.k}" aria-pressed="${f.k===fl.k}">${f.n}<em>${base.filter(f.f).length}</em></button>`).join('')}</div>
+    ${list.length?`<div class="group">${list.map(leadRow).join('')}</div>`:`<div class="pempty">${ico('lead','i big')}<b>${leadFilter==='needs'?'All caught up':'No leads here'}</b><p>${leadFilter==='needs'?'Every lead has an answer from you.':'New leads from your website, HomeStars and ads show up here automatically.'}</p></div>`}`;
+}
+const leadAt=r=>{const lm=jmails(r).at(-1);return lm?lm.at:(r.history?.[0]?.d||r.date||'')};
+function leadRow(r){const sk=srcKey(r),st=leadState(r),lm=jmails(r).at(-1),un=jUnread(r),stg=stageOf(r);
+  const stage=stg==='visit'&&r.ms.visit?.date?`Visit ${fmtDate(r.ms.visit.date)}`:stg==='quote'?'Visited · quote needed':stg==='sent'?`Estimate${total(r)?' '+kmoney(total(r)):''} sent`:'';
+  const snip=lm?(lm.dir==='out'?(lm.from==='homestars'?'Replied on HomeStars':lm.from==='phone'?'Called':'You: '+lm.body):lm.body):(r.notes?r.notes.split('\n')[0]:'No messages yet');
+  return `<button class="row crow${r.lost?' dim':''}${selId===r.id?' sel':''}" data-lead="${r.id}">
+   <span class="av" style="--c:${SRC[sk].c}">${esc(initials(r.name))}</span>
+   <span class="rt"><b>${un?'<span class="unread"></span>':''}${esc(r.name)}<span class="stag" style="--c:${SRC[sk].c}">${SRC[sk].n}</span></b><span>${esc([r.type,r.city].filter(Boolean).join(' · '))}</span>
+     <span class="psnip${lm?.dir==='in'?' in':''}">${esc(String(snip||'').replace(/\s+/g,' ').slice(0,110))}</span>
+     <span class="needs"><span class="pst" style="--c:var(${LST[st].c})"><i></i>${LST[st].n}</span>${stage?`<span class="pst" style="--c:var(--s-visit)"><i></i>${esc(stage)}</span>`:''}</span></span>
+   <span class="rv"><em>${whenShort(lm?lm.at:(r.history?.[0]?.d?r.history[0].d+'T12:00':''))}</em>${ico('chev')}</span></button>`}
+function oppsHtml(opps){
+  if(!opps.length)return `<div class="pempty">${ico('star','i big')}<b>No opportunities right now</b><p>HomeStars invites and new leads in your area show up here. Buy the ones you want on HomeStars; once you start the conversation, the customer moves to Leads automatically.</p></div>`;
+  const inv=opps.filter(o=>o.kind==='invite'),area=opps.filter(o=>o.kind!=='invite');
+  const card=o=>`<div class="opp${o.kind==='invite'?' inv':''}"><div class="ot"><b>${o.kind==='invite'?`${esc(o.customer||'A homeowner')} invited you`:esc(o.title)}</b>
+      <span>${esc([o.kind==='invite'?o.title:'',o.city,o.postal,o.km?o.km+' km':''].filter(Boolean).join(' · '))}</span>
+      <span class="ob">${o.kind==='invite'?'<span class="pst" style="--c:#f26722"><i></i>Invite · free to talk</span>':''}${o.hired_before?'<span class="pst" style="--c:var(--green)"><i></i>Hired on HomeStars before</span>':''}<em>${whenShort(o.at)}</em></span></div>
+    <div class="oa">${o.url?`<a class="btn" href="${esc(o.url)}" target="_blank" rel="noopener">Open</a>`:''}<button class="btn gray" data-oppx="${o.id}">Dismiss</button></div></div>`;
+  return `${inv.length?`<div class="label">Invites</div><div class="opps">${inv.map(card).join('')}</div>`:''}
+    <div class="label">HomeStars leads in your area · last 14 days</div><div class="opps">${area.map(card).join('')}</div>`;
+}
+$('pLeads').addEventListener('click',async e=>{
+  const s=e.target.closest('[data-src]');if(s){if(s.dataset.src==='opps'){leadView='opps'}else{leadView='list';leadSrc=s.dataset.src}renderLeads();return}
+  const f=e.target.closest('[data-lf]');if(f){leadFilter=f.dataset.lf;renderLeads();return}
+  const x=e.target.closest('[data-oppx]');if(x){const o=(db.opps||[]).find(y=>y.id===x.dataset.oppx);if(o){o.status='dismissed';renderLeads();renderLeadCount();sb.from('opportunities').update({status:'dismissed'}).eq('id',o.id).then(()=>{},()=>{})}return}
+  const r=e.target.closest('[data-lead]');if(r)openDetail(r.dataset.lead,true)});
+$('lq').oninput=e=>{leadQuery=e.target.value.trim();renderLeads()};
+$('leadAdd').onclick=()=>{formPre={source:{website:'Website form',facebook:'Facebook ad',instagram:'Instagram ad',homestars:'HomeStars'}[leadSrc]||'Other'};openForm(null)};
+
+/* conversation inside a lead / customer */
+const LTPL={
+ thanks:{n:'Thanks · book visit',t:r=>`Hi ${firstName(r)},\n\nThank you for reaching out to NEVACO BUILD about your ${String(r.type||'project').toLowerCase()}. I'd be happy to help.\n\nWhen would be a good time for a free site visit? I can usually come within a few days, including evenings.\n\nBest regards,`},
+ photos:{n:'Ask for photos',t:r=>`Hi ${firstName(r)},\n\nThank you for your message. To give you an accurate price, could you send a few photos of the space and rough measurements? If it's easier, I can also come by for a free site visit.\n\nBest regards,`},
+ visit:{n:'Confirm visit',t:r=>`Hi ${firstName(r)},\n\nThis is to confirm our site visit${r.ms.visit?.date?` on ${new Date(r.ms.visit.date+'T12:00').toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})}${r.ms.visit.time?' at '+fmtTime(r.ms.visit.time):''}`:''} at ${r.address||'your home'}.\n\nSee you then.\n\nBest regards,`},
+ follow:{n:'Follow up estimate',t:r=>`Hi ${firstName(r)},\n\nJust following up on the estimate I sent for your ${String(r.type||'project').toLowerCase()}. Do you have any questions, or would you like to adjust anything?\n\nWe can usually start within two weeks of signing.\n\nBest regards,`}
+};
+function leadConvHtml(r){
+  const ms=jmsgs(r),hs=srcKey(r)==='homestars',hsUrl=[...ms].reverse().flatMap(m=>m.att).find(a=>a.url)?.url;
+  const d=drafts['j:'+r.id]||{s:jmails(r).filter(m=>m.subject&&m.threadId!=='homestars').at(-1)?.subject?'Re: '+jmails(r).filter(m=>m.subject&&m.threadId!=='homestars').at(-1).subject.replace(/^\s*((re|fwd?|fw)\s*:\s*)+/i,''):`Your ${String(r.type||'renovation').toLowerCase()} · NEVACO BUILD`,t:''};
+  const st=leadState(r);
+  return `<div class="block" id="jConv"><div class="label">Messages${ms.length?` <span>${jmails(r).length}</span>`:''}</div>
+    ${isLead(r)&&!r.lost?`<div class="lstate" style="--c:var(${LST[st].c})"><i></i><b>${st==='reply'?'Waiting for your reply':st==='new'?'New lead · not contacted yet':'You replied'}</b>
+      <span class="qa">${hs&&hsUrl?`<a class="btn gray" href="${esc(hsUrl)}" target="_blank" rel="noopener">Open HomeStars</a>`:''}${st!=='replied'?`${hs?'<button class="btn gray" data-qa="homestars">Replied on HomeStars</button>':''}<button class="btn gray" data-qa="phone">I called</button>`:''}</span></div>`:''}
+    <div class="thread" id="jThread">${threadHtml(ms,r.email,r.email?'No emails with this customer yet.':hs?'Messages from HomeStars show up here.':'Add an email address to write from here.')}</div>
+    ${r.email?`<div class="composer inline" id="jComp">
+      <div class="tpls">${Object.entries(LTPL).map(([k,t])=>`<button data-ltpl="${k}">${t.n}</button>`).join('')}</div>
+      <div class="cbox"><input id="jSubj" placeholder="Subject" value="${esc(d.s)}"><textarea id="jBody" rows="3" placeholder="Write to ${esc(firstName(r))}…">${esc(d.t)}</textarea>
+        <div class="crow2"><span class="cto">To ${esc(r.email)}</span><button class="sendbtn" id="jSend">${gmailSt.connected?ico('sent')+'Send':ico('mail')+'Open in Gmail'}</button></div></div></div>`:''}
+  </div>`;
+}
+function bindLeadConv(r){
+  const el=$('jConv');if(!el)return;bindThread(el);
+  el.querySelectorAll('[data-qa]').forEach(b=>b.onclick=()=>leadQuick(r,b.dataset.qa));
+  const body=$('jBody');if(!body)return;
+  const keep=()=>{drafts['j:'+r.id]={s:$('jSubj').value,t:$('jBody').value}};
+  const grow=()=>{body.style.height='auto';body.style.height=Math.min(body.scrollHeight+2,Math.max(120,Math.round(innerHeight*.35)))+'px'};
+  $('jSubj').addEventListener('input',keep);body.addEventListener('input',()=>{keep();grow()});setTimeout(grow,0);
+  body.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();sendLead(r)}});
+  el.querySelectorAll('[data-ltpl]').forEach(b=>b.onclick=()=>{body.value=LTPL[b.dataset.ltpl].t(r);keep();grow();body.focus();const k=body.value.lastIndexOf('\n\nBest regards,');if(k>0)body.setSelectionRange(k,k)});
+  $('jSend').onclick=()=>sendLead(r);
+}
+function markLeadRead(r){const un=jmsgs(r).filter(m=>m.dir==='in'&&m.unread);if(!un.length)return;
+  un.forEach(m=>m.unread=false);sb.from('partner_messages').update({unread:false}).in('id',un.map(m=>m.id)).then(()=>{},()=>{});
+  const g=un.map(m=>m.gmailId).filter(Boolean);if(g.length&&gmailSt.connected)gm('read',{gmail_ids:g}).catch(()=>{});renderLeadCount()}
+async function leadQuick(r,kind){
+  const m=addMsg({id:uid(),jobId:r.id,partnerId:null,dir:'out',from:kind,body:kind==='homestars'?'Replied on HomeStars':'Called the customer',subject:'',att:[],unread:false,at:new Date().toISOString()});
+  if(!stepDone(r,'contacted')){r.ms.contacted={done:true,date:today()}}log(r,m.body);save();
+  try{await flush();await must(sb.from('partner_messages').insert({id:m.id,job_id:r.id,dir:'out',from_email:kind,body:m.body,at:m.at,created_by:me?.email||''}))}catch(e){console.error(e)}
+  openDetail(r.id);render();toast('Marked as replied')}
+async function sendLead(r){
+  const body=$('jBody').value.trim(),subject=$('jSubj').value.trim();
+  if(!body){toast('Write a message first');$('jBody').focus();return}
+  if(!gmailSt.connected){window.open(`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(r.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,'_blank','noopener');return}
+  const btn=$('jSend');if(btn.disabled)return;btn.disabled=true;btn.innerHTML='<span class="spin"></span>Sending…';
+  try{
+    if(!(await flush()))throw new Error('Still saving. Try again in a moment.');
+    const res=await gm('send',{job_id:r.id,subject,body});addMsg(res.message);delete drafts['j:'+r.id];
+    if(!stepDone(r,'contacted'))r.ms.contacted={done:true,date:today()};log(r,'Email sent: '+subject);save();
+    openDetail(r.id);render();toast(`Sent to ${firstName(r)}`);
+    setTimeout(()=>{const t=$('jThread');if(t)t.lastElementChild?.scrollIntoView({block:'center'})},60);
+  }catch(e){toast(e.message,false,true);if(btn.isConnected){btn.disabled=false;btn.innerHTML=ico('sent')+'Send'}}
+}
+const leadComposing=()=>{const a=document.activeElement;return !!(a&&a.closest&&a.closest('#jComp'))||!!($('jBody')&&$('jBody').value.trim())};
+function refreshLeadThread(r){const t=$('jThread');if(!t)return;t.innerHTML=threadHtml(jmsgs(r),r.email);bindThread(t)}
+
+/* ---------- push notifications ---------- */
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const pushSupported=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window&&location.protocol==='https:';
+function pushState(){if(!pushSupported())return isIOS&&!standalone()?'install':'unsupported';if(Notification.permission==='denied')return 'denied';
+  return Notification.permission==='granted'&&safe(()=>localStorage.getItem('nv-push'))==='1'?'on':'off'}
+const u8=b=>{b=b.replace(/-/g,'+').replace(/_/g,'/');b+='==='.slice((b.length+3)%4);return Uint8Array.from(atob(b),c=>c.charCodeAt(0))};
+const deviceName=()=>/iPhone/.test(navigator.userAgent)?'iPhone':/iPad/.test(navigator.userAgent)||isIOS?'iPad':/Mac/.test(navigator.platform)?'Mac':/Android/.test(navigator.userAgent)?'Android':'Computer';
+async function pushSubscribe(test){
+  const reg=await navigator.serviceWorker.ready;const{key}=await gm('vapid');
+  let sub=await reg.pushManager.getSubscription();
+  if(sub){const k=sub.options&&sub.options.applicationServerKey;const same=k&&btoa(String.fromCharCode(...new Uint8Array(k))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')===key;if(!same){await sub.unsubscribe().catch(()=>{});sub=null}}
+  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(key)});
+  await gm('push_sub',{subscription:sub.toJSON(),device:deviceName(),test});safe(()=>localStorage.setItem('nv-push','1'));
+}
+async function enablePush(btn){
+  const st=pushState();
+  if(st==='install'){toast('On iPhone/iPad: tap Share, then “Add to Home Screen”, open the app from there and turn notifications on.',false,true);return}
+  if(st==='unsupported'){toast('This browser cannot show notifications. Use Safari on iPhone/iPad (from the Home Screen) or Chrome/Safari on the Mac.',false,true);return}
+  if(st==='denied'){toast('Notifications are blocked for this app. Turn them on in Settings › Notifications (iPhone) or the browser site settings (Mac).',false,true);return}
+  if(btn){btn.disabled=true;btn.textContent='Turning on…'}
+  try{const p=await Notification.requestPermission();if(p!=='granted')throw new Error('Notifications were not allowed.');await pushSubscribe(true);toast('Notifications are on for this '+deviceName());}
+  catch(e){toast(e.message||'Could not turn on notifications',false,true)}
+  renderToday();paintPushRow();
+}
+async function refreshPushSub(){if(pushState()!=='on')return;const last=+safe(()=>localStorage.getItem('nv-push-at'))||0;if(Date.now()-last<864e5)return;
+  try{await pushSubscribe(false);safe(()=>localStorage.setItem('nv-push-at',String(Date.now())))}catch(e){console.warn(e)}}
+function paintPushRow(){const el=$('acctPush');if(!el)return;const st=pushState();
+  el.innerHTML=`<span><b>Notifications</b><small>${st==='on'?'On for this '+deviceName():st==='install'?'Add the app to your Home Screen first':st==='denied'?'Blocked in settings':st==='unsupported'?'Not available in this browser':'Off on this device'}</small></span>${st==='on'?'<button type="button" class="lnkbtn" id="pushTest">Send test</button>':'<button type="button" class="lnkbtn" id="pushOn">Turn on</button>'}`;
+  const on=$('pushOn');if(on)on.onclick=()=>enablePush(on);
+  const t=$('pushTest');if(t)t.onclick=async()=>{t.disabled=true;try{const r=await gm('push_test');toast(r.sent?`Test sent to ${r.sent} device${r.sent>1?'s':''}`:'No devices are signed up yet')}catch(e){toast(e.message,false,true)}t.disabled=false};
+}
+
 /* ---------- tabs ---------- */
 function setTab(t){tab=t;
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  ['today','jobs','cust','part','cal','map'].forEach(k=>{const el=$({today:'sToday',jobs:'sJobs',cust:'sCust',part:'sPart',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
+  ['today','leads','jobs','cust','part','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
   if(t!=='map'&&isPhone()&&selId&&false)closeDetail();
   render();
   if(t==='part'&&gmailSt.connected&&Date.now()-lastCheck>60000)checkMail(false);
@@ -1801,7 +2017,7 @@ function openDetail(id,pan){
   v.innerHTML=`<div class="navbar"><button id="dBack">${ico('back')}${isPhone()?'Back':'Close'}</button><button id="dEdit">Edit</button></div>
   <div class="scroll">
     <div class="dtitle" style="--c:var(${st.c})"><div class="st"><i></i>${st.n}${ps?`<span class="tag ${ps.cls}">${ps.t}</span>`:''}${r.sample?'<span class="tag">Example</span>':''}</div>
-      <h2>${esc(r.name)}</h2><p>${esc(r.address)}, ${esc(r.city)}${r.postal?' '+esc(r.postal):''} · ${esc(r.type)}${r.approx?' · <span style="color:var(--orange)">approximate pin</span>':''}</p></div>
+      <h2>${esc(r.name)}</h2><p>${esc([r.address,[r.city,r.postal].filter(Boolean).join(' ')].filter(Boolean).join(', '))}${r.type?' · '+esc(r.type):''}${r.approx?' · <span style="color:var(--orange)">approximate pin</span>':''}</p></div>
     <div class="acts">
       <a class="act primary" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${dest}">${ico('dir')}Directions</a>
       <a class="act" href="${ph?'tel:'+ph:'#'}" aria-disabled="${!ph}">${ico('call')}Call</a>
@@ -1809,6 +2025,7 @@ function openDetail(id,pan){
       <button class="act" id="dCal">${ico('calp')}Schedule</button>
     </div>
     ${nx&&!r.lost?`<div class="nextcard"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
+    ${leadConvHtml(r)}
     <div class="block"><div class="label">Estimates & Invoices <span><button id="newDoc">+ Estimate</button>&nbsp;&nbsp;<button id="newInv">+ Invoice</button></span></div>
       <div class="group">${docsFor(r.id).length?docsFor(r.id).sort((a,b)=>(isInv(a)-isInv(b))||String(a.number).localeCompare(String(b.number))).map(docListRow).join(''):`<div class="empty" style="padding:16px"><b style="font-size:15px">No estimate yet</b>Create one and send it for online signature.</div>`}</div></div>
     ${filesBlock(filesFor(r.id),'attachJob')}
@@ -1857,6 +2074,7 @@ function openDetail(id,pan){
     </div>
     <div id="dConfirm"></div>
   </div>`;
+  bindLeadConv(r);markLeadRead(r);
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
   if($('dNotesEdit'))$('dNotesEdit').onclick=()=>{openForm(r);setTimeout(()=>$('f-notes').focus(),300)};
@@ -2297,7 +2515,8 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 let tt;function toast(m,canUndo,long){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.toggle('long',!!long||m.length>60);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:long?6500:2600)}
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];db.files=db.files||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel)closeDetail()}});
-function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>!r.lost&&stageOf(r)!=='done').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();if(tab==='cal')renderCal();drawPins();renderCards()}
+function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();if(tab==='cal')renderCal();drawPins();renderCards();
+  if('setAppBadge' in navigator&&loaded){const n=data.filter(leadNeeds).length+(db.partners||[]).filter(pUnread).length;(n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{})}}
 let locating=false;
 async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
 async function locateMissingRun(){const todo=data.filter(r=>r.lat==null);
@@ -2346,10 +2565,17 @@ async function start(session){
   const qp=new URLSearchParams(location.search);
   if(qp.get('gmail')){const ok=qp.get('gmail')==='connected';gmailFlash=ok?'':(qp.get('msg')||'Could not connect Gmail.');history.replaceState(null,'',location.pathname);setTab('part');
     if(ok){toast('Gmail connected. Looking for partner replies…',false,true);checkMail(true)}else toast(gmailFlash,false,true)}
+  const lid=qp.get('lead'),pid=qp.get('partner'),tb=qp.get('tab');
+  if(lid||pid||tb){history.replaceState(null,'',location.pathname);
+    if(lid&&job(lid)){setTab(isLead(job(lid))?'leads':'jobs');openDetail(lid,true)}
+    else if(pid&&part(pid)){setTab('part');openPartner(pid)}
+    else if(tb==='leads'){leadView=qp.get('view')==='opps'?'opps':'list';if(qp.get('view')==='reply')leadFilter='needs';setTab('leads')}}
+  refreshPushSub();
+  if(gmailSt.connected)setTimeout(()=>checkMail(false),1500);
 }
 let partChannel=null;
 function ensurePartChannel(){if(!partReady||partChannel||!me)return;partChannel=sb.channel('nevaco-partners');
-  ['partners','partner_messages','app_settings'].forEach(t=>partChannel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));partChannel.subscribe()}
+  ['partners','partner_messages','app_settings','opportunities'].forEach(t=>partChannel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));partChannel.subscribe()}
 sb.auth.onAuthStateChange((ev,session)=>{
   if(ev==='PASSWORD_RECOVERY'){showAuth('recover');return}
   if(ev==='SIGNED_OUT'){me=null;loaded=false;db={jobs:[],events:[]};data=db.jobs;render();showAuth('signin')}
@@ -2361,7 +2587,7 @@ sb.auth.onAuthStateChange((ev,session)=>{
     if(g){const ok=g==='connected';$('authErr').className=ok?'authok':'autherr';$('authErr').textContent=ok?'Gmail is connected. You can close this window and go back to the NEVACO app.':(new URLSearchParams(location.search).get('msg')||'Could not connect Gmail.')}}})();
 
 /* account sheet */
-const openAcct=()=>{if(!me)return;$('appVer').textContent=APP_VERSION;$('acctName').textContent=me.name;$('acctEmail').textContent=me.email;
+const openAcct=()=>{if(!me)return;$('appVer').textContent=APP_VERSION;paintPushRow();$('acctName').textContent=me.name;$('acctEmail').textContent=me.email;
   $('acctTeam').innerHTML=team.map(t=>`<div class="row"><span>${esc(t.name||t.email.split('@')[0])}</span><span style="color:var(--label2);font-size:13px">${esc(t.email)}</span></div>`).join('');showModal('acctModal')};
 $('acctBtn').onclick=openAcct;document.querySelectorAll('.js-acct').forEach(b=>b.onclick=openAcct);
 $('acctClose').onclick=()=>hideModal('acctModal');
