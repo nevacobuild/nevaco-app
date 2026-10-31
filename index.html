@@ -531,6 +531,16 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .phead{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.phead h2{margin:0;font-size:24px;letter-spacing:-.02em}.phead p{margin:2px 0 0;color:var(--label2);font-size:14px}
 .pdates{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:12px;padding:9px 12px;text-align:left}.pdates>svg{width:22px;height:22px;color:var(--s-won)}.pdates b{display:block;font-size:14px}.pdates small{color:var(--label2);font-size:12.5px}
 .pstats.four{margin:0}
+.pstats.three{grid-template-columns:repeat(3,1fr)}
+.dstat{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--c)}.dstat::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.subwarn{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:600;margin:-2px 2px 4px}
+.lnkbtn.sm{font-size:12.5px;padding:4px 9px;margin-top:4px}
+.refrow.cjob{align-items:center}.refrow.cjob .rl{flex:1;padding:0;background:none;cursor:pointer}.refrow.cjob .rl small{white-space:normal}
+.refrow.cjob .rr{display:flex;flex-direction:column;align-items:flex-end}
+.cjrow{width:100%;align-items:center;text-align:left}.cjrow .rl{flex:1}
+.fsec{font-size:12.5px;font-weight:600;color:var(--label2);text-transform:uppercase;letter-spacing:.04em;margin:18px 4px 6px}
+.morelist .row{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;font-size:16px;font-weight:500}.morelist .row .ni{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--nc);color:#fff;flex:none}.morelist .row .ni svg{width:18px;height:18px;stroke:#fff}
+.morelist .row em{margin-left:auto;font-style:normal;background:var(--p1);color:#fff;font-size:12px;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
 .gantt{background:var(--card);border-radius:14px;padding:6px 0;position:relative}
 .gticks{position:relative;height:22px;margin:0 14px 4px;border-bottom:.5px solid var(--sep)}.gticks span{position:absolute;top:4px;font-size:11px;color:var(--label3);font-weight:600;transform:translateX(-2px);white-space:nowrap}
 .gtoday{position:absolute;top:0;bottom:-2000px;width:2px;background:color-mix(in srgb,var(--red) 70%,transparent);z-index:1;pointer-events:none}
@@ -782,6 +792,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   <button class="navbtn" data-tab="jobs" aria-selected="false"><span class="ni" style="--nc:var(--blue)"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg></span>Jobs<em id="jobsCount"></em></button>
   <button class="navbtn" data-tab="cust" aria-selected="false"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em id="custCount" hidden></em></button>
   <button class="navbtn" data-tab="part" aria-selected="false"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em id="partCount" hidden></em></button>
+  <button class="navbtn" data-tab="crew" aria-selected="false"><span class="ni" style="--nc:#a2845e"><svg class="i" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M2.5 15h19v2.5h-19z"/><path d="M10 7.2V5h4v2.2"/></svg></span>Contractors<em class="scount" hidden></em></button>
   <button class="navbtn" data-tab="cal" aria-selected="false"><span class="ni" style="--nc:var(--orange)"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>Calendar</button>
   <button class="navbtn" data-tab="map" aria-selected="false"><span class="ni" style="--nc:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>Map</button>
   <button class="newbtn" id="addBtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New Customer</button>
@@ -820,6 +831,12 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
     <label class="searchbox" id="partSearchWrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="pq" type="search" placeholder="Search name, company, email" aria-label="Search partners"></label>
     <div class="scroll"><div class="wrap" id="pPart"></div></div>
   </section>
+  <section class="screen" id="sCrew" hidden>
+    <header class="lt"><div><h1>Contractors</h1><div class="sub" id="crewSub">Your trades and subcontractors</div></div>
+      <div class="tools"><button class="iconbtn dark" id="crewAdd" aria-label="Add contractor"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
+    <label class="searchbox"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="crq" type="search" placeholder="Search name, trade, phone" aria-label="Search contractors"></label>
+    <div class="scroll"><div class="wrap" id="pCrew"></div></div>
+  </section>
   <section class="screen" id="sCal" hidden>
     <header class="lt"><div><h1 id="calTitle">Calendar</h1></div>
       <div class="tools"><button class="pill" id="calToday">Today</button><button class="iconbtn" id="calPrev" aria-label="Previous month"><svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button><button class="iconbtn" id="calNext" aria-label="Next month"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button><button class="iconbtn" id="calExpand" aria-label="Full month view"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><button class="iconbtn dark" id="calAdd" aria-label="Add event"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
@@ -846,10 +863,9 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   <button data-tab="today" aria-selected="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/></svg>Today<em class="tcount" hidden></em></button>
   <button data-tab="leads" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5l1.5-3h5"/><path d="M5.5 5h13L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/></svg>Leads<em class="lcount" hidden></em></button>
   <button data-tab="jobs" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>Jobs</button>
-  <button data-tab="cust" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg>Customers<em class="ccount" hidden></em></button>
-  <button data-tab="part" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg>Partners<em class="pcount" hidden></em></button>
   <button data-tab="cal" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Calendar</button>
   <button data-tab="map" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Map</button>
+  <button id="moreBtn" aria-selected="false"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>More<em class="mcount" hidden></em></button>
 </nav>
 
 <div class="scrim" id="modal" hidden>
@@ -974,18 +990,56 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   </div>
 </div>
 
+<div class="scrim acct" id="moreModal" hidden>
+  <div class="sheet">
+    <header><span></span><h3>More</h3><button type="button" class="save" id="moreClose">Done</button></header>
+    <div class="body morelist"><div class="group">
+      <button class="row" data-more="cust"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em class="ccount" hidden></em></button>
+      <button class="row" data-more="part"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em class="pcount" hidden></em></button>
+      <button class="row" data-more="crew"><span class="ni" style="--nc:#a2845e"><svg class="i" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M2.5 15h19v2.5h-19z"/><path d="M10 7.2V5h4v2.2"/></svg></span>Contractors<em class="scount" hidden></em></button>
+    </div><div class="group"><button class="row" data-more="acct"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>Account & notifications</button></div></div>
+  </div>
+</div>
+
 <div class="scrim" id="subModal" hidden>
   <form class="sheet" id="subForm" novalidate>
     <header><button type="button" id="subCancel">Cancel</button><h3 id="subTitle">New Contractor</h3><button type="submit" class="save">Save</button></header>
     <div class="body">
       <div class="fg">
-        <label><span>Name</span><input id="sb-name" placeholder="Person or company" autocomplete="off"></label>
-        <label><span>Trade</span><input id="sb-trade" placeholder="Plumbing, Electrical, Tile, Painting…" list="tradeList"></label>
+        <label><span>Name</span><input id="sb-name" placeholder="Contact name" autocomplete="off"></label>
+        <label><span>Company</span><input id="sb-company" placeholder="Business name (optional)"></label>
+        <label><span>Trade</span><input id="sb-trade" placeholder="Plumbing, Electrical, Tile…" list="tradeList"></label>
+      </div>
+      <datalist id="tradeList"><option>General</option><option>Plumbing</option><option>Electrical</option><option>HVAC</option><option>Drywall</option><option>Tile</option><option>Painting</option><option>Flooring</option><option>Carpentry</option><option>Countertops</option><option>Cleaning</option><option>Demolition</option><option>Roofing</option></datalist>
+      <div class="fsec">Contact</div>
+      <div class="fg">
         <label><span>Phone</span><input id="sb-phone" type="tel" placeholder="416 555 0123"></label>
         <label><span>Email</span><input id="sb-email" type="email" placeholder="Optional"></label>
+        <label><span>Address</span><input id="sb-address" placeholder="Optional"></label>
       </div>
-      <datalist id="tradeList"><option>General</option><option>Plumbing</option><option>Electrical</option><option>HVAC</option><option>Drywall</option><option>Tile</option><option>Painting</option><option>Flooring</option><option>Carpentry</option><option>Countertops</option><option>Cleaning</option></datalist>
-      <div class="fg"><label class="ta"><span>Notes</span><textarea id="sb-notes" placeholder="Rates, how they like to be paid, HST number"></textarea></label></div>
+      <div class="xcrew">
+      <div class="fsec">Insurance</div>
+      <div class="fg">
+        <label><span>Insurer</span><input id="sb-insCompany" placeholder="Insurance company"></label>
+        <label><span>Policy #</span><input id="sb-insPolicy" placeholder="Policy number"></label>
+        <label><span>Coverage</span><input id="sb-insAmount" placeholder="$2,000,000 liability"></label>
+        <label><span>Expires</span><input id="sb-insExp" type="date"></label>
+      </div>
+      <div class="fsec">WSIB & license</div>
+      <div class="fg">
+        <label><span>WSIB #</span><input id="sb-wsib" placeholder="Account number"></label>
+        <label><span>Clearance until</span><input id="sb-wsibExp" type="date"></label>
+        <label><span>License</span><input id="sb-license" placeholder="e.g. ECRA/ESA, gas, plumbing"></label>
+      </div>
+      <div class="fsec">Payment</div>
+      <div class="fg">
+        <label><span>Rate</span><input id="sb-rate" placeholder="$45/hr, $3/sq ft, per job…"></label>
+        <label><span>Pay by</span><select id="sb-payMethod"><option value="">Choose</option><option>e-Transfer</option><option>Cheque</option><option>Cash</option><option>Bank transfer</option><option>Other</option></select></label>
+        <label><span>HST #</span><input id="sb-hst" placeholder="123456789 RT0001"></label>
+      </div>
+      </div>
+      <div class="fg"><label class="ta"><span>Notes</span><textarea id="sb-notes" placeholder="Anything worth remembering"></textarea></label></div>
+      <div id="subDelWrap" hidden style="margin-top:18px"><button type="button" class="lnkbtn red" id="subDel" style="width:100%;padding:12px">Delete Contractor</button></div>
     </div>
   </form>
 </div>
@@ -1105,7 +1159,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.27 (Oct 31) · Job Plan';
+const APP_VERSION='1.28 (Oct 31) · Contractors';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1220,7 +1274,7 @@ const authStorage={
   removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
 };
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
-let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[]};let planReady=false;let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
+let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[]};let planReady=false,crewReady=false,fileSubReady=false;const filesReady0=fl=>!fl.error;let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
 let data=db.jobs;
 let me=null,team=[],loaded=false;
 let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map(),partners:new Map(),contractors:new Map(),job_tasks:new Map()};
@@ -1236,14 +1290,16 @@ function docRow(d){return{id:d.id,job_id:d.jobId,kind:d.kind||'estimate',number:
   notes:d.notes||'',terms:d.terms||'',subtotal:Number(d.subtotal)||0,tax:Number(d.tax)||0,total:Number(d.total)||0,share_token:d.token,sent_at:nz(d.sentAt),
   ...(invReady?{credit:Number(d.credit)||0,due_date:nz(d.dueDate),paid_at:nz(d.paidAt),paid_method:nz(d.paidMethod),ref:nz(d.ref)}:{})}}
 function jtaskRow(t){return{id:t.id,job_id:t.jobId,title:t.title||'',start:nz(t.start),end:nz(t.end),contractor_id:nz(t.subId),cost:(t.cost==null||t.cost==='')?null:Number(t.cost),paid:!!t.paid,paid_at:nz(t.paidAt),done:!!t.done,notes:t.notes||'',sort:t.sort||0}}
-function subRow(c){return{id:c.id,name:c.name||'',trade:c.trade||'',phone:c.phone||'',email:c.email||'',notes:c.notes||''}}
+const SUBF=[['company','company'],['address','address'],['hst','hst'],['wsib','wsib'],['wsibExp','wsib_exp',1],['insCompany','ins_company'],['insPolicy','ins_policy'],['insAmount','ins_amount'],['insExp','ins_exp',1],['license','license'],['rate','rate'],['payMethod','pay_method']];
+function subRow(c){const o={id:c.id,name:c.name||'',trade:c.trade||'',phone:c.phone||'',email:c.email||'',notes:c.notes||''};if(crewReady)SUBF.forEach(([k,col,d])=>o[col]=d?nz(c[k]):(c[k]||''));return o}
+function subFrom(x){const o={id:x.id,name:x.name||'',trade:x.trade||'',phone:x.phone||'',email:x.email||'',notes:x.notes||''};SUBF.forEach(([k,col])=>o[k]=x[col]||'');return o}
 function setStatus(t,cls){const el=$('syncStatus');if(!el)return;el.textContent=t;el.className=cls||''}
 async function must(q){const{error}=await q;if(error)throw error}
 async function fetchAll(){
   const[j,p,e,dc,fl]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
     sb.from('documents').select('*').order('created_at'),sb.from('files').select('*').order('created_at')]);
   const[pt,pm,ps,op]=await Promise.all([sb.from('partners').select('*').order('created_at'),sb.from('partner_messages').select('*').order('at'),sb.from('app_settings').select('*').eq('key','partners'),sb.from('opportunities').select('*').order('at',{ascending:false}).limit(300)]);
-  const[jt,ct]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name')]);planReady=!jt.error&&!ct.error;
+  const[jt,ct]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name')]);planReady=!jt.error&&!ct.error;crewReady=planReady&&(ct.data.length?('ins_exp' in ct.data[0]):!(await sb.from('contractors').select('ins_exp').limit(1)).error);if(filesReady0(fl))fileSubReady=fl.data.length?('contractor_id' in fl.data[0]):!(await sb.from('files').select('contractor_id').limit(1)).error;
   partReady=!pt.error&&!pm.error;if(partReady){pset=(ps.data&&ps.data[0]&&ps.data[0].value)||{};await loadGmailStatus()}
   filesReady=!fl.error;
   if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error}
@@ -1263,7 +1319,7 @@ async function fetchAll(){
     credit:Number(x.credit)||0,dueDate:x.due_date||'',paidAt:x.paid_at||'',paidMethod:x.paid_method||'',ref:x.ref||''}));
   const partners=partReady?pt.data.map(mapPartner):[],pmsgsL=partReady?pm.data.map(mapMsg):[];
   const tasks=planReady?jt.data.map(x=>({id:x.id,jobId:x.job_id,title:x.title||'',start:x.start||'',end:x.end||'',subId:x.contractor_id||'',cost:x.cost==null?null:Number(x.cost),paid:!!x.paid,paidAt:x.paid_at||'',done:!!x.done,notes:x.notes||'',sort:x.sort||0})):[];
-  const subs=planReady?ct.data.map(x=>({id:x.id,name:x.name||'',trade:x.trade||'',phone:x.phone||'',email:x.email||'',notes:x.notes||''})):[];
+  const subs=planReady?ct.data.map(subFrom):[];
   db={jobs,events,docs,files:fl.data||[],partners,pmsgs:pmsgsL,opps:(op&&!op.error&&op.data)||[],tasks,subs};data=db.jobs;
   synced={jobs:new Map(jobs.map(r=>[r.id,JSON.stringify(jobRow(r))])),payments:new Map(payRows().map(x=>[x.id,JSON.stringify(x)])),events:new Map(events.map(x=>[x.id,JSON.stringify(evRow(x))])),documents:new Map(docs.map(x=>[x.id,JSON.stringify(docRow(x))])),partners:new Map(partners.map(x=>[x.id,JSON.stringify(partRow(x))]))};
   synced.job_tasks=new Map(tasks.map(x=>[x.id,JSON.stringify(jtaskRow(x))]));synced.contractors=new Map(subs.map(x=>[x.id,JSON.stringify(subRow(x))]));
@@ -1311,7 +1367,7 @@ async function refreshFromServer(force){
   if(selId&&job(selId)){const ids=newIn.filter(m=>m.jobId===selId);if(ids.length&&document.visibilityState==='visible')markLeadRead(job(selId))}
   if(partSel&&part(partSel)){const ids=newIn.filter(m=>m.partnerId===partSel);if(ids.length&&document.visibilityState==='visible'){ids.forEach(m=>m.unread=false);sb.from('partner_messages').update({unread:false}).in('id',ids.map(m=>m.id)).then(()=>{},()=>{});const g=ids.map(m=>m.gmailId).filter(Boolean);if(g.length&&gmailSt.connected)gm('read',{gmail_ids:g}).catch(()=>{})}}
   locateMissing();
-  render();if(selId){if(job(selId)){if(leadComposing())refreshLeadThread(job(selId));else openDetail(selId)}else closeDetail()}else if(custSel)openCustomer(custSel);else if(partSel){if(part(partSel))refreshPartnerView();else{partSel=null;closeDetail()}}
+  render();if(selId){if(job(selId)){if(leadComposing())refreshLeadThread(job(selId));else openDetail(selId)}else closeDetail()}else if(custSel)openCustomer(custSel);else if(partSel){if(part(partSel))refreshPartnerView();else{partSel=null;closeDetail()}}else if(subSel){if(sub(subSel))openContractor(subSel);else closeDetail()}
 }
 const me_name=()=>me?.name||(me?.email||'').split('@')[0];
 
@@ -2195,7 +2251,7 @@ function taskHtml(t,pct,span){const st=taskState(t),c=sub(t.subId),open=openTask
     ${open?`<div class="ped">
       <label><span>Task</span><input data-f="title" value="${esc(t.title)}" placeholder="e.g. Tile shower walls"></label>
       <div class="pedrow"><label><span>Start</span><input type="date" data-f="start" value="${a||''}"></label><label><span>Finish</span><input type="date" data-f="end" value="${t.end||''}"></label></div>
-      <label><span>Contractor</span><select data-f="subId"><option value="">Our team / not set</option>${(db.subs||[]).slice().sort((x,y)=>x.name.localeCompare(y.name)).map(s=>`<option value="${s.id}"${s.id===t.subId?' selected':''}>${esc(s.name)}${s.trade?' · '+esc(s.trade):''}</option>`).join('')}<option value="__new">+ New contractor…</option></select></label>
+      <label><span>Contractor</span><select data-f="subId"><option value="">Our team / not set</option>${(db.subs||[]).slice().sort((x,y)=>x.name.localeCompare(y.name)).map(s=>`<option value="${s.id}"${s.id===t.subId?' selected':''}>${esc(s.name)}${s.trade?' · '+esc(s.trade):''}</option>`).join('')}<option value="__new">+ New contractor…</option></select></label>${c?`<div class="subwarn">${crewReady&&['expired','soon','missing'].includes(docSt(c.insExp))?`<span style="color:${DST[docSt(c.insExp)].c}">⚠︎ Insurance ${DST[docSt(c.insExp)].n.toLowerCase()}</span>`:''}<button type="button" class="lnkbtn sm" data-subview="${c.id}">View ${esc(c.name.split(' ')[0])}</button></div>`:''}
       <div class="pedrow"><label><span>Pay them</span><input data-f="cost" inputmode="decimal" placeholder="$0" value="${t.cost??''}"></label><label class="sw"><span>Paid</span><input type="checkbox" data-f="paid"${t.paid?' checked':''}></label></div>
       <label class="ta"><span>Notes</span><textarea data-f="notes" rows="2" placeholder="Materials, access, details">${esc(t.notes||'')}</textarea></label>
       <div class="pedact"><button class="btn gray" data-tdel="${t.id}">Delete</button><button class="btn" data-tclose="${t.id}">Done</button></div></div>`:''}</div>`}
@@ -2204,6 +2260,7 @@ function bindPlan(){const r=planFor,B=$('planBody');
   $('plAdd').onclick=()=>{const ts=jtasks(r),last=ts.at(-1),s=last?.end||jStart(r)||today();const t={id:uid(),jobId:r.id,title:'',start:s,end:s,subId:'',cost:null,paid:false,paidAt:'',done:false,notes:'',sort:ts.length};db.tasks.push(t);openTask=t.id;save();paintPlan();setTimeout(()=>{const i=document.querySelector(`[data-task="${t.id}"] [data-f="title"]`);if(i)i.focus()},80)};
   if($('plTpl'))$('plTpl').onclick=()=>{if(!jStart(r)||!jEnd(r)){openSched(r,false);return}const n=buildFromTemplate(r);save();paintPlan();render();toast(`${n} tasks added`)};
   $('plSub').onclick=()=>openSub(null);
+  B.querySelectorAll('[data-subview]').forEach(b=>b.onclick=()=>{const id=b.dataset.subview;hideModal('planModal');openTask=null;setTab('crew');openContractor(id)});
   $('plScope').oninput=e=>{r.ms.plan=Object.assign(r.ms.plan||{},{scope:e.target.value});save()};
   B.querySelectorAll('[data-topen]').forEach(b=>b.onclick=()=>{openTask=openTask===b.dataset.topen?null:b.dataset.topen;paintPlan()});
   B.querySelectorAll('[data-tclose]').forEach(b=>b.onclick=()=>{openTask=null;paintPlan();render()});
@@ -2226,24 +2283,106 @@ $('planModal').onclick=e=>{if(e.target.id==='planModal')$('planClose').click()};
 
 /* contractors */
 let subEditing=null,subForTask=null;
-function openSub(c,task){subEditing=c||null;subForTask=task||null;['name','trade','phone','email','notes'].forEach(k=>$('sb-'+k).value=c?.[k]||'');$('subTitle').textContent=c?'Edit Contractor':'New Contractor';showModal('subModal');setTimeout(()=>$('sb-name').focus(),250)}
+const SUBK=['name','company','trade','phone','email','address','insCompany','insPolicy','insAmount','insExp','wsib','wsibExp','license','rate','payMethod','hst','notes'];
+function openSub(c,task){subEditing=c||null;subForTask=task||null;SUBK.forEach(k=>$('sb-'+k).value=c?.[k]||'');$('subTitle').textContent=c?'Edit Contractor':'New Contractor';
+  document.querySelector('#subForm .xcrew').hidden=!crewReady;$('subDelWrap').hidden=!c;$('subDel').textContent='Delete Contractor';$('subDel').classList.remove('sure');showModal('subModal');setTimeout(()=>{if(!c)$('sb-name').focus()},250)}
 $('subCancel').onclick=()=>hideModal('subModal');
 $('subModal').onclick=e=>{if(e.target.id==='subModal')hideModal('subModal')};
-$('subForm').onsubmit=e=>{e.preventDefault();const v={};['name','trade','phone','email','notes'].forEach(k=>v[k]=$('sb-'+k).value.trim());if(!v.name){toast('Add a name');return}
+$('subForm').onsubmit=e=>{e.preventDefault();const v={};SUBK.forEach(k=>v[k]=$('sb-'+k).value.trim());if(!v.name){toast('Add a name');return}
   let c=subEditing;if(c)Object.assign(c,v);else{c=Object.assign({id:uid()},v);db.subs.push(c)}
-  if(subForTask){subForTask.subId=c.id;openTask=subForTask.id}save();hideModal('subModal');if(planFor&&!$('planModal').hidden)paintPlan();toast('Contractor saved')};
+  if(subForTask){subForTask.subId=c.id;openTask=subForTask.id}save();hideModal('subModal');if(planFor&&!$('planModal').hidden)paintPlan();
+  if(subSel===c.id)openContractor(c.id);if(tab==='crew')renderCrew();renderCrewCount();toast('Contractor saved')};
+$('subDel').onclick=()=>{const c=subEditing,b=$('subDel');if(!c)return;const n=(db.tasks||[]).filter(t=>t.subId===c.id).length;
+  if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent=n?`Delete? ${n} task${n>1?'s':''} will show no contractor`:'Tap again to delete';return}
+  (db.tasks||[]).forEach(t=>{if(t.subId===c.id)t.subId=''});db.subs=db.subs.filter(x=>x.id!==c.id);save();hideModal('subModal');if(subSel===c.id){subSel=null;closeDetail()}renderCrew();renderCrewCount();toast('Contractor deleted')};
+
+/* ---------- contractors ---------- */
+const PAYM=['e-Transfer','Cheque','Cash','Bank transfer','Other'];
+function docSt(exp){if(!exp)return 'missing';const n=dayDiff(exp,today());if(n<0)return 'expired';if(n<=30)return 'soon';return 'ok'}
+const DST={ok:{n:'Valid',c:'var(--green)'},soon:{n:'Expires soon',c:'var(--orange)'},expired:{n:'Expired',c:'var(--red)'},missing:{n:'Not on file',c:'var(--label3)'}};
+function subStats(c){const ts=(db.tasks||[]).filter(t=>t.subId===c.id&&job(t.jobId));
+  const byJob=new Map();ts.forEach(t=>{if(!byJob.has(t.jobId))byJob.set(t.jobId,[]);byJob.get(t.jobId).push(t)});
+  const total=ts.reduce((s,t)=>s+(+t.cost||0),0),paidT=ts.filter(t=>t.paid).reduce((s,t)=>s+(+t.cost||0),0);
+  const T=today(),active=ts.filter(t=>!t.done&&t.start&&t.start<=T&&(t.end||t.start)>=T),next=ts.filter(t=>!t.done&&t.start>T).sort((a,b)=>a.start.localeCompare(b.start));
+  return{ts,byJob,total,paid:paidT,owed:total-paidT,active,next}}
+const subWorst=c=>{const a=docSt(c.insExp),b=docSt(c.wsibExp);const r={expired:3,soon:2,missing:1,ok:0};return r[a]>=r[b]?a:b};
+let crewQuery='',crewTrade='all',subSel=null;
+function renderCrewCount(){const n=(db.subs||[]).filter(c=>['expired','soon'].includes(docSt(c.insExp))&&subStats(c).ts.some(t=>!t.done)).length;document.querySelectorAll('.scount').forEach(x=>{x.textContent=n;x.hidden=!n;x.classList.toggle('hot',n>0)})}
+function renderCrew(){
+  const S=db.subs||[],q=crewQuery.toLowerCase();
+  if(!planReady){$('pCrew').innerHTML='<div class="pempty"><b>One-time setup needed</b><p>Run the job plan setup step, then contractors appear here.</p></div>';return}
+  const trades=[...new Set(S.map(c=>c.trade).filter(Boolean))].sort();
+  const list=S.filter(c=>(crewTrade==='all'||c.trade===crewTrade)&&(!q||[c.name,c.company,c.trade,c.phone,c.email,c.notes].join(' ').toLowerCase().includes(q)))
+    .map(c=>({c,st:subStats(c)})).sort((a,b)=>(b.st.active.length-a.st.active.length)||(b.st.owed-a.st.owed)||a.c.name.localeCompare(b.c.name));
+  const all=S.map(c=>subStats(c));
+  $('crewSub').textContent=`${S.length} contractor${S.length===1?'':'s'} · ${all.filter(x=>x.active.length).length} working today`;
+  $('pCrew').innerHTML=`<div class="pstats"><div class="mt"><b>${S.length}</b><span>Contractors</span></div><div class="mt"><b>${all.filter(x=>x.active.length).length}</b><span>On site today</span></div><div class="mt"><b>${kmoney(all.reduce((t,x)=>t+x.owed,0))}</b><span>Still to pay</span></div><div class="mt"><b>${S.filter(c=>['expired','soon','missing'].includes(docSt(c.insExp))).length}</b><span>Insurance to check</span></div></div>
+    ${trades.length>1?`<div class="cfil"><button data-trade="all" aria-pressed="${crewTrade==='all'}">All<em>${S.length}</em></button>${trades.map(t=>`<button data-trade="${esc(t)}" aria-pressed="${crewTrade===t}">${esc(t)}<em>${S.filter(c=>c.trade===t).length}</em></button>`).join('')}</div>`:''}
+    ${list.length?`<div class="group">${list.map(({c,st})=>{const ins=docSt(c.insExp);
+      return `<button class="row crow${subSel===c.id?' sel':''}" data-sub="${c.id}"><span class="av" style="--c:var(--s-visit)">${esc(initials(c.name))}</span>
+        <span class="rt"><b>${esc(c.name)}${c.trade?`<span class="stag" style="--c:var(--s-visit)">${esc(c.trade)}</span>`:''}</b><span>${esc([c.company,c.phone].filter(Boolean).join(' · ')||'No contact info yet')}</span>
+          <span class="needs">${st.active.length?`<span class="pst" style="--c:var(--s-won)"><i></i>On site · ${esc(job(st.active[0].jobId)?.name||'')}</span>`:st.next.length?`<span class="pst" style="--c:var(--blue)"><i></i>Next ${fmtDate(st.next[0].start)}</span>`:''}<span class="pst" style="--c:${DST[ins].c}"><i></i>Insurance ${DST[ins].n.toLowerCase()}</span>${st.owed>0?`<span class="pst" style="--c:var(--orange)"><i></i>${money(st.owed)} to pay</span>`:''}</span></span>
+        <span class="rv"><em>${st.byJob.size} job${st.byJob.size===1?'':'s'}</em>${ico('chev')}</span></button>`}).join('')}</div>`
+      :`<div class="pempty">${ico('meet','i big')}<b>${S.length?'No contractors match':'No contractors yet'}</b><p>Add the trades you work with: plumber, electrician, tiler, painter. Then pick them on each task in a job plan.</p></div>`}`;
+}
+$('pCrew').addEventListener('click',e=>{const t=e.target.closest('[data-trade]');if(t){crewTrade=t.dataset.trade;renderCrew();return}const r=e.target.closest('[data-sub]');if(r)openContractor(r.dataset.sub)});
+$('crq').oninput=e=>{crewQuery=e.target.value.trim();renderCrew()};
+$('crewAdd').onclick=()=>{if(!planReady){toast('Job plan setup is not finished yet');return}openSub(null)};
+function openContractor(id){const c=sub(id);if(!c)return;subSel=id;selId=null;custSel=null;partSel=null;
+  const st=subStats(c),ph=digits(c.phone),ins=docSt(c.insExp),ws=docSt(c.wsibExp);
+  const jobs=[...st.byJob.entries()].map(([jid,ts])=>{const r=job(jid);const a=ts.map(t=>t.start).filter(Boolean).sort()[0],b=ts.map(t=>t.end||t.start).filter(Boolean).sort().at(-1);
+    const tot=ts.reduce((s,t)=>s+(+t.cost||0),0),pd=ts.filter(t=>t.paid).reduce((s,t)=>s+(+t.cost||0),0);return{r,ts,a,b,tot,pd}}).sort((x,y)=>String(y.a).localeCompare(String(x.a)));
+  const v=$('vDetail');
+  v.innerHTML=`<div class="navbar"><button id="cbBack">${ico('back')}${isPhone()?'Contractors':'Close'}</button><button id="cbEdit">Edit</button></div>
+  <div class="scroll">
+    <div class="cbig"><span class="av" style="--c:var(--s-visit)">${esc(initials(c.name))}</span><div><h2>${esc(c.name)}</h2><p>${esc([c.company,c.trade].filter(Boolean).join(' · ')||'Contractor')}</p>${c.rate?`<p class="pmail">Rate: ${esc(c.rate)}</p>`:''}</div></div>
+    <div class="acts">
+      <a class="act primary" href="${ph?'tel:+1'+ph:'#'}" aria-disabled="${!ph}">${ico('call')}Call</a>
+      <a class="act" href="${ph?'sms:+1'+ph:'#'}" aria-disabled="${!ph}">${ico('msg')}Text</a>
+      <a class="act" href="${c.email?'mailto:'+esc(c.email):'#'}" aria-disabled="${!c.email}">${ico('mail')}Email</a>
+      <a class="act" target="_blank" rel="noopener" href="https://wa.me/1${ph}" aria-disabled="${!ph}">${ico('msg')}WhatsApp</a>
+    </div>
+    <div class="pstats three"><div class="mt"><b>${st.byJob.size}</b><span>Jobs</span></div><div class="mt"><b>${kmoney(st.total)}</b><span>Total earned</span></div><div class="mt"><b style="color:${st.owed>0?'var(--orange)':'inherit'}">${kmoney(st.owed)}</b><span>Still to pay</span></div></div>
+    <div class="block"><div class="label">Insurance & documents</div><div class="group info">
+      <div class="r"><span>Liability insurance</span><b><span class="dstat" style="--c:${DST[ins].c}">${DST[ins].n}</span>${c.insExp?` until ${longDate(c.insExp)}`:''}</b></div>
+      ${c.insCompany||c.insPolicy||c.insAmount?`<div class="r"><span>Insurer</span><b>${esc([c.insCompany,c.insPolicy&&('Policy '+c.insPolicy),c.insAmount].filter(Boolean).join(' · '))}</b></div>`:''}
+      <div class="r"><span>WSIB clearance</span><b><span class="dstat" style="--c:${DST[ws].c}">${DST[ws].n}</span>${c.wsibExp?` until ${longDate(c.wsibExp)}`:''}${c.wsib?' · #'+esc(c.wsib):''}</b></div>
+      <div class="r"><span>License</span><b>${esc(c.license)||'—'}</b></div>
+      <div class="r"><span>HST number</span><b>${esc(c.hst)||'—'}</b></div>
+      <div class="r"><span>How to pay</span><b>${esc(c.payMethod)||'—'}</b></div>
+    </div></div>
+    ${filesBlock(subFiles(c.id),'attachSub').replace('Attach the contract, photos, permits or drawings.','Attach their insurance certificate, WSIB clearance, license or void cheque.')}
+    ${st.active.length||st.next.length?`<div class="block"><div class="label">Coming up</div><div class="group">${[...st.active,...st.next.slice(0,6)].map(t=>`<button class="refrow cjrow" data-cjob="${t.jobId}" data-ctask="${t.id}"><span class="rl"><b>${esc(t.title)} · ${esc(job(t.jobId)?.name||'')}</b><small>${fmtRange(t.start,t.end||t.start)}${taskState(t)==='now'?' · on site now':''}</small></span>${ico('chev')}</button>`).join('')}</div></div>`:''}
+    <div class="block"><div class="label">Jobs worked <span>${jobs.length}</span></div>
+      ${jobs.length?`<div class="group">${jobs.map(j=>`<div class="refrow cjob"><button class="rl" data-cjob="${j.r.id}"><b>${esc(j.r.name)}</b><small>${esc(j.r.city||'')}${j.a?' · '+fmtRange(j.a,j.b):''} · ${esc(j.ts.map(t=>t.title).join(', '))}</small></button>
+        <span class="rr"><b>${j.tot?money(j.tot):'—'}</b><small style="color:${j.tot&&j.pd>=j.tot?'var(--green)':j.tot?'var(--orange)':'var(--label3)'}">${j.tot?(j.pd>=j.tot?'Paid':`${money(j.tot-j.pd)} to pay`):'No amount'}</small>${j.tot&&j.pd<j.tot?`<button class="lnkbtn sm" data-cpay="${j.r.id}">Mark paid</button>`:''}</span></div>`).join('')}</div>`
+      :`<p class="pnone left">No jobs yet. Pick ${esc(c.name.split(' ')[0])} on a task in a job plan.</p>`}</div>
+    ${c.notes?`<div class="block"><div class="label">Notes</div>${renderNotes(c.notes)}</div>`:''}
+  </div>`;
+  $('cbBack').onclick=()=>{subSel=null;closeDetail()};$('cbEdit').onclick=()=>openSub(c);
+  if($('attachSub'))$('attachSub').onclick=()=>pickFiles('sub:'+c.id);
+  v.querySelectorAll('[data-cjob]').forEach(b=>b.onclick=()=>{const jid=b.dataset.cjob,tid=b.dataset.ctask;subSel=null;if(isLead(job(jid)))setTab('leads');else setTab('jobs');openDetail(jid,true);if(tid)setTimeout(()=>openPlan(job(jid),tid),150)});
+  v.querySelectorAll('[data-cpay]').forEach(b=>b.onclick=e=>{e.stopPropagation();const jid=b.dataset.cpay;let amt=0;(db.tasks||[]).forEach(t=>{if(t.subId===c.id&&t.jobId===jid&&!t.paid&&t.cost){t.paid=true;t.paidAt=today();amt+=+t.cost}});
+    const r=job(jid);if(r)log(r,`Paid ${c.name} ${money(amt)}`);save();openContractor(c.id);renderCrew();toast(`${money(amt)} marked as paid`)});
+  v.classList.add('open');if(tab==='crew')renderCrew();
+}
+const subFiles=id=>(db.files||[]).filter(f=>f.contractor_id===id).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
 
 /* ---------- tabs ---------- */
 function setTab(t){tab=t;
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  ['today','leads','jobs','cust','part','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
+  $('moreBtn').setAttribute('aria-selected',['cust','part','crew'].includes(t));
+  ['today','leads','jobs','cust','part','crew','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',crew:'sCrew',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
   if(t!=='map'&&isPhone()&&selId&&false)closeDetail();
   render();
   if(t==='part'&&gmailSt.connected&&Date.now()-lastCheck>60000)checkMail(false);
   if(t==='map'&&map){setTimeout(()=>{map.invalidateSize();if(!mapFitted){mapFitted=true;fit()}},30)}
 }
 let mapFitted=false;
-document.addEventListener('click',e=>{const b=e.target.closest('.side [data-tab],.tabbar [data-tab]');if(!b)return;if(isPhone()&&selId)closeDetail();setTab(b.dataset.tab)});
+document.addEventListener('click',e=>{const b=e.target.closest('.side [data-tab],.tabbar [data-tab]');if(!b)return;if(isPhone()&&(selId||custSel||partSel||subSel))closeDetail();setTab(b.dataset.tab)});
+$('moreBtn').onclick=()=>showModal('moreModal');$('moreClose').onclick=()=>hideModal('moreModal');$('moreModal').onclick=e=>{if(e.target.id==='moreModal'){hideModal('moreModal');return}
+  const b=e.target.closest('[data-more]');if(!b)return;hideModal('moreModal');const k=b.dataset.more;if(k==='acct'){setTimeout(()=>$('acctBtn').click(),280);return}if(isPhone()&&(selId||custSel||partSel||subSel))closeDetail();setTab(k)};
+function renderMoreCount(){const v=sel=>{const e=document.querySelector(sel);return e&&!e.hidden?(+e.textContent||0):0};const n=v('#custCount')+v('#partCount')+v('.side .scount');document.querySelectorAll('.mcount').forEach(x=>{x.textContent=n;x.hidden=!n})}
 
 /* ---------- detail ---------- */
 function setStep(r,k,on,date){
@@ -2373,7 +2512,7 @@ function openDetail(id,pan){
   v.classList.add('open');
   renderList();drawPins();renderCards();
 }
-function closeDetail(){selId=null;custSel=null;partSel=null;inlinePay=null;$('vDetail').classList.remove('open');render()}
+function closeDetail(){selId=null;custSel=null;partSel=null;subSel=null;inlinePay=null;$('vDetail').classList.remove('open');render()}
 
 /* ---------- map ---------- */
 let map=null;const markers={},seen=new Set();
@@ -2543,28 +2682,28 @@ const fmtSize=n=>!n?'':n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/10485
 const isImgFile=f=>/^image\//.test(f.mime||'')||/\.(jpe?g|png|heic|gif|webp)$/i.test(f.name||'');
 function guessLabel(file){const n=(file.name||'').toLowerCase();
   if(/contract|agreement|signed/.test(n))return 'Contract';if(/estimate|quote|quotation|proposal/.test(n))return 'Estimate';if(/invoice|receipt/.test(n))return /receipt/.test(n)?'Receipt':'Invoice';
-  if(/permit/.test(n))return 'Permit';if(/drawing|plan|dwg|layout/.test(n))return 'Drawing';if(/^image\//.test(file.type)||/\.(jpe?g|png|heic|webp)$/.test(n))return 'Photo';return ''}
+  if(/insur|liabil|coi\b|certificate/.test(n))return 'Insurance';if(/wsib|clearance/.test(n))return 'WSIB';if(/licen[cs]e/.test(n))return 'License';if(/void|cheque|direct.?deposit/.test(n))return 'Banking';if(/permit/.test(n))return 'Permit';if(/drawing|plan|dwg|layout/.test(n))return 'Drawing';if(/^image\//.test(file.type)||/\.(jpe?g|png|heic|webp)$/.test(n))return 'Photo';return ''}
 function fileRow(f,jobTag){return `<div class="frow"><button class="fopen" data-file="${f.id}"><span class="gl" style="--c:var(${isImgFile(f)?'--s-visit':'--s-sent'})">${ico(isImgFile(f)?'img':'quote')}</span><span class="rt"><b>${esc(f.name)}</b><span>${f.label?`<span class="ftag">${esc(f.label)}</span>`:''}${fmtSize(f.size)}${f.created_at?' · '+fmtDate(ld(f.created_at)):''}${jobTag?' · '+esc(jobTag):''}</span></span></button><button class="fdel" data-fdel="${f.id}" aria-label="Delete ${esc(f.name)}">×</button></div>`}
 function filesBlock(list,btnId,jobTagFn){return `<div class="block"><div class="label">Files <span>${filesReady?`<button id="${btnId}">+ Attach File</button>`:''}</span></div>
   <div class="group" id="${btnId}List">${!filesReady?'<div class="empty" style="padding:16px"><b style="font-size:15px">Files not set up yet</b>Run the files setup step to attach documents.</div>':list.length?list.map(f=>fileRow(f,jobTagFn?jobTagFn(f):'')).join(''):'<div class="empty" style="padding:16px"><b style="font-size:15px">No files yet</b>Attach the contract, photos, permits or drawings.</div>'}</div></div>`}
 let attachJobId=null;
-function pickFiles(jobId){attachJobId=jobId;const i=$('fileInput');i.value='';i.click()}
-$('fileInput').onchange=async e=>{const list=[...e.target.files];const jobId=attachJobId;if(!list.length||!jobId)return;const r=job(jobId);
+function pickFiles(jobId){if(String(jobId).startsWith('sub:')&&!fileSubReady){toast('Contractor files need the latest setup step');return}attachJobId=jobId;const i=$('fileInput');i.value='';i.click()}
+$('fileInput').onchange=async e=>{const list=[...e.target.files];const target=attachJobId;if(!list.length||!target)return;const subId=String(target).startsWith('sub:')?target.slice(4):null,jobId=subId?null:target;const r=jobId?job(jobId):null;
   const box=document.querySelector('[id$="List"].group')||null;
   let ok=0;
   for(let k=0;k<list.length;k++){const f=list[k];
     if(f.size>50*1048576){toast(`${f.name} is larger than 50 MB`);continue}
     toast(list.length>1?`Uploading ${k+1} of ${list.length}…`:`Uploading ${f.name}…`);
     const safeName=f.name.normalize('NFKD').replace(/[^\w.\-]+/g,'_').slice(-80)||'file';
-    const path=`${jobId}/${Date.now()}-${Math.random().toString(36).slice(2,7)}-${safeName}`;
+    const path=`${subId?'contractors/'+subId:jobId}/${Date.now()}-${Math.random().toString(36).slice(2,7)}-${safeName}`;
     const up=await sb.storage.from('job-files').upload(path,f,{contentType:f.type||undefined,upsert:false});
     if(up.error){console.error(up.error);toast(`Could not upload ${f.name}`);continue}
-    const row={id:uid(),job_id:jobId,name:f.name,path,size:f.size,mime:f.type||'',label:guessLabel(f),uploaded_by:me?.email||''};
+    const row={id:uid(),job_id:jobId,...(subId?{contractor_id:subId}:{}),name:f.name,path,size:f.size,mime:f.type||'',label:guessLabel(f),uploaded_by:me?.email||''};
     const ins=await sb.from('files').insert(row);
     if(ins.error){console.error(ins.error);await sb.storage.from('job-files').remove([path]);toast(`Could not save ${f.name}`);continue}
     db.files.push(Object.assign({created_at:new Date().toISOString()},row));ok++;
     if(r)log(r,`File attached: ${f.name}`)}
-  if(ok){save();render();if(selId)openDetail(selId);else if(custSel)openCustomer(custSel);toast(ok>1?`${ok} files attached`:'File attached')}};
+  if(ok){save();render();if(selId)openDetail(selId);else if(custSel)openCustomer(custSel);else if(subSel)openContractor(subSel);toast(ok>1?`${ok} files attached`:'File attached')}};
 async function openFileById(id){const f=(db.files||[]).find(x=>x.id===id);if(!f)return;const w=window.open('about:blank','_blank');
   const{data,error}=await sb.storage.from('job-files').createSignedUrl(f.path,3600);
   if(error||!data?.signedUrl){if(w)w.close();toast('Could not open the file');return}
@@ -2573,7 +2712,7 @@ async function deleteFileById(id,btn){const f=(db.files||[]).find(x=>x.id===id);
   if(!btn.classList.contains('sure')){btn.classList.add('sure');btn.textContent='Delete';setTimeout(()=>{if(btn.isConnected){btn.classList.remove('sure');btn.textContent='×'}},3000);return}
   const del=await sb.from('files').delete().eq('id',id);if(del.error){toast('Could not delete');return}
   await sb.storage.from('job-files').remove([f.path]);db.files=db.files.filter(x=>x.id!==id);const r=job(f.job_id);if(r){log(r,`File removed: ${f.name}`);save()}
-  render();if(selId)openDetail(selId);else if(custSel)openCustomer(custSel);toast('File deleted')}
+  render();if(selId)openDetail(selId);else if(custSel)openCustomer(custSel);else if(subSel)openContractor(subSel);toast('File deleted')}
 $('vDetail').addEventListener('click',e=>{const o=e.target.closest('[data-file]');if(o){openFileById(o.dataset.file);return}
   const d=e.target.closest('[data-fdel]');if(d)deleteFileById(d.dataset.fdel,d)});
 
@@ -2771,8 +2910,8 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 /* ---------- misc ---------- */
 let tt;function toast(m,canUndo,long){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.toggle('long',!!long||m.length>60);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:long?6500:2600)}
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];db.files=db.files||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('subModal').hidden)hideModal('subModal');else if(!$('schedModal').hidden)hideModal('schedModal');else if(!$('planModal').hidden)$('planClose').click();else if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel)closeDetail()}});
-function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();if(tab==='cal')renderCal();drawPins();renderCards();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('moreModal').hidden)hideModal('moreModal');else if(!$('subModal').hidden)hideModal('subModal');else if(!$('schedModal').hidden)hideModal('schedModal');else if(!$('planModal').hidden)$('planClose').click();else if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel||subSel)closeDetail()}});
+function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();renderCrewCount();if(tab==='crew')renderCrew();renderMoreCount();if(tab==='cal')renderCal();drawPins();renderCards();
   if('setAppBadge' in navigator&&loaded){const n=data.filter(leadNeeds).length+(db.partners||[]).filter(pUnread).length;(n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{})}}
 let locating=false;
 async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
