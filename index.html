@@ -533,6 +533,23 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .pstats.four{margin:0}
 .pstats.three{grid-template-columns:repeat(3,1fr)}
 .dstat{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--c)}.dstat::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.plseg{margin:0 0 10px;max-width:280px}
+.pcal{background:var(--card);border-radius:14px;padding:8px;margin-bottom:12px}
+.pcw{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}.pcw span{text-align:center;font-size:11px;font-weight:600;color:var(--label3);text-transform:uppercase}
+.pcg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.pcd{min-height:88px;border-radius:9px;background:var(--card2);padding:4px 3px;display:flex;flex-direction:column;gap:2px;text-align:left;align-items:stretch;overflow:hidden;position:relative;border:1.5px solid transparent}
+.pcd.out{background:transparent;opacity:.35}.pcd.sun:not(.out){background:repeating-linear-gradient(135deg,var(--card2) 0 6px,transparent 6px 12px)}
+.pcd.sel{border-color:var(--blue)}.pcd.today .pcn{color:#fff;background:var(--red);border-radius:10px;padding:0 6px;align-self:flex-start}
+.pcn{font-size:13px;font-weight:700;color:var(--label);line-height:20px;padding-left:3px}.pcn small{font-size:10px;font-weight:700;color:var(--red);margin-right:3px;text-transform:uppercase}
+.pchip{display:block;font-style:normal;height:17px;border-radius:4px;background:color-mix(in srgb,var(--c) 22%,transparent);border-left:3px solid var(--c);padding:0 3px;overflow:hidden}
+.pchip em{font-style:normal;font-size:10.5px;font-weight:600;line-height:17px;white-space:nowrap;color:var(--label)}.pchip.done{opacity:.45}.pchip.done em{text-decoration:line-through}
+.pmore{font-size:10.5px;font-weight:600;color:var(--label2);padding-left:3px}
+.pday{margin-bottom:6px}.pdh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 4px 8px}.pdh b{display:block;font-size:17px}.pdh small{color:var(--label2);font-size:13px}
+.pdnav{display:flex;gap:6px}.pdnav .iconbtn:disabled{opacity:.3}
+.pdt{display:flex;align-items:center;gap:10px;padding:10px 14px;position:relative}.pdt+.pdt{border-top:.5px solid var(--sep)}.pdt>i{width:4px;align-self:stretch;border-radius:2px;flex:none}
+.pdx{flex:1;min-width:0;text-align:left}.pdx b{display:block;font-weight:600}.pdx b.done{text-decoration:line-through;color:var(--label2)}.pdx small{display:block;color:var(--label2);font-size:12.5px}
+.pdadd{color:var(--blue);font-weight:600;justify-content:center;border-top:.5px solid var(--sep)}
+@media (max-width:760px){.pcd{min-height:64px;padding:3px 2px}.pchip{height:7px;background:var(--c);border-left-width:0;padding:0}.pchip em{display:none}.pchip.st{border-radius:4px}.pcal{padding:6px;margin-left:-4px;margin-right:-4px}.pcn{font-size:12px}}
 .subwarn{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:600;margin:-2px 2px 4px}
 .lnkbtn.sm{font-size:12.5px;padding:4px 9px;margin-top:4px}
 .refrow.cjob{align-items:center}.refrow.cjob .rl{flex:1;padding:0;background:none;cursor:pointer}.refrow.cjob .rl small{white-space:normal}
@@ -1159,7 +1176,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.28 (Oct 31) · Contractors';
+const APP_VERSION='1.29 (Oct 31) · Plan calendar';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -2230,9 +2247,10 @@ function paintPlan(){const r=planFor;if(!r)return;const ts=jtasks(r),s=jStart(r)
     <div class="phead"><div><h2>${esc(r.name)}</h2><p>${esc([r.address,r.city].filter(Boolean).join(', '))} · ${esc(r.type)}</p></div>
       <button class="pdates" id="plDates">${ico('calp')}<span><b>${s?longDate(s):'Set start'} → ${e?longDate(e):'set finish'}</b><small>${s&&e?workDays(s,e).length+' work days':'Tap to schedule'}</small></span></button></div>
     <div class="pstats four"><div class="mt"><b>${ts.length?Math.round(dn/ts.length*100):0}%</b><span>${dn}/${ts.length} done</span></div><div class="mt"><b>${s&&T<s?dayDiff(s,T):s&&e&&T<=e?dayDiff(e,T):0}</b><span>${s&&T<s?'days to start':s&&e&&T<=e?'days left':'days'}</span></div><div class="mt"><b>${kmoney(cost)}</b><span>Contractors</span></div><div class="mt"><b>${kmoney(cost-paidC)}</b><span>Still to pay</span></div></div>
-    <div class="label">Timeline <span><button id="plAdd">+ Add task</button>${!ts.length?'&nbsp;&nbsp;<button id="plTpl">Use template</button>':''}</span></div>
-    <div class="gantt">${s&&e?`<div class="gticks">${ticks.map(d=>`<span style="left:${pct(d)}%">${new Date(d+'T12:00').toLocaleDateString('en-CA',{month:'short',day:'numeric'})}</span>`).join('')}${T>=s&&T<=e?`<i class="gtoday" style="left:${pct(T)+50/span}%"></i>`:''}</div>`:''}
-      ${ts.length?ts.map(t=>taskHtml(t,pct,span)).join(''):`<div class="empty" style="padding:22px"><b style="font-size:15px">No tasks yet</b>Use the template or add your own tasks: demolition, plumbing, tile, paint…</div>`}</div>
+    <div class="label">${planView==='cal'?'Calendar':'Timeline'} <span><button id="plAdd">+ Add task</button>${!ts.length?'&nbsp;&nbsp;<button id="plTpl">Use template</button>':''}</span></div>
+    <div class="seg plseg" id="plView"><button data-pv="timeline" aria-pressed="${planView!=='cal'}">Timeline</button><button data-pv="cal" aria-pressed="${planView==='cal'}">Calendar</button></div>
+    ${planView==='cal'?planCal(r,ts,s,e,T):`<div class="gantt">${s&&e?`<div class="gticks">${ticks.map(d=>`<span style="left:${pct(d)}%">${new Date(d+'T12:00').toLocaleDateString('en-CA',{month:'short',day:'numeric'})}</span>`).join('')}${T>=s&&T<=e?`<i class="gtoday" style="left:${pct(T)+50/span}%"></i>`:''}</div>`:''}
+      ${ts.length?ts.map(t=>taskHtml(t,pct,span)).join(''):`<div class="empty" style="padding:22px"><b style="font-size:15px">No tasks yet</b>Use the template or add your own tasks: demolition, plumbing, tile, paint…</div>`}</div>`}
     <div class="label">Contractors on this job <span><button id="plSub">+ New contractor</button></span></div>
     <div class="group">${subsUsed.length?subsUsed.map(id=>{const c=sub(id),mine=ts.filter(t=>t.subId===id),tot=mine.reduce((t,x)=>t+(+x.cost||0),0),pd=mine.filter(t=>t.paid).reduce((t,x)=>t+(+x.cost||0),0),ph=digits(c?.phone);
       return `<div class="subrow"><span class="av" style="--c:var(--s-visit)">${esc(initials(c?.name||'?'))}</span><span class="sx"><b>${esc(c?.name||'Contractor')}</b><small>${esc([c?.trade,mine.map(t=>t.title).join(', ')].filter(Boolean).join(' · '))}</small></span>
@@ -2242,6 +2260,32 @@ function paintPlan(){const r=planFor;if(!r)return;const ts=jtasks(r),s=jStart(r)
   bindPlan();
   if(openTask){const el=document.querySelector(`[data-task="${openTask}"]`);if(el)setTimeout(()=>el.scrollIntoView({block:'center'}),60)}
 }
+let planView='timeline',planDay=null;
+try{planView=localStorage.getItem('nv-planview')==='cal'?'cal':'timeline'}catch(e){}
+const PCOL=['#0a84ff','#ff9f0a','#30d158','#bf5af2','#ff375f','#64d2ff','#ac8e68','#5e5ce6','#ffd60a','#66d4cf'];
+const mondayOf=d=>addDays(d,-((new Date(d+'T12:00').getDay()+6)%7));
+function planCal(r,ts,s,e,T){
+  if(!s||!e)return `<div class="group"><div class="empty" style="padding:22px"><b style="font-size:15px">Set the job dates first</b>The calendar shows every day from start to finish with the work planned for it.<br><br><button class="btn" id="plCalDates">Set dates</button></div></div>`;
+  const col=new Map(ts.map((t,i)=>[t.id,PCOL[i%PCOL.length]]));
+  const on=d=>ts.filter(t=>t.start&&t.start<=d&&(t.end||t.start)>=d);
+  if(!planDay||planDay<s||planDay>e)planDay=T>=s&&T<=e?T:s;
+  const a=mondayOf(s),z=addDays(mondayOf(e),6),days=[];for(let d=a;d<=z;d=addDays(d,1))days.push(d);
+  const mon=d=>new Date(d+'T12:00').toLocaleDateString('en-CA',{month:'short'});
+  const cells=days.map(d=>{const inR=d>=s&&d<=e,list=inR?on(d):[],dow=new Date(d+'T12:00').getDay(),dn=+d.slice(8);
+    return `<button class="pcd${inR?'':' out'}${dow===0?' sun':''}${d===T?' today':''}${d===planDay?' sel':''}" ${inR?`data-pday="${d}"`:'disabled'}>
+      <span class="pcn">${dn===1||d===a||d===s?`<small>${mon(d)}</small>`:''}${dn}</span>
+      ${list.slice(0,3).map(t=>`<i class="pchip${t.done?' done':''}${t.start===d||d===a||dow===1?' st':''}" style="--c:${col.get(t.id)}"><em>${esc(t.title||'Task')}</em></i>`).join('')}${list.length>3?`<span class="pmore">+${list.length-3}</span>`:''}
+      ${inR&&!list.length&&dow!==0?'<span class="pfree"></span>':''}</button>`}).join('');
+  const dl=on(planDay),dow=new Date(planDay+'T12:00').getDay();
+  const nth=workDays(s,planDay).length,tot=workDays(s,e).length;
+  return `<div class="pcal"><div class="pcw">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(x=>`<span>${x}</span>`).join('')}</div><div class="pcg">${cells}</div></div>
+    <div class="pday"><div class="pdh"><div><b>${longDate(planDay)}</b><small>${dow===0?'Sunday · day off':`Work day ${nth} of ${tot}`}${planDay===T?' · today':''}</small></div>
+      <span class="pdnav"><button class="iconbtn" id="pdPrev" aria-label="Previous day"${planDay<=s?' disabled':''}>${ico('back')}</button><button class="iconbtn" id="pdNext" aria-label="Next day"${planDay>=e?' disabled':''}><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button></span></div>
+      <div class="group">${dl.length?dl.map(t=>{const c=sub(t.subId),ph=digits(c?.phone),st=taskState(t),b=t.end||t.start,k=workDays(t.start,planDay).length,n=workDays(t.start,b).length||1;
+        return `<div class="pdt"><i style="background:${col.get(t.id)}"></i><button class="pdx" data-pdtask="${t.id}"><b${t.done?' class="done"':''}>${esc(t.title||'Untitled task')}</b><small>${c?esc(subName(t.subId))+' · ':''}${n>1?`Day ${Math.max(1,k)} of ${n} · `:''}${fmtRange(t.start,b)}${t.cost?' · '+money(t.cost):''}</small></button>
+          <span class="tst" style="--c:${TST[st].c}">${TST[st].n}</span>${ph?`<a class="iconbtn" href="tel:+1${ph}" aria-label="Call ${esc(c.name)}">${ico('call')}</a>`:''}</div>`}).join('')
+        :`<div class="empty" style="padding:16px"><b style="font-size:15px">${dow===0?'Day off':'Nothing planned'}</b>${dow===0?'':'No task on this day yet.'}</div>`}
+        <button class="row pdadd" id="pdAdd">+ Add task on ${new Date(planDay+'T12:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'})}</button></div></div>`}
 function taskHtml(t,pct,span){const st=taskState(t),c=sub(t.subId),open=openTask===t.id;const a=t.start,b=t.end||t.start;
   const bar=a?`<div class="gbarw"><i class="gb ${st}" style="left:${pct(a)}%;width:${Math.max(100/span,(dayDiff(b,a)+1)/span*100)}%"></i></div>`:'';
   return `<div class="ptask ${st}${open?' open':''}" data-task="${t.id}">
@@ -2260,6 +2304,13 @@ function bindPlan(){const r=planFor,B=$('planBody');
   $('plAdd').onclick=()=>{const ts=jtasks(r),last=ts.at(-1),s=last?.end||jStart(r)||today();const t={id:uid(),jobId:r.id,title:'',start:s,end:s,subId:'',cost:null,paid:false,paidAt:'',done:false,notes:'',sort:ts.length};db.tasks.push(t);openTask=t.id;save();paintPlan();setTimeout(()=>{const i=document.querySelector(`[data-task="${t.id}"] [data-f="title"]`);if(i)i.focus()},80)};
   if($('plTpl'))$('plTpl').onclick=()=>{if(!jStart(r)||!jEnd(r)){openSched(r,false);return}const n=buildFromTemplate(r);save();paintPlan();render();toast(`${n} tasks added`)};
   $('plSub').onclick=()=>openSub(null);
+  B.querySelectorAll('[data-pv]').forEach(b=>b.onclick=()=>{planView=b.dataset.pv;try{localStorage.setItem('nv-planview',planView)}catch(e){}paintPlan()});
+  if($('plCalDates'))$('plCalDates').onclick=()=>openSched(r,false);
+  B.querySelectorAll('[data-pday]').forEach(b=>b.onclick=()=>{planDay=b.dataset.pday;paintPlan();setTimeout(()=>{const d=document.querySelector('.pday');if(d&&isPhone())d.scrollIntoView({behavior:'smooth',block:'nearest'})},40)});
+  if($('pdPrev'))$('pdPrev').onclick=()=>{planDay=addDays(planDay,-1);paintPlan()};
+  if($('pdNext'))$('pdNext').onclick=()=>{planDay=addDays(planDay,1);paintPlan()};
+  B.querySelectorAll('[data-pdtask]').forEach(b=>b.onclick=()=>{planView='timeline';openTask=b.dataset.pdtask;paintPlan()});
+  if($('pdAdd'))$('pdAdd').onclick=()=>{const ts=jtasks(r),d=planDay;const t={id:uid(),jobId:r.id,title:'',start:d,end:d,subId:'',cost:null,paid:false,paidAt:'',done:false,notes:'',sort:ts.length};db.tasks.push(t);planView='timeline';openTask=t.id;save();paintPlan();setTimeout(()=>{const i=document.querySelector(`[data-task="${t.id}"] [data-f="title"]`);if(i)i.focus()},80)};
   B.querySelectorAll('[data-subview]').forEach(b=>b.onclick=()=>{const id=b.dataset.subview;hideModal('planModal');openTask=null;setTab('crew');openContractor(id)});
   $('plScope').oninput=e=>{r.ms.plan=Object.assign(r.ms.plan||{},{scope:e.target.value});save()};
   B.querySelectorAll('[data-topen]').forEach(b=>b.onclick=()=>{openTask=openTask===b.dataset.topen?null:b.dataset.topen;paintPlan()});
@@ -3006,7 +3057,7 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')up()})}).catch(()=>{});
 }
 setInterval(()=>{if(!selId&&$('modal').hidden&&$('evModal').hidden)render()},60000);
-if(location.protocol==='file:')window.__nv={get db(){return db},get data(){return data},setGmail(v){gmailSt=v},renderPartners};
+if(location.protocol==='file:')window.__nv={openPlan:(...a)=>openPlan(...a),get db(){return db},get data(){return data},setGmail(v){gmailSt=v},renderPartners};
 })();
 </script>
 </body>
