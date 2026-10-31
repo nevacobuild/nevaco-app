@@ -516,6 +516,45 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .pushcard>div{flex:1;min-width:0}.pushcard b{display:block;font-size:15px}.pushcard span{display:block;font-size:13px;color:var(--label2)}
 .pushcard .px{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--label3)}.pushcard .px svg{width:14px;height:14px}
 .lcount{margin-left:auto}
+/* ===== job plan ===== */
+.plancard{display:block;width:100%;text-align:left;background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:20px}
+.plancard.empty{display:flex;gap:12px;align-items:center}.plancard.empty>div{flex:1}.plancard.empty p{margin:2px 0 0;color:var(--label2);font-size:13.5px}.plancard.empty b{font-size:15px}
+.plancard .gl{width:38px;height:38px;flex:none}
+.pc1{display:flex;gap:12px;align-items:center}.pc1>div{flex:1;min-width:0}.pc1 b{font-size:16px;display:block}.pc1 p{margin:1px 0 0;font-size:13.5px;color:var(--label2)}.pc1>svg{width:16px;height:16px;color:var(--label3)}
+.pbar{position:relative;height:8px;border-radius:4px;background:var(--card2);margin:12px 0 8px;overflow:visible}.pbar i{display:block;height:100%;border-radius:4px;background:var(--s-won)}.pbar u{position:absolute;top:-4px;width:2px;height:16px;background:var(--red);border-radius:1px}
+.pc2{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--label2)}
+#sc-tplrow label>span{width:auto;flex:1}
+.durs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:-6px}.durs span{font-size:13px;color:var(--label2);margin-right:2px}
+.durs button{padding:6px 11px;border-radius:999px;background:var(--card);font-weight:600;font-size:13px;color:var(--blue)}
+.schedsub{margin:0 4px -6px;font-size:15px;color:var(--label2)}
+.scrim.plan .sheet{max-width:920px;height:min(900px,100%);max-height:100%}
+.phead{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.phead h2{margin:0;font-size:24px;letter-spacing:-.02em}.phead p{margin:2px 0 0;color:var(--label2);font-size:14px}
+.pdates{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:12px;padding:9px 12px;text-align:left}.pdates>svg{width:22px;height:22px;color:var(--s-won)}.pdates b{display:block;font-size:14px}.pdates small{color:var(--label2);font-size:12.5px}
+.pstats.four{margin:0}
+.gantt{background:var(--card);border-radius:14px;padding:6px 0;position:relative}
+.gticks{position:relative;height:22px;margin:0 14px 4px;border-bottom:.5px solid var(--sep)}.gticks span{position:absolute;top:4px;font-size:11px;color:var(--label3);font-weight:600;transform:translateX(-2px);white-space:nowrap}
+.gtoday{position:absolute;top:0;bottom:-2000px;width:2px;background:color-mix(in srgb,var(--red) 70%,transparent);z-index:1;pointer-events:none}
+.gantt{overflow:hidden}
+.ptask{padding:8px 14px 10px;position:relative}.ptask+.ptask{border-top:.5px solid var(--sep)}
+.ptop{display:flex;gap:10px;align-items:center}
+.ptop .chk{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--label3);display:flex;align-items:center;justify-content:center;color:transparent}.ptop .chk svg{width:14px;height:14px}
+.ptop .chk.on{background:var(--green);border-color:var(--green);color:#fff}
+.ptx{flex:1;min-width:0;text-align:left}.ptx b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ptx small{display:block;font-size:12.5px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptask.done .ptx b{text-decoration:line-through;color:var(--label2)}
+.tst{flex:none;font-size:11px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);padding:2px 8px;border-radius:6px}
+.gbarw{position:relative;height:8px;margin:7px 0 0 36px;border-radius:4px;background:var(--card2)}
+.gb{position:absolute;top:0;height:100%;border-radius:4px;background:var(--label3)}.gb.now{background:var(--blue)}.gb.done{background:var(--green)}.gb.late{background:var(--red)}
+.ped{display:grid;gap:8px;margin:12px 0 4px 36px;background:var(--bg);border-radius:12px;padding:10px}
+.ped label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--label2);font-weight:600;flex:1}
+.ped label.sw{flex-direction:row;align-items:center;justify-content:space-between;gap:10px;max-width:140px}
+.ped input,.ped select,.ped textarea{border:0;background:var(--card);border-radius:9px;padding:9px 10px;font:inherit;font-size:15px;color:var(--label);font-weight:400;width:100%}
+.ped input[type=checkbox]{width:22px;height:22px;accent-color:var(--green);padding:0}
+.pedrow{display:flex;gap:8px;align-items:flex-end}
+.pedact{display:flex;justify-content:space-between;gap:8px;margin-top:2px}
+.subrow{display:flex;gap:12px;align-items:center;padding:10px 14px;position:relative}.subrow+.subrow::before{content:"";position:absolute;top:0;left:62px;right:0;height:.5px;background:var(--sep)}
+.subrow .av{width:36px;height:36px;font-size:13px}.subrow .sx{flex:1;min-width:0}.subrow .sx b{display:block;font-size:15px}.subrow .sx small,.subrow .sm small{display:block;font-size:12.5px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subrow .sm{text-align:right;flex:none}
+.task.onsite{display:flex;align-items:center;gap:10px}.task.onsite .tt{flex:1;text-align:left}
 /* ===== customers ===== */
 #sCust .searchbox{margin:0 32px 12px;max-width:820px}
 .cfil{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
@@ -640,6 +679,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   .lt .sub{font-size:14px}
   .screen>.scroll{padding:2px 14px calc(96px + env(safe-area-inset-bottom))}
   #sJobs .searchbox,#sCust .searchbox,#sPart .searchbox,#sLeads .searchbox{margin:0 14px 8px}
+  .scrim.plan{padding:0}.scrim.plan .sheet{border-radius:0;height:100%}.ped,.gbarw{margin-left:0}.pedrow{flex-wrap:wrap}
   .opp{flex-direction:column;align-items:stretch}.opp .oa{flex-direction:row}.opp .oa .btn{flex:1}
   .pstats{grid-template-columns:repeat(2,1fr)}
   .tabbar button{font-size:9.5px}
@@ -910,6 +950,46 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   </form>
 </div>
 
+<div class="scrim" id="schedModal" hidden>
+  <form class="sheet" id="schedForm" novalidate>
+    <header><button type="button" id="schedCancel">Later</button><h3 id="schedTitle">Job dates</h3><button type="submit" class="save">Save</button></header>
+    <div class="body">
+      <p class="schedsub" id="schedSub"></p>
+      <div class="fg">
+        <label><span>Start</span><input id="sc-start" type="date"></label>
+        <label><span>Finish</span><input id="sc-end" type="date"></label>
+      </div>
+      <div class="durs"><span>Takes about</span><button type="button" data-dur="3">3 days</button><button type="button" data-dur="6">1 week</button><button type="button" data-dur="12">2 weeks</button><button type="button" data-dur="18">3 weeks</button><button type="button" data-dur="26">1 month</button></div>
+      <p class="fnote" id="sc-sum" style="margin-top:-8px"></p>
+      <div class="fg" id="sc-tplrow"><label class="sw"><span id="sc-tplname">Build the job plan from a template</span><input id="sc-tpl" type="checkbox" checked></label></div>
+      <p class="fnote">Start and finish go on your calendar. You can change every task after.</p>
+    </div>
+  </form>
+</div>
+
+<div class="scrim plan" id="planModal" hidden>
+  <div class="sheet planSheet">
+    <header><span></span><h3>Job Plan</h3><button type="button" class="save" id="planClose">Done</button></header>
+    <span id="planTitle" hidden></span><div class="body" id="planBody"></div>
+  </div>
+</div>
+
+<div class="scrim" id="subModal" hidden>
+  <form class="sheet" id="subForm" novalidate>
+    <header><button type="button" id="subCancel">Cancel</button><h3 id="subTitle">New Contractor</h3><button type="submit" class="save">Save</button></header>
+    <div class="body">
+      <div class="fg">
+        <label><span>Name</span><input id="sb-name" placeholder="Person or company" autocomplete="off"></label>
+        <label><span>Trade</span><input id="sb-trade" placeholder="Plumbing, Electrical, Tile, Painting…" list="tradeList"></label>
+        <label><span>Phone</span><input id="sb-phone" type="tel" placeholder="416 555 0123"></label>
+        <label><span>Email</span><input id="sb-email" type="email" placeholder="Optional"></label>
+      </div>
+      <datalist id="tradeList"><option>General</option><option>Plumbing</option><option>Electrical</option><option>HVAC</option><option>Drywall</option><option>Tile</option><option>Painting</option><option>Flooring</option><option>Carpentry</option><option>Countertops</option><option>Cleaning</option></datalist>
+      <div class="fg"><label class="ta"><span>Notes</span><textarea id="sb-notes" placeholder="Rates, how they like to be paid, HST number"></textarea></label></div>
+    </div>
+  </form>
+</div>
+
 <div class="scrim" id="partModal" hidden>
   <form class="sheet" id="partForm" novalidate>
     <header><button type="button" id="partCancel">Cancel</button><h3 id="partFormTitle">New Partner</h3><button type="submit" class="save" id="partSave">Add</button></header>
@@ -1025,7 +1105,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.26 (Oct 30) · Leads + Facebook';
+const APP_VERSION='1.27 (Oct 31) · Job Plan';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1062,6 +1142,7 @@ const STEPS=[
  {k:'visit',n:'Site visit',ic:'visit',c:'--s-visit',sched:true},
  {k:'estimate',n:'Estimate sent',ic:'sent',c:'--s-sent'},
  {k:'contract',n:'Contract signed',ic:'sign',c:'--s-won'},
+ {k:'plan',n:'Dates & job plan',ic:'calp',c:'--s-won',plan:true},
  {k:'deposit',n:'Deposit received',ic:'pay',c:'--s-pay',pay:true},
  {k:'start',n:'Work started',ic:'won',c:'--s-won',sched:true},
  {k:'complete',n:'Work completed',ic:'done',c:'--s-done',sched:true},
@@ -1069,7 +1150,7 @@ const STEPS=[
  {k:'review',n:'Review requested',ic:'star',c:'--s-quote'}
 ];
 const SK=Object.fromEntries(STEPS.map((s,i)=>[s.k,Object.assign(s,{i})]));
-const EVTYPES={visit:{n:'Site visit',c:'--s-visit',ic:'visit'},start:{n:'Work start',c:'--s-won',ic:'won'},complete:{n:'Target finish',c:'--s-done',ic:'done'},call:{n:'Call',c:'--s-follow',ic:'follow'},meet:{n:'Meeting',c:'--s-lead',ic:'meet'},pay:{n:'Payment',c:'--s-pay',ic:'pay'},task:{n:'Task',c:'--s-sent',ic:'task'},other:{n:'Other',c:'--s-quote',ic:'calp'}};
+const EVTYPES={work:{n:'Work',c:'--s-won',ic:'won'},visit:{n:'Site visit',c:'--s-visit',ic:'visit'},start:{n:'Work start',c:'--s-won',ic:'won'},complete:{n:'Target finish',c:'--s-done',ic:'done'},call:{n:'Call',c:'--s-follow',ic:'follow'},meet:{n:'Meeting',c:'--s-lead',ic:'meet'},pay:{n:'Payment',c:'--s-pay',ic:'pay'},task:{n:'Task',c:'--s-sent',ic:'task'},other:{n:'Other',c:'--s-quote',ic:'calp'}};
 const CITIES={'Toronto':[43.653,-79.383],'North York':[43.768,-79.413],'Scarborough':[43.773,-79.257],'East York':[43.690,-79.330],'Etobicoke':[43.643,-79.540],'York':[43.689,-79.487],'Mississauga':[43.589,-79.644],'Oakville':[43.467,-79.687],'Burlington':[43.326,-79.799],'Brampton':[43.731,-79.762],'Vaughan':[43.837,-79.508],'Richmond Hill':[43.882,-79.440],'Markham':[43.856,-79.337],'Aurora':[44.000,-79.466],'Newmarket':[44.059,-79.461],'King City':[43.928,-79.528],'Stouffville':[43.970,-79.250],'Pickering':[43.838,-79.086],'Ajax':[43.851,-79.020],'Whitby':[43.897,-78.943],'Oshawa':[43.897,-78.865],'Bradford':[44.114,-79.566],'Innisfil':[44.300,-79.611],'Barrie':[44.389,-79.690],'New Lowell':[44.468,-80.007],'Thornhill':[43.815,-79.424],'Woodbridge':[43.783,-79.597],'Maple':[43.853,-79.508],'Concord':[43.801,-79.488],'Collingwood':[44.501,-80.216],'Wasaga Beach':[44.520,-80.016],'Angus':[44.318,-79.881],'Alliston':[44.153,-79.868],'Orillia':[44.608,-79.420],'Guelph':[43.545,-80.248],'Hamilton':[43.256,-79.869],'Milton':[43.518,-79.877],'Caledon':[43.866,-79.858]};
 const TYPES=['Full home renovation','Kitchen renovation','Bathroom renovation','Basement renovation','Home addition','Flooring','Carpentry / millwork','Drywall / framing','Painting','Electrical','Plumbing','Commercial renovation','Other'];
 
@@ -1091,6 +1172,7 @@ const total=r=>(+r.value||0)*(r.hst?1.13:1);
 const paid=r=>(r.payments||[]).reduce((t,p)=>t+(+p.amount||0),0);
 const balance=r=>Math.max(0,Math.round((total(r)-paid(r))*100)/100);
 function stepDone(r,k){
+  if(k==='plan')return !!(r.ms.plan?.done||(r.ms.start?.date&&r.ms.complete?.date&&(db.tasks||[]).some(t=>t.jobId===r.id)));
   if(k==='deposit')return (r.payments||[]).length>0||!!r.ms.deposit?.done;
   if(k==='final')return (total(r)>0&&balance(r)<=0.5)||!!r.ms.final?.done;
   return !!r.ms[k]?.done;
@@ -1138,10 +1220,10 @@ const authStorage={
   removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
 };
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
-let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[]};let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
+let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[]};let planReady=false;let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
 let data=db.jobs;
 let me=null,team=[],loaded=false;
-let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map(),partners:new Map()};
+let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map(),partners:new Map(),contractors:new Map(),job_tasks:new Map()};
 const nz=v=>(v===''||v==null)?null:v;
 function jobRow(r){return{id:r.id,name:r.name||'',phone:r.phone||'',email:r.email||'',address:r.address||'',city:r.city||'',...(postalReady?{postal:r.postal||''}:{}),type:r.type||'',source:r.source||'',
   value:(r.value==null||r.value==='')?null:Number(r.value),hst:!!r.hst,notes:r.notes||'',lat:r.lat??null,lng:r.lng??null,approx:!!r.approx,
@@ -1153,12 +1235,15 @@ function docRow(d){return{id:d.id,job_id:d.jobId,kind:d.kind||'estimate',number:
   items:(d.items||[]).map(i=>({d:i.d||'',a:(i.a===''||i.a==null)?null:Number(i.a)})),lump:(d.lump===''||d.lump==null)?null:Number(d.lump),hst:!!d.hst,deposit_pct:Number(d.depositPct)||0,
   notes:d.notes||'',terms:d.terms||'',subtotal:Number(d.subtotal)||0,tax:Number(d.tax)||0,total:Number(d.total)||0,share_token:d.token,sent_at:nz(d.sentAt),
   ...(invReady?{credit:Number(d.credit)||0,due_date:nz(d.dueDate),paid_at:nz(d.paidAt),paid_method:nz(d.paidMethod),ref:nz(d.ref)}:{})}}
+function jtaskRow(t){return{id:t.id,job_id:t.jobId,title:t.title||'',start:nz(t.start),end:nz(t.end),contractor_id:nz(t.subId),cost:(t.cost==null||t.cost==='')?null:Number(t.cost),paid:!!t.paid,paid_at:nz(t.paidAt),done:!!t.done,notes:t.notes||'',sort:t.sort||0}}
+function subRow(c){return{id:c.id,name:c.name||'',trade:c.trade||'',phone:c.phone||'',email:c.email||'',notes:c.notes||''}}
 function setStatus(t,cls){const el=$('syncStatus');if(!el)return;el.textContent=t;el.className=cls||''}
 async function must(q){const{error}=await q;if(error)throw error}
 async function fetchAll(){
   const[j,p,e,dc,fl]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
     sb.from('documents').select('*').order('created_at'),sb.from('files').select('*').order('created_at')]);
   const[pt,pm,ps,op]=await Promise.all([sb.from('partners').select('*').order('created_at'),sb.from('partner_messages').select('*').order('at'),sb.from('app_settings').select('*').eq('key','partners'),sb.from('opportunities').select('*').order('at',{ascending:false}).limit(300)]);
+  const[jt,ct]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name')]);planReady=!jt.error&&!ct.error;
   partReady=!pt.error&&!pm.error;if(partReady){pset=(ps.data&&ps.data[0]&&ps.data[0].value)||{};await loadGmailStatus()}
   filesReady=!fl.error;
   if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error}
@@ -1177,8 +1262,11 @@ async function fetchAll(){
     token:x.share_token,sentAt:x.sent_at||'',acceptedAt:x.accepted_at||'',acceptedName:x.accepted_name||'',
     credit:Number(x.credit)||0,dueDate:x.due_date||'',paidAt:x.paid_at||'',paidMethod:x.paid_method||'',ref:x.ref||''}));
   const partners=partReady?pt.data.map(mapPartner):[],pmsgsL=partReady?pm.data.map(mapMsg):[];
-  db={jobs,events,docs,files:fl.data||[],partners,pmsgs:pmsgsL,opps:(op&&!op.error&&op.data)||[]};data=db.jobs;
+  const tasks=planReady?jt.data.map(x=>({id:x.id,jobId:x.job_id,title:x.title||'',start:x.start||'',end:x.end||'',subId:x.contractor_id||'',cost:x.cost==null?null:Number(x.cost),paid:!!x.paid,paidAt:x.paid_at||'',done:!!x.done,notes:x.notes||'',sort:x.sort||0})):[];
+  const subs=planReady?ct.data.map(x=>({id:x.id,name:x.name||'',trade:x.trade||'',phone:x.phone||'',email:x.email||'',notes:x.notes||''})):[];
+  db={jobs,events,docs,files:fl.data||[],partners,pmsgs:pmsgsL,opps:(op&&!op.error&&op.data)||[],tasks,subs};data=db.jobs;
   synced={jobs:new Map(jobs.map(r=>[r.id,JSON.stringify(jobRow(r))])),payments:new Map(payRows().map(x=>[x.id,JSON.stringify(x)])),events:new Map(events.map(x=>[x.id,JSON.stringify(evRow(x))])),documents:new Map(docs.map(x=>[x.id,JSON.stringify(docRow(x))])),partners:new Map(partners.map(x=>[x.id,JSON.stringify(partRow(x))]))};
+  synced.job_tasks=new Map(tasks.map(x=>[x.id,JSON.stringify(jtaskRow(x))]));synced.contractors=new Map(subs.map(x=>[x.id,JSON.stringify(subRow(x))]));
   loaded=true;ensurePartChannel();
 }
 let syncing=false,again=false,dirty=false,syncT=null;
@@ -1188,17 +1276,18 @@ async function sync(){
   if(syncing){again=true;return}
   syncing=true;syncT=null;setStatus('Saving…','busy');
   try{
-    const sets={jobs:db.jobs.map(jobRow),payments:payRows(),events:db.events.map(evRow),documents:docsReady?(db.docs||[]).map(docRow):[...synced.documents.keys()].map(id=>({id})),partners:partReady?(db.partners||[]).map(partRow):[]},plan={};
-    for(const t of ['partners','jobs','payments','events','documents']){
+    const sets={jobs:db.jobs.map(jobRow),payments:payRows(),events:db.events.map(evRow),documents:docsReady?(db.docs||[]).map(docRow):[...synced.documents.keys()].map(id=>({id})),partners:partReady?(db.partners||[]).map(partRow):[],contractors:planReady?(db.subs||[]).map(subRow):[],job_tasks:planReady?(db.tasks||[]).filter(t=>job(t.jobId)).map(jtaskRow):[]},plan={};
+    for(const t of ['partners','contractors','jobs','payments','events','documents','job_tasks']){
       const cur=new Map(sets[t].map(x=>[x.id,x])),changed=[];
       for(const[id,row]of cur){const js=JSON.stringify(row);if(synced[t].get(id)!==js)changed.push([row,js])}
       plan[t]={changed,removed:[...synced[t].keys()].filter(id=>!cur.has(id))};
     }
     if(plan.partners.changed.length)await must(sb.from('partners').upsert(plan.partners.changed.map(([r])=>Object.assign({},r,{updated_by:me.email}))));
+    if(plan.contractors.changed.length)await must(sb.from('contractors').upsert(plan.contractors.changed.map(([r])=>r)));
     if(plan.jobs.changed.length)await must(sb.from('jobs').upsert(plan.jobs.changed.map(([r])=>Object.assign({},r,{updated_by:me.email}))));
-    for(const t of ['payments','events','documents'])if(plan[t].changed.length&&(t!=='documents'||docsReady))await must(sb.from(t).upsert(plan[t].changed.map(([r])=>r)));
-    for(const t of ['payments','events','documents','jobs','partners'])if(plan[t].removed.length&&(t!=='documents'||docsReady))await must(sb.from(t).delete().in('id',plan[t].removed));
-    for(const t of ['partners','jobs','payments','events','documents']){plan[t].changed.forEach(([r,js])=>synced[t].set(r.id,js));plan[t].removed.forEach(id=>synced[t].delete(id))}
+    for(const t of ['payments','events','documents','job_tasks'])if(plan[t].changed.length&&(t!=='documents'||docsReady))await must(sb.from(t).upsert(plan[t].changed.map(([r])=>r)));
+    for(const t of ['payments','events','documents','job_tasks','jobs','partners','contractors'])if(plan[t].removed.length&&(t!=='documents'||docsReady))await must(sb.from(t).delete().in('id',plan[t].removed));
+    for(const t of ['partners','contractors','jobs','payments','events','documents','job_tasks']){plan[t].changed.forEach(([r,js])=>synced[t].set(r.id,js));plan[t].removed.forEach(id=>synced[t].delete(id))}
     setStatus('Synced');
   }catch(err){console.error(err);setStatus('Not saved · retrying','err');toast('Not saved. Check your connection.');setTimeout(()=>{dirty=true;sync()},8000)}
   syncing=false;
@@ -1209,7 +1298,7 @@ let remoteT=null;
 function onRemote(){clearTimeout(remoteT);remoteT=setTimeout(refreshFromServer,700)}
 async function refreshFromServer(force){
   if(!me)return;
-  if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden||!$('docModal').hidden||!$('partModal').hidden||!$('meetModal').hidden||!$('feeModal').hidden||!$('psetModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
+  if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden||!$('docModal').hidden||!$('partModal').hidden||!$('meetModal').hidden||!$('feeModal').hidden||!$('psetModal').hidden||!$('planModal').hidden||!$('schedModal').hidden||!$('subModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
   const inBefore=new Set((db.pmsgs||[]).filter(m=>m.dir==='in').map(m=>m.id)),hadMsgs=(db.pmsgs||[]).length>0;
   const before=new Set(data.map(r=>r.id)),signedBefore=new Set((db.docs||[]).filter(x=>x.status==='accepted').map(x=>x.id));
   try{await fetchAll()}catch(e){console.error(e);return}
@@ -1294,6 +1383,9 @@ function renderToday(){
     ${sect(1,'Urgent',g[1])}${sect(2,'Today',g[2])}${sect(3,'Soon',g[3])}
     ${(()=>{const ps=pushState();const off=ps==='off'||ps==='install';if(!off||safe(()=>localStorage.getItem('nv-push-hide'))==='1')return '';
       return `<div class="pushcard">${ico('msg')}<div><b>Get notified about new leads</b><span>${ps==='install'?'On iPhone/iPad: Share › Add to Home Screen, then open the app from there.':'New leads, replies and reminders on this '+deviceName()+'.'}</span></div>${ps==='off'?'<button class="btn" data-pushon>Turn on</button>':''}<button class="px" data-pushhide aria-label="Hide">${ico('x')}</button></div>`})()}
+    ${(()=>{const T2=today(),on=(db.tasks||[]).filter(t=>!t.done&&t.start&&t.start<=T2&&(t.end||t.start)>=T2&&job(t.jobId)&&!job(t.jobId).lost);if(!on.length)return '';
+      return `<div class="sect"><div class="secthead"><h3 style="--c:var(--s-won)"><i></i>On site today<em>${on.length}</em></h3><button data-go="cal">Calendar</button></div><div class="group">${on.map(t=>{const r=job(t.jobId),c=sub(t.subId),ph=digits(c?.phone),st=taskState(t);
+        return `<div class="task onsite" style="--c:var(--s-won)"><span class="gl" style="--c:var(--s-won);width:28px;height:28px">${ico('won')}</span><button class="tt" data-goplan="${t.id}"><b>${esc(t.title)} · ${esc(r.name)}</b><span><u>${c?esc(c.name):'Our team'}${t.end&&t.end!==T2?' · until '+fmtDate(t.end):' · finishes today'}${st==='late'?' · late':''}</u></span></button>${ph?`<a class="iconbtn" href="tel:+1${ph}" aria-label="Call">${ico('call')}</a>`:''}</div>`}).join('')}</div></div>`})()}
     ${(()=>{const ln=data.filter(r=>isLead(r)&&leadState(r)==='reply');return ln.length?`<div class="sect"><div class="secthead"><h3 style="--c:#5856d6"><i></i>Leads waiting for a reply<em>${ln.length}</em></h3><button data-go="leads">Leads</button></div><div class="group">${ln.map(r=>{const lm=jmails(r).at(-1),sk=srcKey(r);
       return `<button class="task" data-golead="${r.id}" style="--c:${SRC[sk].c}"><span class="gl" style="--c:${SRC[sk].c};width:28px;height:28px">${ico('msg')}</span><span class="tt"><b>Reply to ${esc(r.name)}</b><span><u>${SRC[sk].n} · ${esc(String(lm?.body||'').replace(/\s+/g,' ').slice(0,70))}</u></span></span><span class="when">${whenShort(lm?.at)}</span></button>`}).join('')}</div></div>`:''})()}
     ${(()=>{const pn=(db.partners||[]).filter(pNeeds).sort((a,b)=>(pUnread(b)?1:0)-(pUnread(a)?1:0));return pn.length?`<div class="sect"><div class="secthead"><h3 style="--c:var(--blue)"><i></i>Partners<em>${pn.length}</em></h3><button data-go="part">Partners</button></div><div class="group">${pn.map(p=>{const a=pAction(p),un=pUnread(p),c=un||a?.k==='reply'?'--blue':a?.k==='meet'?'--orange':'--p1';
@@ -1313,6 +1405,7 @@ $('pToday').addEventListener('click',e=>{
   const rowE=e.target.closest('.task');if(rowE&&!e.target.closest('[data-act="done"]')){const it=window._todo?.[rowE.dataset.k];if(it&&it.key.endsWith('e')&&it.title.startsWith('Send estimate')&&it.job){openDetail(it.job.id,true);setTimeout(()=>openDoc(docsFor(it.job.id)[0]||null,it.job),80);return}}
   const go=e.target.closest('[data-go]');if(go){setTab(go.dataset.go);return}
   const gp=e.target.closest('[data-gopart]');if(gp){setTab('part');openPartner(gp.dataset.gopart);return}
+  const gpl=e.target.closest('[data-goplan]');if(gpl){const t=db.tasks.find(x=>x.id===gpl.dataset.goplan);if(t){openDetail(t.jobId,true);setTimeout(()=>openPlan(job(t.jobId),t.id),120)}return}
   const gl=e.target.closest('[data-golead]');if(gl){setTab('leads');openDetail(gl.dataset.golead,true);return}
   if(e.target.closest('[data-pushon]')){enablePush(e.target.closest('[data-pushon]'));return}
   if(e.target.closest('[data-pushhide]')){safe(()=>localStorage.setItem('nv-push-hide','1'));renderToday();return}
@@ -1330,15 +1423,18 @@ function calItems(date){
     for(const k of ['visit','start','complete']){const m=r.ms[k];if(m?.date===date&&(!m.done||k!=='complete'||true))out.push({key:`m:${r.id}:${k}`,type:k,title:`${EVTYPES[k].n} · ${r.name}`,time:m.time||'',done:!!m.done,job:r});}
     if(r.follow===date)out.push({key:`f:${r.id}`,type:'call',title:`Follow up · ${r.name}`,time:'',done:false,job:r});
   }
+  for(const t of db.tasks||[]){if(!t.start)continue;const e=t.end||t.start,r=job(t.jobId);if(!r||r.lost||t.start>date||e<date)continue;
+    out.push({key:`t:${t.id}`,type:'work',title:`${t.title||'Task'} · ${r.name}${t.subId&&sub(t.subId)?' ('+subName(t.subId)+')':''}`,time:'',done:t.done,job:r,first:t.start===date})}
   for(const e of db.events)if(e.date===date)out.push({key:`e:${e.id}`,type:e.type,title:e.title+(e.jobId&&job(e.jobId)?` · ${job(e.jobId).name}`:''),time:e.time||'',done:e.done,job:e.jobId?job(e.jobId):null,ev:e});
   const T=today();out.forEach(x=>{x.date=x.date||date;x.p=priOf({date,done:x.done},T)});
   return out.sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
 }
-function upcoming(from,days){const out=[];for(let i=1;i<=days;i++){const d=addDays(from,i);calItems(d).filter(x=>!x.done).forEach(x=>out.push(Object.assign({date:d},x)))}return out}
+function upcoming(from,days){const out=[];for(let i=1;i<=days;i++){const d=addDays(from,i);calItems(d).filter(x=>!x.done&&(x.type!=='work'||x.first)).forEach(x=>out.push(Object.assign({date:d},x)))}return out}
 function calRow(x){const t=EVTYPES[x.type]||EVTYPES.other;const pc=x.p?PC[x.p]:'--p0';
   return `<button class="task" data-cal="${x.key}" style="--c:var(${pc})"><span class="gl" style="--c:var(${pc});width:28px;height:28px">${ico(t.ic)}</span>
     <span class="tt"><b style="${x.done?'text-decoration:line-through;color:var(--label2)':''}">${esc(x.title)}</b><span><u>${x.date?fmtDate(x.date)+(x.time?' · ':''):''}${x.time?fmtTime(x.time):(x.date?'':'All day')}${x.job?' · '+esc(x.job.city):''}</u></span></span>${ico('chev')}</button>`}
 function openCalItem(key){const[kind,a,b]=key.split(':');
+  if(kind==='t'){const t=(db.tasks||[]).find(x=>x.id===a);if(t&&job(t.jobId)){openDetail(t.jobId,true);setTimeout(()=>openPlan(job(t.jobId),t.id),120)}return}
   if(kind==='e'){const e=db.events.find(x=>x.id===a);if(e?.jobId&&job(e.jobId))openDetail(e.jobId,true);else if(e)openEvent(e)}
   else openDetail(a,true)}
 let calFull=safe(()=>localStorage.getItem('nevaco-calfull'))?safe(()=>localStorage.getItem('nevaco-calfull'))==='1':!isPhone();
@@ -1996,6 +2092,147 @@ function paintPushRow(){const el=$('acctPush');if(!el)return;const st=pushState(
   const t=$('pushTest');if(t)t.onclick=async()=>{t.disabled=true;try{const r=await gm('push_test');toast(r.sent?`Test sent to ${r.sent} device${r.sent>1?'s':''}`:'No devices are signed up yet')}catch(e){toast(e.message,false,true)}t.disabled=false};
 }
 
+/* ---------- job plan: dates, tasks, contractors ---------- */
+const TEMPLATES={
+ 'Bathroom renovation':[['Demolition',1,'General'],['Plumbing rough-in',1,'Plumbing'],['Electrical rough-in',1,'Electrical'],['Framing & drywall',2,'Drywall'],['Waterproofing',1,'Tile'],['Tile',3,'Tile'],['Vanity, toilet & fixtures',1,'Plumbing'],['Paint',1,'Painting'],['Final clean & walkthrough',1,'General']],
+ 'Kitchen renovation':[['Demolition',1,'General'],['Plumbing & electrical rough-in',2,'Electrical'],['Drywall & repairs',2,'Drywall'],['Cabinets install',2,'Carpentry'],['Countertop template',1,'Countertops'],['Countertop install',1,'Countertops'],['Backsplash tile',2,'Tile'],['Plumbing & appliance hookup',1,'Plumbing'],['Paint & trim',2,'Painting'],['Final clean & walkthrough',1,'General']],
+ 'Basement renovation':[['Framing',3,'Carpentry'],['Electrical rough-in',2,'Electrical'],['Plumbing rough-in',2,'Plumbing'],['Inspection',1,'General'],['Insulation',1,'Drywall'],['Drywall',3,'Drywall'],['Taping & mudding',3,'Drywall'],['Flooring',3,'Flooring'],['Paint',2,'Painting'],['Trim & doors',2,'Carpentry'],['Final clean & walkthrough',1,'General']],
+ 'Full home renovation':[['Demolition',3,'General'],['Framing',4,'Carpentry'],['Plumbing, electrical & HVAC rough-in',5,'Electrical'],['Inspection',1,'General'],['Drywall',5,'Drywall'],['Flooring',4,'Flooring'],['Cabinets & millwork',4,'Carpentry'],['Tile',4,'Tile'],['Paint',4,'Painting'],['Fixtures & finishing',3,'General'],['Final clean & walkthrough',1,'General']],
+ 'Drywall / framing':[['Framing',1,'Carpentry'],['Drywall',1,'Drywall'],['Taping & mudding',2,'Drywall'],['Paint',1,'Painting'],['Final clean',1,'General']],
+ 'Painting':[['Prep & protection',1,'Painting'],['Paint',3,'Painting'],['Touch-ups & clean',1,'Painting']],
+ 'Flooring':[['Remove old floor',1,'Flooring'],['Subfloor prep',1,'Flooring'],['Install flooring',3,'Flooring'],['Trim & baseboards',1,'Carpentry'],['Final clean',1,'General']],
+ _:[['Prep & protection',1,'General'],['Main work',4,'General'],['Finishing',2,'General'],['Final clean & walkthrough',1,'General']]
+};
+const tplFor=r=>TEMPLATES[r.type]||(/bath|shower/i.test(r.type)?TEMPLATES['Bathroom renovation']:/kitchen/i.test(r.type)?TEMPLATES['Kitchen renovation']:/basement/i.test(r.type)?TEMPLATES['Basement renovation']:/full|home/i.test(r.type)?TEMPLATES['Full home renovation']:TEMPLATES._);
+const isWork=d=>{const w=new Date(d+'T12:00').getDay();return w!==0};            // Mon–Sat are work days
+function workDays(a,b){const out=[];if(!a||!b||b<a)return out;for(let d=a;d<=b;d=addDays(d,1))if(isWork(d))out.push(d);return out}
+const jtasks=r=>(db.tasks||[]).filter(t=>t.jobId===r.id).sort((a,b)=>(a.start||'~').localeCompare(b.start||'~')||a.sort-b.sort);
+const sub=id=>(db.subs||[]).find(s=>s.id===id);
+const subName=id=>{const s=sub(id);return s?s.name.split(' (')[0]:''};
+const jStart=r=>r.ms.start?.date||'',jEnd=r=>r.ms.complete?.date||'';
+const planDone=r=>!!(jStart(r)&&jEnd(r)&&jtasks(r).length);
+function taskState(t){const T=today();if(t.done)return 'done';if(t.end&&t.end<T)return 'late';if(t.start&&t.start<=T)return 'now';return 'next'}
+const TST={done:{n:'Done',c:'var(--green)'},late:{n:'Late',c:'var(--red)'},now:{n:'In progress',c:'var(--blue)'},next:{n:'Upcoming',c:'var(--label3)'}};
+function buildFromTemplate(r){
+  const tpl=tplFor(r),days=workDays(jStart(r),jEnd(r));if(!days.length)return 0;
+  const total=tpl.reduce((t,x)=>t+x[1],0),scale=days.length/total;let i=0;const base=jtasks(r).length;
+  tpl.forEach(([title,w,trade],k)=>{const n=Math.max(1,Math.round(w*scale));const s=days[Math.min(i,days.length-1)];const e=days[Math.min(i+n-1,days.length-1)];i+=n;
+    const c=(db.subs||[]).find(x=>(x.trade||'').toLowerCase()===trade.toLowerCase());
+    db.tasks.push({id:uid(),jobId:r.id,title,start:s,end:k===tpl.length-1?days.at(-1):e,subId:c?c.id:'',cost:null,paid:false,paidAt:'',done:false,notes:'',sort:base+k})});
+  return tpl.length;
+}
+const fmtRange=(a,b)=>!a?'No dates':a===b||!b?fmtDate(a):`${fmtDate(a)} → ${fmtDate(b)}`;
+const longDate=d=>d?new Date(d+'T12:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'}):'';
+function planCard(r){
+  if(!['won','done'].includes(stageOf(r))&&!stepDone(r,'contract'))return '';
+  const ts=jtasks(r),s=jStart(r),e=jEnd(r);
+  if(!s||!e)return `<div class="plancard empty"><span class="gl" style="--c:var(--s-won)">${ico('calp')}</span><div><b>Schedule this job</b><p>Set the start and finish dates and build the job plan.</p></div><button class="btn" id="planSched">Set dates</button></div>`;
+  const dn=ts.filter(t=>t.done).length,cost=ts.reduce((t,x)=>t+(+x.cost||0),0),paidC=ts.filter(t=>t.paid).reduce((t,x)=>t+(+x.cost||0),0);
+  const T=today(),cur=ts.find(t=>!t.done&&t.start<=T&&(t.end||t.start)>=T)||ts.find(t=>!t.done);
+  const span=Math.max(1,dayDiff(e,s)+1),pos=Math.min(100,Math.max(0,(dayDiff(T,s)+0.5)/span*100));
+  return `<button class="plancard" id="planOpen"><div class="pc1"><span class="gl" style="--c:var(--s-won)">${ico('calp')}</span><div><b>Job Plan</b><p>${longDate(s)} → ${longDate(e)} · ${workDays(s,e).length} work days</p></div>${ico('chev')}</div>
+    <div class="pbar"><i style="width:${ts.length?dn/ts.length*100:0}%"></i>${T>=s&&T<=e?`<u style="left:${pos}%"></u>`:''}</div>
+    <div class="pc2"><span>${ts.length?`${dn}/${ts.length} tasks done`:'No tasks yet'}</span>${cur?`<span>${taskState(cur)==='late'?'⚠︎ ':''}${esc(cur.title)}${cur.subId?' · '+esc(subName(cur.subId)):''}</span>`:''}${cost?`<span>Contractors ${money(cost)}${paidC?` · paid ${money(paidC)}`:''}</span>`:''}</div></button>`;
+}
+
+/* schedule sheet: right after the contract is signed */
+let schedFor=null;
+function openSched(r,fromContract){schedFor=r;
+  const nextMon=(()=>{let d=addDays(today(),1);while(new Date(d+'T12:00').getDay()!==1)d=addDays(d,1);return d})();
+  $('schedTitle').textContent=fromContract?'Contract signed 🎉':'Job dates';
+  $('schedSub').textContent=fromContract?`When will you work on ${r.name}?`:`${r.name} · ${r.type}`;
+  $('sc-start').value=jStart(r)||nextMon;$('sc-end').value=jEnd(r)||addDays($('sc-start').value,11);
+  $('sc-tplrow').hidden=jtasks(r).length>0;$('sc-tpl').checked=!jtasks(r).length;$('sc-tplname').textContent=`Build the job plan from the ${TEMPLATES[r.type]?r.type.toLowerCase():'standard'} template`;
+  paintSched();showModal('schedModal')}
+function paintSched(){const s=$('sc-start').value,e=$('sc-end').value;$('sc-sum').textContent=s&&e&&e>=s?`${workDays(s,e).length} work days (Mon–Sat) · ${longDate(s)} to ${longDate(e)}`:'Pick a finish date after the start';}
+['sc-start','sc-end'].forEach(id=>$(id).addEventListener('change',()=>{if(id==='sc-start'&&$('sc-end').value<$('sc-start').value)$('sc-end').value=$('sc-start').value;paintSched()}));
+document.querySelectorAll('[data-dur]').forEach(b=>b.onclick=()=>{const s=$('sc-start').value;if(!s)return;let n=+b.dataset.dur,d=s,c=isWork(s)?1:0;while(c<n){d=addDays(d,1);if(isWork(d))c++}$('sc-end').value=d;paintSched()});
+$('schedCancel').onclick=()=>hideModal('schedModal');
+$('schedModal').onclick=e=>{if(e.target.id==='schedModal')hideModal('schedModal')};
+$('schedForm').onsubmit=e=>{e.preventDefault();const r=schedFor;if(!r)return;const s=$('sc-start').value,en=$('sc-end').value;
+  if(!s||!en||en<s){toast('Pick a start and a finish date');return}
+  const moved=jStart(r)&&jStart(r)!==s?dayDiff(s,jStart(r)):0;
+  r.ms.start=Object.assign(r.ms.start||{},{date:s});r.ms.complete=Object.assign(r.ms.complete||{},{date:en});
+  if(moved&&jtasks(r).length&&confirmShift(r,moved)){}
+  let n=0;if(planReady&&$('sc-tpl').checked&&!jtasks(r).length)n=buildFromTemplate(r);
+  log(r,`Job scheduled ${fmtRange(s,en)}`);save();hideModal('schedModal');render();if(selId===r.id)openDetail(r.id);
+  toast(n?`Scheduled · ${n} tasks added`:'Added to calendar');if(planReady)setTimeout(()=>openPlan(r),350)};
+function confirmShift(r,days){jtasks(r).forEach(t=>{if(t.start)t.start=addDays(t.start,days);if(t.end)t.end=addDays(t.end,days)});return true}
+
+/* the job plan sheet */
+let planFor=null,openTask=null;
+function openPlan(r,taskId){if(!planReady){toast('Job plan setup is not finished yet',false,true);return}planFor=r;openTask=taskId||null;paintPlan();showModal('planModal')}
+function paintPlan(){const r=planFor;if(!r)return;const ts=jtasks(r),s=jStart(r),e=jEnd(r),T=today();
+  const span=s&&e?Math.max(1,dayDiff(e,s)+1):1;
+  const pct=d=>s?Math.min(100,Math.max(0,dayDiff(d,s)/span*100)):0;
+  const cost=ts.reduce((t,x)=>t+(+x.cost||0),0),paidC=ts.filter(t=>t.paid).reduce((t,x)=>t+(+x.cost||0),0),dn=ts.filter(t=>t.done).length;
+  // week ticks for the timeline header
+  const ticks=[];if(s&&e){let d=s;while(d<=e){ticks.push(d);d=addDays(d,7)}}
+  const subsUsed=[...new Set(ts.map(t=>t.subId).filter(Boolean))];
+  $('planTitle').textContent=r.name;
+  $('planBody').innerHTML=`
+    <div class="phead"><div><h2>${esc(r.name)}</h2><p>${esc([r.address,r.city].filter(Boolean).join(', '))} · ${esc(r.type)}</p></div>
+      <button class="pdates" id="plDates">${ico('calp')}<span><b>${s?longDate(s):'Set start'} → ${e?longDate(e):'set finish'}</b><small>${s&&e?workDays(s,e).length+' work days':'Tap to schedule'}</small></span></button></div>
+    <div class="pstats four"><div class="mt"><b>${ts.length?Math.round(dn/ts.length*100):0}%</b><span>${dn}/${ts.length} done</span></div><div class="mt"><b>${s&&T<s?dayDiff(s,T):s&&e&&T<=e?dayDiff(e,T):0}</b><span>${s&&T<s?'days to start':s&&e&&T<=e?'days left':'days'}</span></div><div class="mt"><b>${kmoney(cost)}</b><span>Contractors</span></div><div class="mt"><b>${kmoney(cost-paidC)}</b><span>Still to pay</span></div></div>
+    <div class="label">Timeline <span><button id="plAdd">+ Add task</button>${!ts.length?'&nbsp;&nbsp;<button id="plTpl">Use template</button>':''}</span></div>
+    <div class="gantt">${s&&e?`<div class="gticks">${ticks.map(d=>`<span style="left:${pct(d)}%">${new Date(d+'T12:00').toLocaleDateString('en-CA',{month:'short',day:'numeric'})}</span>`).join('')}${T>=s&&T<=e?`<i class="gtoday" style="left:${pct(T)+50/span}%"></i>`:''}</div>`:''}
+      ${ts.length?ts.map(t=>taskHtml(t,pct,span)).join(''):`<div class="empty" style="padding:22px"><b style="font-size:15px">No tasks yet</b>Use the template or add your own tasks: demolition, plumbing, tile, paint…</div>`}</div>
+    <div class="label">Contractors on this job <span><button id="plSub">+ New contractor</button></span></div>
+    <div class="group">${subsUsed.length?subsUsed.map(id=>{const c=sub(id),mine=ts.filter(t=>t.subId===id),tot=mine.reduce((t,x)=>t+(+x.cost||0),0),pd=mine.filter(t=>t.paid).reduce((t,x)=>t+(+x.cost||0),0),ph=digits(c?.phone);
+      return `<div class="subrow"><span class="av" style="--c:var(--s-visit)">${esc(initials(c?.name||'?'))}</span><span class="sx"><b>${esc(c?.name||'Contractor')}</b><small>${esc([c?.trade,mine.map(t=>t.title).join(', ')].filter(Boolean).join(' · '))}</small></span>
+        <span class="sm"><b>${tot?money(tot):'—'}</b><small style="color:${tot&&pd>=tot?'var(--green)':tot?'var(--orange)':'var(--label3)'}">${tot?(pd>=tot?'Paid':pd?`${money(tot-pd)} to pay`:'To pay'):'Add amounts'}</small></span>${ph?`<a class="iconbtn" href="tel:+1${ph}" aria-label="Call">${ico('call')}</a>`:''}</div>`}).join(''):`<div class="empty" style="padding:16px"><b style="font-size:15px">No contractors yet</b>Pick a contractor on each task to see who works when and what you owe them.</div>`}</div>
+    <div class="label">Scope of work</div>
+    <div class="fg"><label class="ta" style="padding-top:0"><textarea id="plScope" rows="5" placeholder="Everything that will be done on this job, materials, notes for the crew…" style="text-align:left">${esc(r.ms.plan?.scope||'')}</textarea></label></div>`;
+  bindPlan();
+  if(openTask){const el=document.querySelector(`[data-task="${openTask}"]`);if(el)setTimeout(()=>el.scrollIntoView({block:'center'}),60)}
+}
+function taskHtml(t,pct,span){const st=taskState(t),c=sub(t.subId),open=openTask===t.id;const a=t.start,b=t.end||t.start;
+  const bar=a?`<div class="gbarw"><i class="gb ${st}" style="left:${pct(a)}%;width:${Math.max(100/span,(dayDiff(b,a)+1)/span*100)}%"></i></div>`:'';
+  return `<div class="ptask ${st}${open?' open':''}" data-task="${t.id}">
+    <div class="ptop"><button class="chk${t.done?' on':''}" data-tdone="${t.id}" aria-label="${t.done?'Undo':'Mark done'}">${ico('check')}</button>
+      <button class="ptx" data-topen="${t.id}"><b>${esc(t.title||'Untitled task')}</b><small>${fmtRange(a,b)}${a?` · ${workDays(a,b).length||1}d`:''}${c?' · '+esc(subName(t.subId)):''}${t.cost?` · ${money(t.cost)}${t.paid?' paid':''}`:''}</small></button>
+      <span class="tst" style="--c:${TST[st].c}">${TST[st].n}</span></div>${bar}
+    ${open?`<div class="ped">
+      <label><span>Task</span><input data-f="title" value="${esc(t.title)}" placeholder="e.g. Tile shower walls"></label>
+      <div class="pedrow"><label><span>Start</span><input type="date" data-f="start" value="${a||''}"></label><label><span>Finish</span><input type="date" data-f="end" value="${t.end||''}"></label></div>
+      <label><span>Contractor</span><select data-f="subId"><option value="">Our team / not set</option>${(db.subs||[]).slice().sort((x,y)=>x.name.localeCompare(y.name)).map(s=>`<option value="${s.id}"${s.id===t.subId?' selected':''}>${esc(s.name)}${s.trade?' · '+esc(s.trade):''}</option>`).join('')}<option value="__new">+ New contractor…</option></select></label>
+      <div class="pedrow"><label><span>Pay them</span><input data-f="cost" inputmode="decimal" placeholder="$0" value="${t.cost??''}"></label><label class="sw"><span>Paid</span><input type="checkbox" data-f="paid"${t.paid?' checked':''}></label></div>
+      <label class="ta"><span>Notes</span><textarea data-f="notes" rows="2" placeholder="Materials, access, details">${esc(t.notes||'')}</textarea></label>
+      <div class="pedact"><button class="btn gray" data-tdel="${t.id}">Delete</button><button class="btn" data-tclose="${t.id}">Done</button></div></div>`:''}</div>`}
+function bindPlan(){const r=planFor,B=$('planBody');
+  $('plDates').onclick=()=>openSched(r,false);
+  $('plAdd').onclick=()=>{const ts=jtasks(r),last=ts.at(-1),s=last?.end||jStart(r)||today();const t={id:uid(),jobId:r.id,title:'',start:s,end:s,subId:'',cost:null,paid:false,paidAt:'',done:false,notes:'',sort:ts.length};db.tasks.push(t);openTask=t.id;save();paintPlan();setTimeout(()=>{const i=document.querySelector(`[data-task="${t.id}"] [data-f="title"]`);if(i)i.focus()},80)};
+  if($('plTpl'))$('plTpl').onclick=()=>{if(!jStart(r)||!jEnd(r)){openSched(r,false);return}const n=buildFromTemplate(r);save();paintPlan();render();toast(`${n} tasks added`)};
+  $('plSub').onclick=()=>openSub(null);
+  $('plScope').oninput=e=>{r.ms.plan=Object.assign(r.ms.plan||{},{scope:e.target.value});save()};
+  B.querySelectorAll('[data-topen]').forEach(b=>b.onclick=()=>{openTask=openTask===b.dataset.topen?null:b.dataset.topen;paintPlan()});
+  B.querySelectorAll('[data-tclose]').forEach(b=>b.onclick=()=>{openTask=null;paintPlan();render()});
+  B.querySelectorAll('[data-tdone]').forEach(b=>b.onclick=()=>{const t=db.tasks.find(x=>x.id===b.dataset.tdone);t.done=!t.done;
+    if(t.done&&jtasks(r).every(x=>x.done)&&!stepDone(r,'complete')){r.ms.complete=Object.assign(r.ms.complete||{},{done:true,date:today()});log(r,'All tasks done · work completed');toast('All tasks done · job marked complete')}
+    save();paintPlan();render()});
+  B.querySelectorAll('[data-tdel]').forEach(b=>b.onclick=()=>{db.tasks=db.tasks.filter(x=>x.id!==b.dataset.tdel);openTask=null;save();paintPlan();render();toast('Task deleted')});
+  B.querySelectorAll('.ped [data-f]').forEach(inp=>{const t=db.tasks.find(x=>x.id===inp.closest('[data-task]').dataset.task);
+    inp.addEventListener(inp.type==='checkbox'||inp.tagName==='SELECT'||inp.type==='date'?'change':'input',()=>{const f=inp.dataset.f;
+      if(f==='subId'&&inp.value==='__new'){inp.value=t.subId||'';openSub(null,t);return}
+      if(f==='cost')t.cost=inp.value.replace(/[^0-9.]/g,'')?Number(inp.value.replace(/[^0-9.]/g,'')):null;
+      else if(f==='paid'){t.paid=inp.checked;t.paidAt=inp.checked?today():''}
+      else t[f]=inp.value;
+      if(f==='start'&&(!t.end||t.end<t.start))t.end=t.start;
+      if(f==='end'&&t.start&&t.end<t.start)t.start=t.end;
+      save();if(['start','end','subId','paid'].includes(f)){paintPlan();render()}})});
+}
+$('planClose').onclick=()=>{hideModal('planModal');openTask=null;render();if(selId)openDetail(selId)};
+$('planModal').onclick=e=>{if(e.target.id==='planModal')$('planClose').click()};
+
+/* contractors */
+let subEditing=null,subForTask=null;
+function openSub(c,task){subEditing=c||null;subForTask=task||null;['name','trade','phone','email','notes'].forEach(k=>$('sb-'+k).value=c?.[k]||'');$('subTitle').textContent=c?'Edit Contractor':'New Contractor';showModal('subModal');setTimeout(()=>$('sb-name').focus(),250)}
+$('subCancel').onclick=()=>hideModal('subModal');
+$('subModal').onclick=e=>{if(e.target.id==='subModal')hideModal('subModal')};
+$('subForm').onsubmit=e=>{e.preventDefault();const v={};['name','trade','phone','email','notes'].forEach(k=>v[k]=$('sb-'+k).value.trim());if(!v.name){toast('Add a name');return}
+  let c=subEditing;if(c)Object.assign(c,v);else{c=Object.assign({id:uid()},v);db.subs.push(c)}
+  if(subForTask){subForTask.subId=c.id;openTask=subForTask.id}save();hideModal('subModal');if(planFor&&!$('planModal').hidden)paintPlan();toast('Contractor saved')};
+
 /* ---------- tabs ---------- */
 function setTab(t){tab=t;
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
@@ -2026,7 +2263,7 @@ function openDetail(id,pan){
   const st=STAGES[stageOf(r)],nx=nextStep(r),dest=encodeURIComponent([r.address,r.city&&!r.address.toLowerCase().includes(r.city.toLowerCase())?r.city:'','ON '+(r.postal||''),'Canada'].filter(Boolean).join(', '));
   const ph=(r.phone||'').replace(/[^0-9+]/g,''),wa=(r.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');
   const T=total(r),P=paid(r),B=balance(r),ps=payStatus(r);
-  const nextText=!nx?'All steps complete':nx.k==='visit'&&r.ms.visit?.date?`Site visit ${fmtDate(r.ms.visit.date)}${r.ms.visit.time?' at '+fmtTime(r.ms.visit.time):''}`:nx.k==='start'&&r.ms.start?.date?`Work starts ${fmtDate(r.ms.start.date)}`:nx.k==='final'&&T?`Collect ${money(B)}`:nx.k==='deposit'&&T?`Collect deposit (${money(Math.round(T*.3))} suggested)`:({contacted:'Call the customer',visit:'Book the site visit',estimate:'Send the estimate',contract:'Get the contract signed',deposit:'Collect the deposit',start:'Set a start date',complete:'Finish the work',final:'Collect final payment',review:'Ask for a review'})[nx.k];
+  const nextText=!nx?'All steps complete':nx.k==='visit'&&r.ms.visit?.date?`Site visit ${fmtDate(r.ms.visit.date)}${r.ms.visit.time?' at '+fmtTime(r.ms.visit.time):''}`:nx.k==='start'&&r.ms.start?.date?`Work starts ${fmtDate(r.ms.start.date)}`:nx.k==='final'&&T?`Collect ${money(B)}`:nx.k==='deposit'&&T?`Collect deposit (${money(Math.round(T*.3))} suggested)`:({contacted:'Call the customer',visit:'Book the site visit',estimate:'Send the estimate',contract:'Get the contract signed',plan:'Set the job dates and job plan',deposit:'Collect the deposit',start:'Set a start date',complete:'Finish the work',final:'Collect final payment',review:'Ask for a review'})[nx.k];
   const evs=db.events.filter(e=>e.jobId===r.id).sort((a,b)=>a.date.localeCompare(b.date));
   const curI=nx?nx.i:-1;
   const v=$('vDetail');
@@ -2041,6 +2278,7 @@ function openDetail(id,pan){
       <button class="act" id="dCal">${ico('calp')}Schedule</button>
     </div>
     ${nx&&!r.lost?`<div class="nextcard"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
+    ${planCard(r)}
     ${leadConvHtml(r)}
     <div class="block"><div class="label">Estimates & Invoices <span><button id="newDoc">+ Estimate</button>&nbsp;&nbsp;<button id="newInv">+ Invoice</button></span></div>
       <div class="group">${docsFor(r.id).length?docsFor(r.id).sort((a,b)=>(isInv(a)-isInv(b))||String(a.number).localeCompare(String(b.number))).map(docListRow).join(''):`<div class="empty" style="padding:16px"><b style="font-size:15px">No estimate yet</b>Create one and send it for online signature.</div>`}</div></div>
@@ -2091,6 +2329,7 @@ function openDetail(id,pan){
     <div id="dConfirm"></div>
   </div>`;
   bindLeadConv(r);markLeadRead(r);
+  if($('planOpen'))$('planOpen').onclick=()=>openPlan(r);if($('planSched'))$('planSched').onclick=()=>openSched(r,false);
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
   if($('dNotesEdit'))$('dNotesEdit').onclick=()=>{openForm(r);setTimeout(()=>$('f-notes').focus(),300)};
@@ -2113,6 +2352,8 @@ function openDetail(id,pan){
   $('newInv').onclick=()=>{if(!invReady){toast('Run the invoices setup step first');return}openDoc(null,r,'invoice')};
   v.querySelectorAll('[data-doc]').forEach(b=>b.onclick=()=>openDoc((db.docs||[]).find(x=>x.id===b.dataset.doc),r));
   $('journey').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s,on=stepDone(r,k);
+    if(k==='plan'){if(!jStart(r)||!jEnd(r))openSched(r,false);else openPlan(r);return}
+    if(k==='contract'&&!on){snapshot();setStep(r,'contract',true);save();render();openDetail(r.id);setTimeout(()=>openSched(r,true),250);return}
     if(SK[k].pay&&!on&&T){openPay(k);return}
     snapshot();if(SK[k].pay&&on&&r.payments.length){if(k==='final'){r.payments.pop()}else{r.payments=[]}log(r,'Payment removed');r.ms[k]={done:false}}else setStep(r,k,!on);
     save();render();openDetail(r.id);toast(on?'Step undone':SK[k].n,true)};
@@ -2530,7 +2771,7 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 /* ---------- misc ---------- */
 let tt;function toast(m,canUndo,long){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.toggle('long',!!long||m.length>60);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:long?6500:2600)}
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];db.files=db.files||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel)closeDetail()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('subModal').hidden)hideModal('subModal');else if(!$('schedModal').hidden)hideModal('schedModal');else if(!$('planModal').hidden)$('planClose').click();else if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel)closeDetail()}});
 function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();if(tab==='cal')renderCal();drawPins();renderCards();
   if('setAppBadge' in navigator&&loaded){const n=data.filter(leadNeeds).length+(db.partners||[]).filter(pUnread).length;(n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{})}}
 let locating=false;
@@ -2587,13 +2828,14 @@ async function start(session){
   if(lid||pid||tb){history.replaceState(null,'',location.pathname);
     if(lid&&job(lid)){setTab(isLead(job(lid))?'leads':'jobs');openDetail(lid,true)}
     else if(pid&&part(pid)){setTab('part');openPartner(pid)}
+    else if(tb==='cal'){const dd=qp.get('day');if(dd){calSel=dd;const x=new Date(dd+'T12:00');calMonth=new Date(x.getFullYear(),x.getMonth(),1)}setTab('cal')}
     else if(tb==='leads'){leadView=qp.get('view')==='opps'?'opps':'list';if(qp.get('view')==='reply')leadFilter='needs';setTab('leads')}}
   refreshPushSub();
   if(gmailSt.connected)setTimeout(()=>checkMail(false),1500);
 }
 let partChannel=null;
 function ensurePartChannel(){if(!partReady||partChannel||!me)return;partChannel=sb.channel('nevaco-partners');
-  ['partners','partner_messages','app_settings','opportunities'].forEach(t=>partChannel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));partChannel.subscribe()}
+  [...['partners','partner_messages','app_settings','opportunities'],...(planReady?['job_tasks','contractors']:[])].forEach(t=>partChannel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));partChannel.subscribe()}
 sb.auth.onAuthStateChange((ev,session)=>{
   if(ev==='PASSWORD_RECOVERY'){showAuth('recover');return}
   if(ev==='SIGNED_OUT'){me=null;loaded=false;db={jobs:[],events:[]};data=db.jobs;render();showAuth('signin')}

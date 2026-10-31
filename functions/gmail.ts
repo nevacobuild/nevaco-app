@@ -801,8 +801,50 @@ async function metaDisconnect() {
   return { ok: true };
 }
 
+/* ---------- calendar digest: 8 AM (today) and 10 PM (tomorrow) ---------- */
+const fmt12 = (t: string) => { if (!t) return ""; const [h, m] = t.split(":").map(Number); return `${(h % 12) || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; };
+export function digestLines(d: string, jobs: any[], events: any[], tasks: any[], subs: any[]) {
+  const lines: { t: string; s: string }[] = [];
+  const jn = (id: string) => (jobs.find((j) => j.id === id) || {}).name || "";
+  const lbl: Record<string, string> = { visit: "Site visit", start: "Work starts", complete: "Work should finish" };
+  for (const j of jobs) {
+    if (j.lost) continue;
+    for (const k of ["visit", "start", "complete"]) { const m = (j.ms || {})[k] || {}; if (m.date === d && !m.done) lines.push({ t: m.time || "", s: `${m.time ? fmt12(m.time) + " " : ""}${lbl[k]} · ${j.name}` }); }
+    if (j.follow === d) lines.push({ t: "", s: `Follow up · ${j.name}` });
+  }
+  for (const e of events) if (e.date === d && !e.done) lines.push({ t: e.time || "", s: `${e.time ? fmt12(e.time) + " " : ""}${e.title}${e.job_id && jn(e.job_id) ? " · " + jn(e.job_id) : ""}` });
+  for (const t of tasks) {
+    if (t.done || !t.start) continue;
+    const end = t.end || t.start;
+    if (t.start <= d && d <= end) {
+      const c = subs.find((x) => x.id === t.contractor_id);
+      lines.push({ t: "", s: `${t.start === d ? "Starts: " : ""}${t.title} · ${jn(t.job_id)}${c ? " (" + c.name.split(" (")[0] + ")" : ""}` });
+    }
+  }
+  return lines.sort((a, b) => (a.t || "99").localeCompare(b.t || "99")).map((x) => x.s);
+}
+async function digest(which: "am" | "pm") {
+  const now = new Date();
+  const todayT = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto" }).format(now);
+  const d = which === "am" ? todayT : new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto" }).format(new Date(now.getTime() + 864e5));
+  const key = `dg:${todayT}:${which}`;
+  const { data: done } = await db.from("notify_state").select("key").eq("key", key).maybeSingle();
+  if (done) return { skipped: "sent" };
+  const { data: jobs } = await db.from("jobs").select("id,name,ms,follow,lost");
+  const { data: events } = await db.from("events").select("title,date,time,done,job_id").eq("date", d);
+  let tasks: any[] = [], subs: any[] = [];
+  try { tasks = (await db.from("job_tasks").select("*").lte("start", d)).data || []; subs = (await db.from("contractors").select("id,name")).data || []; } catch { /* job plan not set up */ }
+  const lines = digestLines(d, jobs || [], events || [], tasks, subs);
+  await db.from("notify_state").upsert({ key, at: now.toISOString() }, { onConflict: "key" });
+  if (!lines.length) return { lines: 0 };
+  const title = which === "am" ? `Today · ${lines.length} on your calendar` : `Tomorrow · ${lines.length} on your calendar`;
+  await sendPush(title, lines.slice(0, 5).join("\n") + (lines.length > 5 ? `\n+${lines.length - 5} more` : ""), "/?tab=cal" + (which === "pm" ? "&day=" + d : ""), "digest-" + which);
+  return { lines: lines.length };
+}
 async function remind() {
   const hour = Number(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto", hour: "2-digit", hour12: false }).format(new Date())) % 24;
+  if (hour === 8) await digest("am").catch((e) => console.warn("digest", e.message));
+  if (hour === 22) await digest("pm").catch((e) => console.warn("digest", e.message));
   if (hour < 8 || hour >= 20) return { skipped: "night" };
   const { data: jobs } = await db.from("jobs").select("id,name,source,ms,lost,stage,created_at").eq("lost", false).in("stage", ["lead", "visit", "quote"]);
   const { data: msgs } = await db.from("partner_messages").select("partner_id,job_id,dir,at").in("dir", ["in", "out"]).gte("at", new Date(Date.now() - 30 * 864e5).toISOString()).order("at");
@@ -947,6 +989,7 @@ if (typeof Deno !== "undefined" && (Deno as any).serve && !(globalThis as any)._
       case "vapid": return json({ key: (await vapidKeys()).pub });
       case "push_sub": return json(await pushSubscribe(user, body));
       case "push_unsub": await db.from("push_subs").delete().eq("endpoint", String(body.endpoint || "")); return json({ ok: true });
+      case "digest_test": return json({ lines: digestLines(String(body.date), (await db.from("jobs").select("id,name,ms,follow,lost")).data || [], (await db.from("events").select("*").eq("date", String(body.date))).data || [], (await db.from("job_tasks").select("*")).data || [], (await db.from("contractors").select("id,name")).data || []) });
       case "push_test": return json(await sendPush("Test notification", "Notifications from NEVACO Job Map are working.", "/", "test"));
       case "meta_start": return json(await metaStart(user));
       case "meta_status": return json(await metaStatus());
