@@ -1276,7 +1276,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.32 (Nov 4) · Lead follow-up & Not Interested';
+const APP_VERSION='1.33 (Nov 4) · Panel keeps scroll position';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1754,11 +1754,16 @@ $('pCust').addEventListener('click',e=>{const f=e.target.closest('[data-cf]');if
   const r=e.target.closest('[data-cust]');if(r)openCustomer(r.dataset.cust)});
 $('cq').oninput=e=>{custQuery=e.target.value.trim();renderCust()};
 let custSel=null;
+/* re-drawing the open panel (sync, saves, new data) keeps where you scrolled; a different record starts at the top */
+let detailKey='';
+function keepTop(v,key){const sc=v.querySelector(':scope > .scroll'),same=key===detailKey&&v.classList.contains('open'),top=same&&sc?sc.scrollTop:0;detailKey=key;
+  if(same&&top)queueMicrotask(()=>{const n=v.querySelector(':scope > .scroll');if(n)n.scrollTop=top})}
 function openCustomer(key){
   const c=customers().find(x=>x.key===key);if(!c){closeDetail();return}
   custSel=key;selId=null;
   const ph=digits(c.phone),bal=c.jobs.reduce((t,j)=>t+((stepDone(j,'contract')||stepDone(j,'complete'))&&!j.lost?balance(j):0),0);
   const v=$('vDetail');
+  keepTop(v,'c:'+key);
   v.innerHTML=`<div class="navbar"><button id="cBack">${ico('back')}${isPhone()?'Back':'Close'}</button><button id="cEdit">Edit</button></div>
   <div class="scroll">
     <div class="cbig"><span class="av" style="--c:var(${avColor(c.key)})">${esc(initials(c.name))}</span><div><h2>${esc(c.name)}</h2><p>${esc([c.address,c.city].filter(Boolean).join(', '))}${c.postal?' '+esc(c.postal):''}</p></div></div>
@@ -1927,6 +1932,7 @@ function openPartner(id){const p=part(id);if(!p)return;partSel=id;selId=null;cus
     const ids=un.map(m=>m.gmailId).filter(Boolean);if(ids.length&&gmailSt.connected)gm('read',{gmail_ids:ids}).catch(()=>{})}
   const v=$('vDetail'),pdf=!!pset.pdf_path,noMail=!mails(p).length;
   const d=drafts[p.id]||(noMail?{s:TPL.intro.s(),t:intro(p),a:pdf}:{s:reSubj(p),t:'',a:false});
+  keepTop(v,'p:'+id);
   v.innerHTML=`<div class="navbar"><button id="pBack">${ico('back')}${isPhone()?'Partners':'Close'}</button><button id="pEdit">Edit</button></div>
   <div class="scroll" id="pScroll"><div id="pTop"></div><div class="label">Conversation</div><div class="thread" id="pThread"></div></div>
     <div class="composer" id="pComp">
@@ -2714,6 +2720,7 @@ function openContractor(id){const c=sub(id);if(!c)return;subSel=id;selId=null;cu
   const jobs=[...st.byJob.entries()].map(([jid,ts])=>{const r=job(jid);const a=ts.map(t=>t.start).filter(Boolean).sort()[0],b=ts.map(t=>t.end||t.start).filter(Boolean).sort().at(-1);
     const tot=ts.reduce((s,t)=>s+(+t.cost||0),0),pd=ts.filter(t=>t.paid).reduce((s,t)=>s+(+t.cost||0),0);return{r,ts,a,b,tot,pd}}).sort((x,y)=>String(y.a).localeCompare(String(x.a)));
   const v=$('vDetail');
+  keepTop(v,'s:'+id);
   v.innerHTML=`<div class="navbar"><button id="cbBack">${ico('back')}${isPhone()?'Contractors':'Close'}</button><button id="cbEdit">Edit</button></div>
   <div class="scroll">
     <div class="cbig"><span class="av" style="--c:var(--s-visit)">${esc(initials(c.name))}</span><div><h2>${esc(c.name)}</h2><p>${esc([c.company,c.trade].filter(Boolean).join(' · ')||'Contractor')}</p>${c.rate?`<p class="pmail">Rate: ${esc(c.rate)}</p>`:''}</div></div>
@@ -2787,6 +2794,7 @@ function openDetail(id,pan){
   const evs=db.events.filter(e=>e.jobId===r.id).sort((a,b)=>a.date.localeCompare(b.date));
   const curI=nx?nx.i:-1;
   const v=$('vDetail');
+  keepTop(v,'j:'+id);
   v.innerHTML=`<div class="navbar"><button id="dBack">${ico('back')}${isPhone()?'Back':'Close'}</button><button id="dEdit">Edit</button></div>
   <div class="scroll">
     <div class="dtitle" style="--c:var(${st.c})"><div class="st"><i></i>${st.n}${ps?`<span class="tag ${ps.cls}">${ps.t}</span>`:''}${r.sample?'<span class="tag">Example</span>':''}</div>
