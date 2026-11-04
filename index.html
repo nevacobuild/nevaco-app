@@ -439,6 +439,8 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .exprow .rt span{display:block;font-size:13px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exprow .eamt{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .expcats{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:.5px solid var(--sep)}
+.expcats b{width:100%;font-size:11.5px;font-weight:500;color:var(--label2);text-transform:uppercase;letter-spacing:.04em}
+.expcats+.expcats{border-top:0;padding-top:0}
 .expcats span{font-size:12px;background:var(--card2);border-radius:7px;padding:3px 8px;color:var(--label2)}
 .xph{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
 .xph .xp{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--card2)}
@@ -1027,13 +1029,18 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
     <header><button type="button" id="expCancel">Cancel</button><h3 id="expTitleH">New Expense</h3><button type="submit" class="save" id="expSave">Add</button></header>
     <div class="body">
       <div class="fg">
-        <label><span>What</span><input id="x-title" placeholder="e.g. Drywall + screws" autocomplete="off"></label>
+        <label><span>What</span><input id="x-title" placeholder="e.g. Drywall + screws (optional)" autocomplete="off"></label>
         <label><span>Amount</span><input id="x-amount" inputmode="decimal" placeholder="$0.00" autocomplete="off"></label>
         <label><span>Date</span><input id="x-date" type="date"></label>
         <label><span>Category</span><select id="x-cat"></select></label>
-        <label><span>Paid by</span><input id="x-by" list="x-bylist" placeholder="Kevin, company card…" autocomplete="off"></label>
+        <label id="x-vendrow" hidden><span>Store</span><select id="x-vend"></select></label>
+        <label id="x-vendorow" hidden><span>Store name</span><input id="x-vendo" placeholder="Type the store name" autocomplete="off"></label>
+        <label id="x-subrow" hidden><span>Contractor</span><select id="x-sub"></select></label>
       </div>
-      <datalist id="x-bylist"></datalist>
+      <div class="fg">
+        <label><span>Paid by</span><select id="x-by"></select></label>
+        <label><span>Paid with</span><select id="x-pm"></select></label>
+      </div>
       <div><div class="label" style="margin-bottom:8px">Receipt photos <span id="x-phn"></span></div>
         <div class="xph" id="x-photos"></div></div>
       <div class="fg"><label class="ta"><span>Notes</span><textarea id="x-notes" placeholder="Store, invoice #, what it was for"></textarea></label></div>
@@ -1220,7 +1227,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.30 (Nov 4) · Job expenses';
+const APP_VERSION='1.31 (Nov 4) · Expenses: store, contractor, who paid';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1337,7 +1344,7 @@ const authStorage={
   removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
 };
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
-let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[],exps:[]};let expReady=false;let planReady=false,crewReady=false,fileSubReady=false;const filesReady0=fl=>!fl.error;let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
+let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[],exps:[]};let expReady=false,expMeta=false;let planReady=false,crewReady=false,fileSubReady=false;const filesReady0=fl=>!fl.error;let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
 let data=db.jobs;
 let me=null,team=[],loaded=false;
 let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map(),partners:new Map(),contractors:new Map(),job_tasks:new Map()};
@@ -1362,7 +1369,7 @@ async function fetchAll(){
   const[j,p,e,dc,fl]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
     sb.from('documents').select('*').order('created_at'),sb.from('files').select('*').order('created_at')]);
   const[pt,pm,ps,op]=await Promise.all([sb.from('partners').select('*').order('created_at'),sb.from('partner_messages').select('*').order('at'),sb.from('app_settings').select('*').eq('key','partners'),sb.from('opportunities').select('*').order('at',{ascending:false}).limit(300)]);
-  const[jt,ct,xp]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name'),sb.from('job_expenses').select('*').order('date')]);expReady=!xp.error;planReady=!jt.error&&!ct.error;crewReady=planReady&&(ct.data.length?('ins_exp' in ct.data[0]):!(await sb.from('contractors').select('ins_exp').limit(1)).error);if(filesReady0(fl))fileSubReady=fl.data.length?('contractor_id' in fl.data[0]):!(await sb.from('files').select('contractor_id').limit(1)).error;
+  const[jt,ct,xp]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name'),sb.from('job_expenses').select('*').order('date')]);expReady=!xp.error;expMeta=expReady&&(xp.data.length?('pay_method' in xp.data[0]):!(await sb.from('job_expenses').select('pay_method').limit(1)).error);planReady=!jt.error&&!ct.error;crewReady=planReady&&(ct.data.length?('ins_exp' in ct.data[0]):!(await sb.from('contractors').select('ins_exp').limit(1)).error);if(filesReady0(fl))fileSubReady=fl.data.length?('contractor_id' in fl.data[0]):!(await sb.from('files').select('contractor_id').limit(1)).error;
   partReady=!pt.error&&!pm.error;if(partReady){pset=(ps.data&&ps.data[0]&&ps.data[0].value)||{};await loadGmailStatus()}
   filesReady=!fl.error;
   if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error}
@@ -2256,10 +2263,17 @@ function planCard(r){
 }
 
 /* ---------- job expenses with receipt photos ---------- */
-const EXP_CATS=['Materials','Tools / rental','Bin / disposal','Permit / fees','Fuel / travel','Subcontractor','Food / crew','Other'];
+const EXP_CATS=['Materials','Subcontractor','Tools / rental','Bin / disposal','Permit / fees','Fuel / travel','Food / crew','Other'];
+const EXP_STORES=['Home Depot','Lowe\'s','RONA','Canadian Tire','Home Hardware','Floor & Decor','Costco','IKEA','Amazon','Wolseley (plumbing)','Nedco (electrical)','Gerrie Electric','Benjamin Moore','Sherwin-Williams','Tile store'];
+const EXP_PEOPLE=['Kevin','Raf','Shirin'];
+const EXP_PM=[['bcredit','Business account · credit card'],['bdebit','Business account · debit'],['bcash','Business cash'],['personal','Personal (own pocket)']];
+const pmName=k=>(EXP_PM.find(x=>x[0]===k)||[,''])[1];
+const pmShort=k=>({bcredit:'Business credit',bdebit:'Business debit',bcash:'Business cash',personal:'Personal'})[k]||'';
 const cents=v=>'$'+(Number(v)||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
-function expFrom(x){return{id:x.id,jobId:x.job_id,date:x.date||'',title:x.title||'',cat:x.category||'',amount:Number(x.amount)||0,by:x.paid_by||'',notes:x.notes||'',photos:Array.isArray(x.photos)?x.photos:[],createdAt:x.created_at||''}}
-function expRow(x){return{id:x.id,job_id:x.jobId,date:x.date||today(),title:x.title||'',category:x.cat||'',amount:Number(x.amount)||0,paid_by:x.by||'',notes:x.notes||'',photos:x.photos||[]}}
+function expFrom(x){return{id:x.id,jobId:x.job_id,date:x.date||'',title:x.title||'',cat:x.category||'',amount:Number(x.amount)||0,by:x.paid_by||'',notes:x.notes||'',photos:Array.isArray(x.photos)?x.photos:[],createdAt:x.created_at||'',vendor:x.vendor||'',subId:x.contractor_id||'',pm:x.pay_method||''}}
+function expRow(x){return{id:x.id,job_id:x.jobId,date:x.date||today(),title:x.title||'',category:x.cat||'',amount:Number(x.amount)||0,paid_by:x.by||'',notes:x.notes||'',photos:x.photos||[],...(expMeta?{vendor:x.vendor||'',contractor_id:nz(x.subId),pay_method:x.pm||''}:{})}}
+const expWho=x=>x.cat==='Subcontractor'&&x.subId?subName(x.subId):x.vendor;
+const expName=x=>x.title||expWho(x)||x.cat||'Expense';
 const expsFor=id=>(db.exps||[]).filter(x=>x.jobId===id).sort((a,b)=>b.date.localeCompare(a.date)||String(b.createdAt).localeCompare(String(a.createdAt)));
 const showExp=r=>['won','done'].includes(stageOf(r))||stepDone(r,'contract')||expsFor(r.id).length>0;
 const phUrls={};   // path -> {url, at}
@@ -2270,26 +2284,45 @@ function fillThumbs(root){const ims=[...root.querySelectorAll('img[data-xpath]')
   signPhotos(ims.map(i=>i.dataset.xpath)).then(m=>ims.forEach(i=>{if(m[i.dataset.xpath])i.src=m[i.dataset.xpath]})).catch(()=>{})}
 function expBlock(r){
   if(!showExp(r))return '';
-  if(!expReady)return `<div class="block"><div class="label">Expenses</div><div class="group"><div class="empty" style="padding:16px"><b style="font-size:15px">One-time setup needed</b>Run the expenses setup step (sql/11-expenses.sql) in Supabase, then expenses and receipt photos work here.</div></div></div>`;
+  if(!expReady||!expMeta)return `<div class="block"><div class="label">Expenses</div><div class="group"><div class="empty" style="padding:16px"><b style="font-size:15px">One-time setup needed</b>Run the expenses setup step (sql/12-expenses-who.sql) in Supabase, then expenses and receipt photos work here.</div></div></div>`;
   const xs=expsFor(r.id),tot=xs.reduce((t,x)=>t+x.amount,0),crew=jtasks(r).reduce((t,x)=>t+(+x.cost||0),0),T=total(r);
-  const cats={};xs.forEach(x=>{const c=x.cat||'Other';cats[c]=(cats[c]||0)+x.amount});
   return `<div class="block"><div class="label">Expenses${xs.length?` · ${xs.length}`:''} <button id="addExp">+ Add Expense</button></div><div class="group">
-    ${xs.length?`<div class="expsum"><div><span>Spent</span><b>${cents(tot)}</b></div><div><span>Contractors</span><b>${crew?money(crew):'—'}</b></div><div><span>Left from contract</span><b style="color:${T&&T-tot-crew<0?'var(--red)':'inherit'}">${T?money(T-tot-crew):'—'}</b></div></div>
-    ${xs.map(x=>`<button class="exprow" data-exp="${x.id}"><span class="eth">${x.photos.length?`<img data-xpath="${esc(x.photos[0].path)}" alt="">${x.photos.length>1?`<em>${x.photos.length}</em>`:''}`:ico('rcpt')}</span>
-      <span class="rt"><b>${esc(x.title)||'Expense'}</b><span>${fmtDate(x.date)}${x.cat?' · '+esc(x.cat):''}${x.by?' · '+esc(x.by):''}${x.photos.length?'':' · no receipt'}</span></span><span class="eamt">${cents(x.amount)}</span></button>`).join('')}
-    ${Object.keys(cats).length>1?`<div class="expcats">${Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`<span>${esc(c)} ${cents(a)}</span>`).join('')}</div>`:''}`
+    ${xs.length?`<div class="expsum"><div><span>Spent</span><b>${cents(tot)}</b></div><div><span>Job plan contractors</span><b>${crew?money(crew):'—'}</b></div><div><span>Left from contract</span><b style="color:${T&&T-tot-crew<0?'var(--red)':'inherit'}">${T?money(T-tot-crew):'—'}</b></div></div>
+    ${xs.map(x=>{const w=expWho(x);return `<button class="exprow" data-exp="${x.id}"><span class="eth">${x.photos.length?`<img data-xpath="${esc(x.photos[0].path)}" alt="">${x.photos.length>1?`<em>${x.photos.length}</em>`:''}`:ico('rcpt')}</span>
+      <span class="rt"><b>${esc(expName(x))}</b><span>${[fmtDate(x.date),x.cat,w&&w!==expName(x)?w:''].filter(Boolean).map(esc).join(' · ')}</span><span>${[x.by,pmShort(x.pm)].filter(Boolean).map(esc).join(' · ')||'Who paid not set'}${x.photos.length?'':' · no receipt'}</span></span><span class="eamt">${cents(x.amount)}</span></button>`}).join('')}
+    ${expBreak(xs)}`
     :`<div class="empty" style="padding:16px"><b style="font-size:15px">No expenses yet</b>Add every cost on this job — materials, rentals, bin, permits, gas — with a photo of the receipt.</div>`}
   </div></div>`;
+}
+function expBreak(xs){
+  const by={},cats={};let pers=0;const persBy={};
+  xs.forEach(x=>{const c=x.cat||'Other';cats[c]=(cats[c]||0)+x.amount;if(x.by){by[x.by]=(by[x.by]||0)+x.amount}
+    if(x.pm==='personal'){pers+=x.amount;if(x.by)persBy[x.by]=(persBy[x.by]||0)+x.amount}});
+  const line=(t,o)=>Object.keys(o).length?`<div class="expcats"><b>${t}</b>${Object.entries(o).sort((a,b)=>b[1]-a[1]).map(([k,a])=>`<span>${esc(k)} ${cents(a)}</span>`).join('')}</div>`:'';
+  return line('Paid by',by)+(pers?line('Paid personally · to pay back',persBy):'')+(Object.keys(cats).length>1?line('By category',cats):'');
 }
 function bindExp(r,v){if($('addExp'))$('addExp').onclick=()=>openExp(null,r);
   v.querySelectorAll('[data-exp]').forEach(b=>b.onclick=()=>{const x=(db.exps||[]).find(y=>y.id===b.dataset.exp);if(x)openExp(x,r)});fillThumbs(v)}
 let expEdit=null,expJob=null,xPhotos=[],xRemoved=[],xBusy=false;   // xPhotos: [{path,name,size}] saved, or {file,url} new
 function openExp(x,r){expJob=r;expEdit=x;xBusy=false;xRemoved=[];xPhotos=x?x.photos.map(p=>Object.assign({},p)):[];
   $('expTitleH').textContent=x?'Expense':'New Expense';$('expSave').textContent=x?'Save':'Add';$('expSave').disabled=false;$('expDel').hidden=!x;
-  $('x-title').value=x?x.title:'';$('x-amount').value=x?x.amount:'';$('x-date').value=x?x.date:today();$('x-by').value=x?x.by:(me?.name||'');$('x-notes').value=x?x.notes:'';
+  $('x-title').value=x?x.title:'';$('x-amount').value=x?x.amount:'';$('x-date').value=x?x.date:today();$('x-notes').value=x?x.notes:'';
   $('x-cat').innerHTML=EXP_CATS.map(c=>`<option${(x?x.cat:'Materials')===c?' selected':''}>${c}</option>`).join('');
-  $('x-bylist').innerHTML=[...new Set([...(team||[]).map(t=>t.name).filter(Boolean),...(db.exps||[]).map(y=>y.by).filter(Boolean),'Company card'])].map(n=>`<option value="${esc(n)}">`).join('');
+  const meN=EXP_PEOPLE.find(n=>(me?.name||'').toLowerCase().startsWith(n.toLowerCase())||(n==='Raf'&&/^raouf/i.test(me?.name||'')))||'';
+  const byV=x?x.by:meN,people=[...EXP_PEOPLE,...(byV&&!EXP_PEOPLE.includes(byV)?[byV]:[])];
+  $('x-by').innerHTML=`<option value="">Choose</option>`+people.map(n=>`<option${n===byV?' selected':''}>${esc(n)}</option>`).join('');
+  $('x-pm').innerHTML=`<option value="">Choose</option>`+EXP_PM.map(([k,n])=>`<option value="${k}"${x&&x.pm===k?' selected':''}>${n}</option>`).join('');
+  const stores=[...new Set([...EXP_STORES,...(db.exps||[]).filter(y=>y.cat==='Materials').map(y=>y.vendor).filter(Boolean)])];
+  const vv=x?x.vendor:'';
+  $('x-vend').innerHTML=`<option value="">Choose store</option>`+stores.map(n=>`<option${n===vv?' selected':''}>${esc(n)}</option>`).join('')+`<option value="__other">Other store…</option>`;
+  $('x-vendo').value='';
+  const subs=[...(db.subs||[])].sort((a,b)=>a.name.localeCompare(b.name));
+  $('x-sub').innerHTML=(subs.length?`<option value="">Choose contractor</option>`:`<option value="">No contractors yet — add them in Contractors</option>`)+subs.map(c=>`<option value="${esc(c.id)}"${x&&x.subId===c.id?' selected':''}>${esc(c.name)}${c.trade?' · '+esc(c.trade):''}</option>`).join('');
+  syncExpCat();
   paintXPhotos();showModal('expModal');if(!x)setTimeout(()=>$('x-title').focus(),300)}
+function syncExpCat(){const c=$('x-cat').value;$('x-vendrow').hidden=c!=='Materials';$('x-subrow').hidden=c!=='Subcontractor';$('x-vendorow').hidden=c!=='Materials'||$('x-vend').value!=='__other';
+  if(!$('x-vendorow').hidden)setTimeout(()=>$('x-vendo').focus(),50)}
+$('x-cat').onchange=syncExpCat;$('x-vend').onchange=syncExpCat;
 function paintXPhotos(){$('x-phn').textContent=xPhotos.length?`${xPhotos.length} photo${xPhotos.length>1?'s':''}`:'';
   $('x-photos').innerHTML=xPhotos.map((p,i)=>`<div class="xp${p.file?' new':''}"><img ${p.file?`src="${p.url}"`:`data-xpath="${esc(p.path)}"`} data-xi="${i}" alt="Receipt ${i+1}"><button type="button" data-xrm="${i}" aria-label="Remove photo">×</button></div>`).join('')
     +`<label class="addp" id="xAddPh">${ico('cam')}Add Photo</label>`;
@@ -2308,9 +2341,14 @@ $('expCancel').onclick=()=>{if(xBusy)return;closeExp()};
 $('expModal').onclick=e=>{if(e.target.id==='expModal'&&!xBusy)closeExp()};
 $('expForm').onsubmit=async e=>{e.preventDefault();if(xBusy)return;const r=expJob;if(!r)return;
   if(!expReady){toast('Run the expenses setup step first');return}
-  const title=$('x-title').value.trim(),amount=Number(($('x-amount').value||'').replace(/[^0-9.]/g,''));
-  if(!title){toast('What was it for?');$('x-title').focus();return}
+  const title=$('x-title').value.trim(),amount=Number(($('x-amount').value||'').replace(/[^0-9.]/g,'')),cat=$('x-cat').value;
+  const vendor=cat==='Materials'?($('x-vend').value==='__other'?$('x-vendo').value.trim():$('x-vend').value):'',subId=cat==='Subcontractor'?$('x-sub').value:'';
   if(!amount){toast('Enter the amount');$('x-amount').focus();return}
+  if(cat==='Materials'&&$('x-vend').value==='__other'&&!vendor){toast('Type the store name');$('x-vendo').focus();return}
+  if(!title&&!vendor&&!subId){toast('Write what it was for');$('x-title').focus();return}
+  if(!$('x-by').value){toast('Who paid?');$('x-by').focus();return}
+  if(!$('x-pm').value){toast('How was it paid?');$('x-pm').focus();return}
+  if(!expMeta){toast('Run the expenses setup step first',false,true);return}
   xBusy=true;$('expSave').disabled=true;
   const id=expEdit?expEdit.id:uid(),photos=[],news=xPhotos.filter(p=>p.file);let bad=0,k=0;
   for(const p of xPhotos){if(!p.file){photos.push({path:p.path,name:p.name||'',size:p.size||0});continue}
@@ -2320,13 +2358,13 @@ $('expForm').onsubmit=async e=>{e.preventDefault();if(xBusy)return;const r=expJo
     const up=await sb.storage.from('job-files').upload(path,b,{contentType:b.type||undefined,upsert:false});
     if(up.error){console.error(up.error);bad++;continue}
     photos.push({path,name:p.name||'',size:b.size});URL.revokeObjectURL(p.url)}
-  const x=Object.assign({},expEdit||{createdAt:new Date().toISOString()},{id,jobId:r.id,title,amount,date:$('x-date').value||today(),cat:$('x-cat').value,by:$('x-by').value.trim(),notes:$('x-notes').value.trim(),photos});
+  const x=Object.assign({},expEdit||{createdAt:new Date().toISOString()},{id,jobId:r.id,title,amount,date:$('x-date').value||today(),cat,vendor,subId,by:$('x-by').value,pm:$('x-pm').value,notes:$('x-notes').value.trim(),photos});
   const q=expEdit?await sb.from('job_expenses').update(expRow(x)).eq('id',id):await sb.from('job_expenses').insert(Object.assign(expRow(x),{created_by:me?.email||''}));
   if(q.error){console.error(q.error);const fresh=photos.filter(p=>!(expEdit&&expEdit.photos.some(o=>o.path===p.path))).map(p=>p.path);if(fresh.length)sb.storage.from('job-files').remove(fresh).then(()=>{},()=>{});
     xBusy=false;$('expSave').disabled=false;xPhotos=xPhotos.filter(p=>p.file||photos.some(o=>o.path===p.path));toast('Could not save the expense. Check your connection.');return}
   if(xRemoved.length)sb.storage.from('job-files').remove(xRemoved).then(()=>{},()=>{});
   if(expEdit)Object.assign(expEdit,x);else db.exps.push(x);
-  if(!expEdit)log(r,`Expense: ${title} ${cents(amount)}`);
+  if(!expEdit)log(r,`Expense: ${expName(x)} ${cents(amount)} · paid by ${x.by}`);
   xPhotos=[];xBusy=false;hideModal('expModal');save();render();if(selId===r.id)openDetail(r.id);
   toast(bad?`Saved, but ${bad} photo${bad>1?'s':''} could not upload`:expEdit?'Expense updated':news.length?`Expense added with ${news.length} photo${news.length>1?'s':''}`:'Expense added')};
 $('expDel').onclick=async()=>{const x=expEdit,r=expJob,b=$('expDel');if(!x||xBusy)return;
@@ -2334,7 +2372,7 @@ $('expDel').onclick=async()=>{const x=expEdit,r=expJob,b=$('expDel');if(!x||xBus
   b.classList.remove('sure');b.textContent='Delete Expense';xBusy=true;
   const d=await sb.from('job_expenses').delete().eq('id',x.id);xBusy=false;if(d.error){toast('Could not delete');return}
   const paths=x.photos.map(p=>p.path);if(paths.length)sb.storage.from('job-files').remove(paths).then(()=>{},()=>{});
-  db.exps=db.exps.filter(y=>y.id!==x.id);log(r,`Expense removed: ${x.title} ${cents(x.amount)}`);closeExp();save();render();if(selId===r.id)openDetail(r.id);toast('Expense deleted')};
+  db.exps=db.exps.filter(y=>y.id!==x.id);log(r,`Expense removed: ${expName(x)} ${cents(x.amount)}`);closeExp();save();render();if(selId===r.id)openDetail(r.id);toast('Expense deleted')};
 
 /* schedule sheet: right after the contract is signed */
 let schedFor=null;
