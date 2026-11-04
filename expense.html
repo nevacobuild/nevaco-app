@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f2f2f7">
+<title>Add expense · NEVACO BUILD</title>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#f2f2f7;--card:#fff;--card2:rgba(118,118,128,.12);--label:#1d1d1f;--label2:rgba(60,60,67,.62);--label3:rgba(60,60,67,.34);--sep:rgba(60,60,67,.14);
+  --blue:#007aff;--red:#d0021b;--green:#34c759;--ink:#1d1d1f;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;color-scheme:light}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--label);font-family:var(--font);font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none;padding:0}
+[hidden]{display:none!important}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 60px;display:grid;gap:18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:6px}
+.top img{height:34px;width:auto;display:block}
+.top span{font-size:12px;color:var(--label2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.job{background:var(--card);border-radius:14px;padding:14px 16px}
+.job small{display:block;font-size:12px;color:var(--label2);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.job b{display:block;font-size:20px;margin-top:2px}.job p{margin:2px 0 0;color:var(--label2);font-size:14.5px}
+h2{margin:0 4px -8px;font-size:13px;color:var(--label2);text-transform:uppercase;letter-spacing:.04em;font-weight:500}
+.fg{background:var(--card);border-radius:12px;overflow:hidden}
+.fg label{display:flex;align-items:center;gap:12px;padding:0 14px;min-height:48px;position:relative}
+.fg label+label::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
+.fg label>span{width:104px;flex:none}
+.fg input,.fg select,.fg textarea{flex:1;min-width:0;border:0;background:none;outline:none;padding:13px 0;text-align:right;font-size:16px}
+.fg select{appearance:none;-webkit-appearance:none;color:var(--label2)}
+.fg select.set{color:var(--label)}
+.fg textarea{text-align:left;resize:none;min-height:84px}
+.fg label.ta{align-items:flex-start}.fg label.ta>span{padding-top:13px}
+.amt input{font-size:22px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{background:var(--card);border-radius:999px;padding:10px 16px;font-weight:600;font-size:15px;border:2px solid transparent}
+.chips button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.pm{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pm button{background:var(--card);border-radius:12px;padding:12px;font-weight:600;font-size:14.5px;text-align:left;border:2px solid transparent;line-height:1.25}
+.pm button small{display:block;font-weight:500;color:var(--label2);font-size:12.5px}
+.pm button[aria-pressed="true"]{border-color:var(--blue);background:#eaf3ff}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.photos .p{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--card2)}
+.photos .p img{width:100%;height:100%;object-fit:cover;display:block}
+.photos .p button{position:absolute;top:5px;right:5px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:16px;line-height:26px}
+.photos label{aspect-ratio:1;border-radius:12px;border:1.5px dashed var(--label3);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--blue);font-weight:600;font-size:13px;cursor:pointer;text-align:center}
+.photos label svg{width:26px;height:26px}
+.photos input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.send{width:100%;background:var(--ink);color:#fff;border-radius:14px;padding:16px;font-weight:700;font-size:17px}
+.send:disabled{opacity:.6}
+.err{color:var(--red);font-weight:600;font-size:14.5px;margin:-6px 4px 0}
+.msg{background:var(--card);border-radius:14px;padding:28px 20px;text-align:center}
+.msg b{display:block;font-size:19px;margin-bottom:6px}.msg p{margin:0 0 16px;color:var(--label2)}
+.msg .ok{width:56px;height:56px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.msg .ok svg{width:30px;height:30px}
+.btn2{background:var(--card2);border-radius:12px;padding:12px 18px;font-weight:600}
+.recent{background:var(--card);border-radius:12px;overflow:hidden}
+.recent div{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;font-size:14.5px}
+.recent div+div{border-top:.5px solid var(--sep)}
+.recent span{color:var(--label2);font-size:13px;display:block}
+.recent b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.foot{text-align:center;color:var(--label3);font-size:12px}
+svg.i{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</head>
+<body>
+<div class="wrap" id="root">
+  <div class="top"><img src="logo-dark.png" alt="NEVACO BUILD"><span>Job expense</span></div>
+  <div class="msg"><b>Loading…</b></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<script>
+(()=>{
+const sb=window.supabase.createClient('https://pnomirvkekhurtuigxol.supabase.co','sb_publishable_hZvLBt3e7q6Ycvm1k6yEBA_YMfivV53',{auth:{persistSession:false}});
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');const today=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const cents=v=>'$'+(Number(v)||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtD=d=>d?new Date(d+'T12:00').toLocaleDateString('en-CA',{month:'short',day:'numeric'}):'';
+const token=new URLSearchParams(location.search).get('t')||'';
+const CATS=['Materials','Subcontractor','Tools / rental','Bin / disposal','Permit / fees','Fuel / travel','Food / crew','Other'];
+const STORES=['Home Depot',"Lowe's",'RONA','Canadian Tire','Home Hardware','Floor & Decor','Costco','IKEA','Amazon','Wolseley (plumbing)','Nedco (electrical)','Gerrie Electric','Benjamin Moore','Sherwin-Williams','Tile store'];
+const PEOPLE=['Kevin','Raf','Shirin'];
+const PM=[['bcredit','Business account','credit card'],['bdebit','Business account','debit'],['bcash','Business cash',''],['personal','Personal','own pocket']];
+const CAM='<svg class="i" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+const OK='<svg class="i" viewBox="0 0 24 24" style="stroke-width:2.6"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+let info=null,who='',whoOther=false,pm='',photos=[],busy=false;
+try{const w=localStorage.getItem('nevaco-exp-who');if(w){if(PEOPLE.includes(w))who=w;else{who=w;whoOther=true}}}catch(e){}
+const head=()=>`<div class="top"><img src="logo-dark.png" alt="NEVACO BUILD"><span>Job expense</span></div>`;
+function fail(t,p){$('root').innerHTML=head()+`<div class="msg"><b>${esc(t)}</b><p>${esc(p)}</p></div>`}
+async function load(){
+  if(token.length<32){fail('This link is not complete','Open the full link you received from NEVACO BUILD.');return}
+  try{const r=await sb.rpc('get_expense_link',{p_token:token});if(r.error)throw r.error;info=r.data}catch(e){fail('Could not load','Check your connection and try again.');return}
+  if(!info){fail('This link is not active','Ask NEVACO BUILD for a new link.');return}
+  form()}
+function form(){const j=info.job||{};
+  $('root').innerHTML=head()+`
+  <div class="job"><small>Adding an expense for</small><b>${esc(j.name||'Job')}</b><p>${esc([j.address,j.city].filter(Boolean).join(', '))}${j.type?' · '+esc(j.type):''}</p></div>
+  <h2>Who paid</h2>
+  <div class="chips" id="who">${PEOPLE.map(n=>`<button type="button" data-who="${n}" aria-pressed="${!whoOther&&who===n}">${n}</button>`).join('')}<button type="button" data-who="__o" aria-pressed="${whoOther}">Someone else</button></div>
+  <div class="fg" id="whoOw" ${whoOther?'':'hidden'}><label><span>Name</span><input id="whoO" placeholder="Your name" value="${whoOther?esc(who):''}" autocomplete="name"></label></div>
+  <h2>Expense</h2>
+  <div class="fg">
+    <label class="amt"><span>Amount</span><input id="amt" inputmode="decimal" placeholder="$0.00" autocomplete="off"></label>
+    <label><span>Date</span><input id="dt" type="date" value="${today()}" max="${today()}"></label>
+    <label><span>Category</span><select id="cat" class="set">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></label>
+    <label id="vendR"><span>Store</span><select id="vend"><option value="">Choose store</option>${STORES.map(s=>`<option>${esc(s)}</option>`).join('')}<option value="__o">Other store…</option></select></label>
+    <label id="vendOR" hidden><span>Store name</span><input id="vendO" placeholder="Type the store name"></label>
+    <label id="subR" hidden><span>Contractor</span><select id="sub"><option value="">Choose contractor</option>${(info.contractors||[]).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}${c.trade?' · '+esc(c.trade):''}</option>`).join('')}</select></label>
+    <label><span>What</span><input id="ttl" placeholder="e.g. Drywall + screws (optional)" autocomplete="off"></label>
+  </div>
+  <h2>Paid with</h2>
+  <div class="pm" id="pm">${PM.map(([k,a,b])=>`<button type="button" data-pm="${k}" aria-pressed="${pm===k}">${a}${b?`<small>${b}</small>`:''}</button>`).join('')}</div>
+  <h2>Receipt photos</h2>
+  <div class="photos" id="ph"></div>
+  <div class="fg"><label class="ta"><span>Notes</span><textarea id="nt" placeholder="Invoice #, what it was for"></textarea></label></div>
+  <p class="err" id="err" hidden></p>
+  <button class="send" id="send">Send expense</button>
+  ${recentHtml()}
+  <p class="foot">Only NEVACO BUILD sees what you send. Photos are kept private.</p>`;
+  paintPh();syncCat();
+  $('who').onclick=e=>{const b=e.target.closest('[data-who]');if(!b)return;whoOther=b.dataset.who==='__o';who=whoOther?($('whoO').value.trim()):b.dataset.who;
+    $('who').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));$('whoOw').hidden=!whoOther;if(whoOther)$('whoO').focus()};
+  $('pm').onclick=e=>{const b=e.target.closest('[data-pm]');if(!b)return;pm=b.dataset.pm;$('pm').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))};
+  $('cat').onchange=syncCat;$('vend').onchange=syncCat;
+  ['vend','sub'].forEach(id=>$(id).addEventListener('change',e=>e.target.classList.toggle('set',!!e.target.value)));
+  $('send').onclick=send;
+}
+function syncCat(){const c=$('cat').value;$('vendR').hidden=c!=='Materials';$('subR').hidden=c!=='Subcontractor';$('vendOR').hidden=c!=='Materials'||$('vend').value!=='__o'}
+function recentHtml(){const r=info.recent||[];if(!r.length)return '';
+  return `<h2>Sent with this link</h2><div class="recent">${r.slice(0,10).map(x=>`<div><span style="color:var(--label);font-size:14.5px">${esc(x.title||x.vendor||x.category||'Expense')}<span>${fmtD(x.date)} · ${esc(x.paid_by||'')}${x.photos?` · ${x.photos} photo${x.photos>1?'s':''}`:' · no receipt'}</span></span><b>${cents(x.amount)}</b></div>`).join('')}</div>`}
+function paintPh(){$('ph').innerHTML=photos.map((p,i)=>`<div class="p"><img src="${p.url}" alt=""><button type="button" data-rm="${i}" aria-label="Remove">×</button></div>`).join('')+
+  `<label>${CAM}${photos.length?'Add more':'Take photo<br>or choose'}<input type="file" id="phIn" accept="image/*" multiple></label>`;
+  $('phIn').onchange=e=>{[...e.target.files].forEach(f=>{if(photos.length<12)photos.push({file:f,url:URL.createObjectURL(f),name:f.name})});paintPh()};
+  $('ph').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const p=photos.splice(+b.dataset.rm,1)[0];URL.revokeObjectURL(p.url);paintPh()})}
+function shrink(f){return new Promise(res=>{const u=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{const k=Math.min(1,1800/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>res(b||f),'image/jpeg',.82)};
+  im.onerror=()=>{URL.revokeObjectURL(u);res(f)};im.src=u})}
+const rid=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
+function err(t){const e=$('err');e.textContent=t;e.hidden=!t;if(t)e.scrollIntoView({block:'center',behavior:'smooth'})}
+async function send(){if(busy)return;err('');
+  if(whoOther)who=$('whoO').value.trim();
+  const amount=Number(($('amt').value||'').replace(/[^0-9.]/g,'')),cat=$('cat').value;
+  const vendor=cat==='Materials'?($('vend').value==='__o'?$('vendO').value.trim():$('vend').value):'',sub=cat==='Subcontractor'?$('sub').value:'';
+  if(!who||who.length<2){err('Choose who paid');return}
+  if(!amount){err('Enter the amount');$('amt').focus();return}
+  if(cat==='Materials'&&$('vend').value==='__o'&&!vendor){err('Type the store name');$('vendO').focus();return}
+  if(!pm){err('Choose how it was paid');return}
+  busy=true;const b=$('send');b.disabled=true;
+  const up=[];let bad=0;
+  for(let i=0;i<photos.length;i++){b.textContent=`Uploading photo ${i+1} of ${photos.length}…`;
+    const p=photos[i],blob=await shrink(p.file),ext=blob.type==='image/jpeg'?'jpg':(((p.name||'').split('.').pop()||'jpg').toLowerCase());
+    const path=`expense-links/${token}/${rid()}.${['jpg','jpeg','png','webp','heic','heif'].includes(ext)?ext:'jpg'}`;
+    const r=await sb.storage.from('job-files').upload(path,blob,{contentType:blob.type||'image/jpeg',upsert:false});
+    if(r.error){console.error(r.error);bad++;continue}up.push({path,name:p.name||'',size:blob.size})}
+  if(bad&&!up.length&&photos.length){busy=false;b.disabled=false;b.textContent='Send expense';err('The photos could not upload. Check your connection and try again.');return}
+  b.textContent='Sending…';
+  const r=await sb.rpc('submit_expense',{p_token:token,p_data:{amount,date:$('dt').value,category:cat,vendor,contractor_id:sub,title:$('ttl').value.trim(),paid_by:who,pay_method:pm,notes:$('nt').value.trim(),photos:up}});
+  busy=false;
+  if(r.error){b.disabled=false;b.textContent='Send expense';err(r.error.message||'Could not send. Try again.');return}
+  try{localStorage.setItem('nevaco-exp-who',who)}catch(e){}
+  photos.forEach(p=>URL.revokeObjectURL(p.url));photos=[];pm='';
+  $('root').innerHTML=head()+`<div class="msg"><div class="ok">${OK}</div><b>Expense sent</b><p>${cents(amount)} for ${esc(info.job?.name||'this job')}${up.length?` · ${up.length} photo${up.length>1?'s':''}`:''}${bad?` · ${bad} photo${bad>1?'s':''} did not upload`:''}</p><button class="btn2" id="again">Add another expense</button></div>`;
+  $('again').onclick=async()=>{try{const x=await sb.rpc('get_expense_link',{p_token:token});if(x.data)info=x.data}catch(e){}form();window.scrollTo({top:0})};
+  window.scrollTo({top:0,behavior:'smooth'})}
+load();
+})();
+</script>
+</body>
+</html>
