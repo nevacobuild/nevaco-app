@@ -428,6 +428,28 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .frow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;min-height:46px}
+/* expenses */
+.expsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px;border-bottom:.5px solid var(--sep)}
+.expsum span{display:block;font-size:12px;color:var(--label2)}.expsum b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.exprow{display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px;text-align:left;position:relative}
+.exprow+.exprow::before{content:"";position:absolute;top:0;left:62px;right:0;height:.5px;background:var(--sep)}
+.exprow .eth{width:38px;height:38px;border-radius:9px;flex:none;background:var(--card2);overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--label2);position:relative}
+.exprow .eth img{width:100%;height:100%;object-fit:cover}.exprow .eth svg{width:20px;height:20px}
+.exprow .eth em{position:absolute;right:2px;bottom:2px;font-style:normal;font-size:10px;font-weight:700;background:rgba(0,0,0,.6);color:#fff;border-radius:6px;padding:0 4px}
+.exprow .rt span{display:block;font-size:13px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exprow .eamt{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.expcats{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:.5px solid var(--sep)}
+.expcats span{font-size:12px;background:var(--card2);border-radius:7px;padding:3px 8px;color:var(--label2)}
+.xph{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.xph .xp{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--card2)}
+.xph .xp img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.xph .xp button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:24px}
+.xph .xp.new::after{content:"New";position:absolute;left:4px;bottom:4px;font-size:10px;font-weight:700;background:var(--blue);color:#fff;border-radius:6px;padding:1px 5px}
+.xph .addp{aspect-ratio:1;border-radius:10px;border:1.5px dashed var(--label3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--blue);font-size:12.5px;font-weight:600;cursor:pointer;background:var(--card)}
+.xph .addp svg{width:22px;height:22px}
+#phView{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:44px 12px 12px}
+#phView img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+#phView button{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:14px;color:#fff;font-size:16px;font-weight:600;background:rgba(255,255,255,.16);border-radius:9px;padding:6px 12px}
 .frow>span{display:flex;gap:10px;align-items:center;min-width:0}.frow>span>span{min-width:0}.frow b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .frow small{display:block;color:var(--label2);font-size:12.5px}.frow svg{flex:none;width:22px;height:22px;color:var(--red)}
 .lnkbtn{flex:none;color:var(--blue);font-weight:600;padding:6px 12px;border-radius:9px;background:var(--card2);font-size:14px}.lnkbtn.red{color:var(--red)}
@@ -1000,6 +1022,28 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   </form>
 </div>
 
+<div class="scrim" id="expModal" hidden>
+  <form class="sheet" id="expForm" novalidate>
+    <header><button type="button" id="expCancel">Cancel</button><h3 id="expTitleH">New Expense</h3><button type="submit" class="save" id="expSave">Add</button></header>
+    <div class="body">
+      <div class="fg">
+        <label><span>What</span><input id="x-title" placeholder="e.g. Drywall + screws" autocomplete="off"></label>
+        <label><span>Amount</span><input id="x-amount" inputmode="decimal" placeholder="$0.00" autocomplete="off"></label>
+        <label><span>Date</span><input id="x-date" type="date"></label>
+        <label><span>Category</span><select id="x-cat"></select></label>
+        <label><span>Paid by</span><input id="x-by" list="x-bylist" placeholder="Kevin, company card…" autocomplete="off"></label>
+      </div>
+      <datalist id="x-bylist"></datalist>
+      <div><div class="label" style="margin-bottom:8px">Receipt photos <span id="x-phn"></span></div>
+        <div class="xph" id="x-photos"></div></div>
+      <div class="fg"><label class="ta"><span>Notes</span><textarea id="x-notes" placeholder="Store, invoice #, what it was for"></textarea></label></div>
+      <button type="button" class="delbtn" id="expDel" hidden>Delete Expense</button>
+    </div>
+  </form>
+</div>
+<input type="file" id="expPhotoIn" multiple hidden accept="image/*,.heic">
+<div id="phView" hidden><button type="button" id="phClose">Done</button><img id="phImg" alt="Receipt photo"></div>
+
 <div class="scrim plan" id="planModal" hidden>
   <div class="sheet planSheet">
     <header><span></span><h3>Job Plan</h3><button type="button" class="save" id="planClose">Done</button></header>
@@ -1176,7 +1220,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.29 (Oct 31) · Plan calendar';
+const APP_VERSION='1.30 (Nov 4) · Job expenses';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1195,6 +1239,8 @@ const IC={
  msg:'<path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4A8 8 0 1 1 20 11.5z"/>',view:'<circle cx="12" cy="8" r="3"/><path d="M6 21v-2a6 6 0 0 1 12 0v2M3 14c-1 .7-1 1.5 0 2.2M21 14c1 .7 1 1.5 0 2.2"/>',
  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',x:'<path d="M7 7l10 10M17 7 7 17"/>',
  img:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 8"/>',
+ rcpt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+ cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
  clip:'<path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l9-9a3.3 3.3 0 0 1 4.7 4.7l-9 9a1.7 1.7 0 0 1-2.4-2.4l8.3-8.3"/>',
  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
  tday:'<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>',
@@ -1291,7 +1337,7 @@ const authStorage={
   removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
 };
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
-let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[]};let planReady=false,crewReady=false,fileSubReady=false;const filesReady0=fl=>!fl.error;let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
+let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[],exps:[]};let expReady=false;let planReady=false,crewReady=false,fileSubReady=false;const filesReady0=fl=>!fl.error;let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
 let data=db.jobs;
 let me=null,team=[],loaded=false;
 let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map(),partners:new Map(),contractors:new Map(),job_tasks:new Map()};
@@ -1316,7 +1362,7 @@ async function fetchAll(){
   const[j,p,e,dc,fl]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
     sb.from('documents').select('*').order('created_at'),sb.from('files').select('*').order('created_at')]);
   const[pt,pm,ps,op]=await Promise.all([sb.from('partners').select('*').order('created_at'),sb.from('partner_messages').select('*').order('at'),sb.from('app_settings').select('*').eq('key','partners'),sb.from('opportunities').select('*').order('at',{ascending:false}).limit(300)]);
-  const[jt,ct]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name')]);planReady=!jt.error&&!ct.error;crewReady=planReady&&(ct.data.length?('ins_exp' in ct.data[0]):!(await sb.from('contractors').select('ins_exp').limit(1)).error);if(filesReady0(fl))fileSubReady=fl.data.length?('contractor_id' in fl.data[0]):!(await sb.from('files').select('contractor_id').limit(1)).error;
+  const[jt,ct,xp]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name'),sb.from('job_expenses').select('*').order('date')]);expReady=!xp.error;planReady=!jt.error&&!ct.error;crewReady=planReady&&(ct.data.length?('ins_exp' in ct.data[0]):!(await sb.from('contractors').select('ins_exp').limit(1)).error);if(filesReady0(fl))fileSubReady=fl.data.length?('contractor_id' in fl.data[0]):!(await sb.from('files').select('contractor_id').limit(1)).error;
   partReady=!pt.error&&!pm.error;if(partReady){pset=(ps.data&&ps.data[0]&&ps.data[0].value)||{};await loadGmailStatus()}
   filesReady=!fl.error;
   if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error}
@@ -1337,7 +1383,8 @@ async function fetchAll(){
   const partners=partReady?pt.data.map(mapPartner):[],pmsgsL=partReady?pm.data.map(mapMsg):[];
   const tasks=planReady?jt.data.map(x=>({id:x.id,jobId:x.job_id,title:x.title||'',start:x.start||'',end:x.end||'',subId:x.contractor_id||'',cost:x.cost==null?null:Number(x.cost),paid:!!x.paid,paidAt:x.paid_at||'',done:!!x.done,notes:x.notes||'',sort:x.sort||0})):[];
   const subs=planReady?ct.data.map(subFrom):[];
-  db={jobs,events,docs,files:fl.data||[],partners,pmsgs:pmsgsL,opps:(op&&!op.error&&op.data)||[],tasks,subs};data=db.jobs;
+  const exps=expReady?xp.data.map(expFrom):[];
+  db={jobs,events,docs,files:fl.data||[],partners,pmsgs:pmsgsL,opps:(op&&!op.error&&op.data)||[],tasks,subs,exps};data=db.jobs;
   synced={jobs:new Map(jobs.map(r=>[r.id,JSON.stringify(jobRow(r))])),payments:new Map(payRows().map(x=>[x.id,JSON.stringify(x)])),events:new Map(events.map(x=>[x.id,JSON.stringify(evRow(x))])),documents:new Map(docs.map(x=>[x.id,JSON.stringify(docRow(x))])),partners:new Map(partners.map(x=>[x.id,JSON.stringify(partRow(x))]))};
   synced.job_tasks=new Map(tasks.map(x=>[x.id,JSON.stringify(jtaskRow(x))]));synced.contractors=new Map(subs.map(x=>[x.id,JSON.stringify(subRow(x))]));
   loaded=true;ensurePartChannel();
@@ -1371,7 +1418,7 @@ let remoteT=null;
 function onRemote(){clearTimeout(remoteT);remoteT=setTimeout(refreshFromServer,700)}
 async function refreshFromServer(force){
   if(!me)return;
-  if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden||!$('docModal').hidden||!$('partModal').hidden||!$('meetModal').hidden||!$('feeModal').hidden||!$('psetModal').hidden||!$('planModal').hidden||!$('schedModal').hidden||!$('subModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
+  if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden||!$('docModal').hidden||!$('partModal').hidden||!$('meetModal').hidden||!$('feeModal').hidden||!$('psetModal').hidden||!$('planModal').hidden||!$('expModal').hidden||!$('schedModal').hidden||!$('subModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
   const inBefore=new Set((db.pmsgs||[]).filter(m=>m.dir==='in').map(m=>m.id)),hadMsgs=(db.pmsgs||[]).length>0;
   const before=new Set(data.map(r=>r.id)),signedBefore=new Set((db.docs||[]).filter(x=>x.status==='accepted').map(x=>x.id));
   try{await fetchAll()}catch(e){console.error(e);return}
@@ -2208,6 +2255,87 @@ function planCard(r){
     <div class="pc2"><span>${ts.length?`${dn}/${ts.length} tasks done`:'No tasks yet'}</span>${cur?`<span>${taskState(cur)==='late'?'⚠︎ ':''}${esc(cur.title)}${cur.subId?' · '+esc(subName(cur.subId)):''}</span>`:''}${cost?`<span>Contractors ${money(cost)}${paidC?` · paid ${money(paidC)}`:''}</span>`:''}</div></button>`;
 }
 
+/* ---------- job expenses with receipt photos ---------- */
+const EXP_CATS=['Materials','Tools / rental','Bin / disposal','Permit / fees','Fuel / travel','Subcontractor','Food / crew','Other'];
+const cents=v=>'$'+(Number(v)||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
+function expFrom(x){return{id:x.id,jobId:x.job_id,date:x.date||'',title:x.title||'',cat:x.category||'',amount:Number(x.amount)||0,by:x.paid_by||'',notes:x.notes||'',photos:Array.isArray(x.photos)?x.photos:[],createdAt:x.created_at||''}}
+function expRow(x){return{id:x.id,job_id:x.jobId,date:x.date||today(),title:x.title||'',category:x.cat||'',amount:Number(x.amount)||0,paid_by:x.by||'',notes:x.notes||'',photos:x.photos||[]}}
+const expsFor=id=>(db.exps||[]).filter(x=>x.jobId===id).sort((a,b)=>b.date.localeCompare(a.date)||String(b.createdAt).localeCompare(String(a.createdAt)));
+const showExp=r=>['won','done'].includes(stageOf(r))||stepDone(r,'contract')||expsFor(r.id).length>0;
+const phUrls={};   // path -> {url, at}
+async function signPhotos(paths){const need=[...new Set(paths)].filter(p=>!phUrls[p]||Date.now()-phUrls[p].at>50*60e3);
+  if(need.length){const{data,error}=await sb.storage.from('job-files').createSignedUrls(need,3600);if(!error&&data)data.forEach(d=>{if(d.signedUrl)phUrls[d.path]={url:d.signedUrl,at:Date.now()}})}
+  return Object.fromEntries(paths.map(p=>[p,phUrls[p]?.url||'']))}
+function fillThumbs(root){const ims=[...root.querySelectorAll('img[data-xpath]')];if(!ims.length)return;
+  signPhotos(ims.map(i=>i.dataset.xpath)).then(m=>ims.forEach(i=>{if(m[i.dataset.xpath])i.src=m[i.dataset.xpath]})).catch(()=>{})}
+function expBlock(r){
+  if(!showExp(r))return '';
+  if(!expReady)return `<div class="block"><div class="label">Expenses</div><div class="group"><div class="empty" style="padding:16px"><b style="font-size:15px">One-time setup needed</b>Run the expenses setup step (sql/11-expenses.sql) in Supabase, then expenses and receipt photos work here.</div></div></div>`;
+  const xs=expsFor(r.id),tot=xs.reduce((t,x)=>t+x.amount,0),crew=jtasks(r).reduce((t,x)=>t+(+x.cost||0),0),T=total(r);
+  const cats={};xs.forEach(x=>{const c=x.cat||'Other';cats[c]=(cats[c]||0)+x.amount});
+  return `<div class="block"><div class="label">Expenses${xs.length?` · ${xs.length}`:''} <button id="addExp">+ Add Expense</button></div><div class="group">
+    ${xs.length?`<div class="expsum"><div><span>Spent</span><b>${cents(tot)}</b></div><div><span>Contractors</span><b>${crew?money(crew):'—'}</b></div><div><span>Left from contract</span><b style="color:${T&&T-tot-crew<0?'var(--red)':'inherit'}">${T?money(T-tot-crew):'—'}</b></div></div>
+    ${xs.map(x=>`<button class="exprow" data-exp="${x.id}"><span class="eth">${x.photos.length?`<img data-xpath="${esc(x.photos[0].path)}" alt="">${x.photos.length>1?`<em>${x.photos.length}</em>`:''}`:ico('rcpt')}</span>
+      <span class="rt"><b>${esc(x.title)||'Expense'}</b><span>${fmtDate(x.date)}${x.cat?' · '+esc(x.cat):''}${x.by?' · '+esc(x.by):''}${x.photos.length?'':' · no receipt'}</span></span><span class="eamt">${cents(x.amount)}</span></button>`).join('')}
+    ${Object.keys(cats).length>1?`<div class="expcats">${Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([c,a])=>`<span>${esc(c)} ${cents(a)}</span>`).join('')}</div>`:''}`
+    :`<div class="empty" style="padding:16px"><b style="font-size:15px">No expenses yet</b>Add every cost on this job — materials, rentals, bin, permits, gas — with a photo of the receipt.</div>`}
+  </div></div>`;
+}
+function bindExp(r,v){if($('addExp'))$('addExp').onclick=()=>openExp(null,r);
+  v.querySelectorAll('[data-exp]').forEach(b=>b.onclick=()=>{const x=(db.exps||[]).find(y=>y.id===b.dataset.exp);if(x)openExp(x,r)});fillThumbs(v)}
+let expEdit=null,expJob=null,xPhotos=[],xRemoved=[],xBusy=false;   // xPhotos: [{path,name,size}] saved, or {file,url} new
+function openExp(x,r){expJob=r;expEdit=x;xBusy=false;xRemoved=[];xPhotos=x?x.photos.map(p=>Object.assign({},p)):[];
+  $('expTitleH').textContent=x?'Expense':'New Expense';$('expSave').textContent=x?'Save':'Add';$('expSave').disabled=false;$('expDel').hidden=!x;
+  $('x-title').value=x?x.title:'';$('x-amount').value=x?x.amount:'';$('x-date').value=x?x.date:today();$('x-by').value=x?x.by:(me?.name||'');$('x-notes').value=x?x.notes:'';
+  $('x-cat').innerHTML=EXP_CATS.map(c=>`<option${(x?x.cat:'Materials')===c?' selected':''}>${c}</option>`).join('');
+  $('x-bylist').innerHTML=[...new Set([...(team||[]).map(t=>t.name).filter(Boolean),...(db.exps||[]).map(y=>y.by).filter(Boolean),'Company card'])].map(n=>`<option value="${esc(n)}">`).join('');
+  paintXPhotos();showModal('expModal');if(!x)setTimeout(()=>$('x-title').focus(),300)}
+function paintXPhotos(){$('x-phn').textContent=xPhotos.length?`${xPhotos.length} photo${xPhotos.length>1?'s':''}`:'';
+  $('x-photos').innerHTML=xPhotos.map((p,i)=>`<div class="xp${p.file?' new':''}"><img ${p.file?`src="${p.url}"`:`data-xpath="${esc(p.path)}"`} data-xi="${i}" alt="Receipt ${i+1}"><button type="button" data-xrm="${i}" aria-label="Remove photo">×</button></div>`).join('')
+    +`<label class="addp" id="xAddPh">${ico('cam')}Add Photo</label>`;
+  fillThumbs($('x-photos'))}
+$('x-photos').onclick=e=>{const rm=e.target.closest('[data-xrm]');if(rm){const p=xPhotos.splice(+rm.dataset.xrm,1)[0];if(p.file)URL.revokeObjectURL(p.url);else xRemoved.push(p.path);paintXPhotos();return}
+  const im=e.target.closest('[data-xi]');if(im&&im.src){$('phImg').src=im.src;$('phView').hidden=false;return}
+  if(e.target.closest('#xAddPh')){const i=$('expPhotoIn');i.value='';i.click()}};
+$('expPhotoIn').onchange=e=>{[...e.target.files].forEach(f=>{if(f.size>50*1048576){toast(`${f.name} is larger than 50 MB`);return}xPhotos.push({file:f,url:URL.createObjectURL(f),name:f.name})});paintXPhotos()};
+$('phClose').onclick=()=>{$('phView').hidden=true};$('phView').onclick=e=>{if(e.target.id==='phView')$('phView').hidden=true};
+function shrinkPhoto(f){return new Promise(res=>{const u=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{const k=Math.min(1,1800/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>res(b&&b.size<f.size?b:f),'image/jpeg',.82)};
+  im.onerror=()=>{URL.revokeObjectURL(u);res(f)};im.src=u})}
+function closeExp(){xPhotos.forEach(p=>{if(p.file)URL.revokeObjectURL(p.url)});xPhotos=[];hideModal('expModal')}
+$('expCancel').onclick=()=>{if(xBusy)return;closeExp()};
+$('expModal').onclick=e=>{if(e.target.id==='expModal'&&!xBusy)closeExp()};
+$('expForm').onsubmit=async e=>{e.preventDefault();if(xBusy)return;const r=expJob;if(!r)return;
+  if(!expReady){toast('Run the expenses setup step first');return}
+  const title=$('x-title').value.trim(),amount=Number(($('x-amount').value||'').replace(/[^0-9.]/g,''));
+  if(!title){toast('What was it for?');$('x-title').focus();return}
+  if(!amount){toast('Enter the amount');$('x-amount').focus();return}
+  xBusy=true;$('expSave').disabled=true;
+  const id=expEdit?expEdit.id:uid(),photos=[],news=xPhotos.filter(p=>p.file);let bad=0,k=0;
+  for(const p of xPhotos){if(!p.file){photos.push({path:p.path,name:p.name||'',size:p.size||0});continue}
+    k++;toast(news.length>1?`Uploading photo ${k} of ${news.length}…`:'Uploading photo…');
+    const b=await shrinkPhoto(p.file),ext=b.type==='image/jpeg'?'jpg':((p.name||'').split('.').pop()||'jpg').toLowerCase();
+    const path=`${r.id}/expenses/${id}-${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+    const up=await sb.storage.from('job-files').upload(path,b,{contentType:b.type||undefined,upsert:false});
+    if(up.error){console.error(up.error);bad++;continue}
+    photos.push({path,name:p.name||'',size:b.size});URL.revokeObjectURL(p.url)}
+  const x=Object.assign({},expEdit||{createdAt:new Date().toISOString()},{id,jobId:r.id,title,amount,date:$('x-date').value||today(),cat:$('x-cat').value,by:$('x-by').value.trim(),notes:$('x-notes').value.trim(),photos});
+  const q=expEdit?await sb.from('job_expenses').update(expRow(x)).eq('id',id):await sb.from('job_expenses').insert(Object.assign(expRow(x),{created_by:me?.email||''}));
+  if(q.error){console.error(q.error);const fresh=photos.filter(p=>!(expEdit&&expEdit.photos.some(o=>o.path===p.path))).map(p=>p.path);if(fresh.length)sb.storage.from('job-files').remove(fresh).then(()=>{},()=>{});
+    xBusy=false;$('expSave').disabled=false;xPhotos=xPhotos.filter(p=>p.file||photos.some(o=>o.path===p.path));toast('Could not save the expense. Check your connection.');return}
+  if(xRemoved.length)sb.storage.from('job-files').remove(xRemoved).then(()=>{},()=>{});
+  if(expEdit)Object.assign(expEdit,x);else db.exps.push(x);
+  if(!expEdit)log(r,`Expense: ${title} ${cents(amount)}`);
+  xPhotos=[];xBusy=false;hideModal('expModal');save();render();if(selId===r.id)openDetail(r.id);
+  toast(bad?`Saved, but ${bad} photo${bad>1?'s':''} could not upload`:expEdit?'Expense updated':news.length?`Expense added with ${news.length} photo${news.length>1?'s':''}`:'Expense added')};
+$('expDel').onclick=async()=>{const x=expEdit,r=expJob,b=$('expDel');if(!x||xBusy)return;
+  if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent='Tap again to delete';setTimeout(()=>{if(b.isConnected){b.classList.remove('sure');b.textContent='Delete Expense'}},3000);return}
+  b.classList.remove('sure');b.textContent='Delete Expense';xBusy=true;
+  const d=await sb.from('job_expenses').delete().eq('id',x.id);xBusy=false;if(d.error){toast('Could not delete');return}
+  const paths=x.photos.map(p=>p.path);if(paths.length)sb.storage.from('job-files').remove(paths).then(()=>{},()=>{});
+  db.exps=db.exps.filter(y=>y.id!==x.id);log(r,`Expense removed: ${x.title} ${cents(x.amount)}`);closeExp();save();render();if(selId===r.id)openDetail(r.id);toast('Expense deleted')};
+
 /* schedule sheet: right after the contract is signed */
 let schedFor=null;
 function openSched(r,fromContract){schedFor=r;
@@ -2469,6 +2597,7 @@ function openDetail(id,pan){
     </div>
     ${nx&&!r.lost?`<div class="nextcard"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
     ${planCard(r)}
+    ${expBlock(r)}
     ${leadConvHtml(r)}
     <div class="block"><div class="label">Estimates & Invoices <span><button id="newDoc">+ Estimate</button>&nbsp;&nbsp;<button id="newInv">+ Invoice</button></span></div>
       <div class="group">${docsFor(r.id).length?docsFor(r.id).sort((a,b)=>(isInv(a)-isInv(b))||String(a.number).localeCompare(String(b.number))).map(docListRow).join(''):`<div class="empty" style="padding:16px"><b style="font-size:15px">No estimate yet</b>Create one and send it for online signature.</div>`}</div></div>
@@ -2520,6 +2649,7 @@ function openDetail(id,pan){
   </div>`;
   bindLeadConv(r);markLeadRead(r);
   if($('planOpen'))$('planOpen').onclick=()=>openPlan(r);if($('planSched'))$('planSched').onclick=()=>openSched(r,false);
+  bindExp(r,v);
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
   if($('dNotesEdit'))$('dNotesEdit').onclick=()=>{openForm(r);setTimeout(()=>$('f-notes').focus(),300)};
@@ -2961,7 +3091,7 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 /* ---------- misc ---------- */
 let tt;function toast(m,canUndo,long){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.toggle('long',!!long||m.length>60);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:long?6500:2600)}
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];db.files=db.files||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('moreModal').hidden)hideModal('moreModal');else if(!$('subModal').hidden)hideModal('subModal');else if(!$('schedModal').hidden)hideModal('schedModal');else if(!$('planModal').hidden)$('planClose').click();else if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel||subSel)closeDetail()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('phView').hidden)$('phView').hidden=true;else if(!$('expModal').hidden)$('expCancel').click();else if(!$('moreModal').hidden)hideModal('moreModal');else if(!$('subModal').hidden)hideModal('subModal');else if(!$('schedModal').hidden)hideModal('schedModal');else if(!$('planModal').hidden)$('planClose').click();else if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel||subSel)closeDetail()}});
 function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();renderCrewCount();if(tab==='crew')renderCrew();renderMoreCount();if(tab==='cal')renderCal();drawPins();renderCards();
   if('setAppBadge' in navigator&&loaded){const n=data.filter(leadNeeds).length+(db.partners||[]).filter(pUnread).length;(n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{})}}
 let locating=false;
@@ -3025,7 +3155,7 @@ async function start(session){
 }
 let partChannel=null;
 function ensurePartChannel(){if(!partReady||partChannel||!me)return;partChannel=sb.channel('nevaco-partners');
-  [...['partners','partner_messages','app_settings','opportunities'],...(planReady?['job_tasks','contractors']:[])].forEach(t=>partChannel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));partChannel.subscribe()}
+  [...['partners','partner_messages','app_settings','opportunities'],...(planReady?['job_tasks','contractors']:[]),...(expReady?['job_expenses']:[])].forEach(t=>partChannel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));partChannel.subscribe()}
 sb.auth.onAuthStateChange((ev,session)=>{
   if(ev==='PASSWORD_RECOVERY'){showAuth('recover');return}
   if(ev==='SIGNED_OUT'){me=null;loaded=false;db={jobs:[],events:[]};data=db.jobs;render();showAuth('signin')}
@@ -3057,7 +3187,7 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')up()})}).catch(()=>{});
 }
 setInterval(()=>{if(!selId&&$('modal').hidden&&$('evModal').hidden)render()},60000);
-if(location.protocol==='file:')window.__nv={openPlan:(...a)=>openPlan(...a),get db(){return db},get data(){return data},setGmail(v){gmailSt=v},renderPartners};
+if(location.protocol==='file:')window.__nv={openPlan:(...a)=>openPlan(...a),openExp:(...a)=>openExp(...a),get db(){return db},get data(){return data},setGmail(v){gmailSt=v},renderPartners};
 })();
 </script>
 </body>
