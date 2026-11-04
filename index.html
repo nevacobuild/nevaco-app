@@ -515,6 +515,29 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .srctabs button[aria-pressed="true"] em{color:var(--bg);opacity:.75}
 .srctabs button[aria-pressed="true"] i{box-shadow:0 0 0 2px var(--bg)}
 .stag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:1px 6px;border-radius:5px;margin-left:6px;vertical-align:1px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+/* follow-up card + call log */
+.fucard{background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:20px;display:grid;gap:10px}
+.fuhead{display:flex;gap:12px;align-items:center}.fuhead .gl{width:38px;height:38px}
+.fuhead b{display:block;font-size:12px;color:var(--label2);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.fuhead p{margin:1px 0 0;font-weight:600;font-size:16px}.fuhead small{display:block;color:var(--label2);font-size:13px;margin-top:1px}
+.fuline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-radius:10px;padding:8px 10px;background:color-mix(in srgb,var(--c) 13%,transparent);font-weight:600;font-size:14px}
+.fuline i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}.fuline span{flex:1;min-width:140px}
+.fuline input{border:0;background:var(--card);border-radius:8px;padding:5px 8px;color:var(--label);font-weight:500}
+.fuacts{display:flex;gap:8px;flex-wrap:wrap}.fuacts .btn{padding:8px 13px}
+.fucalls{display:grid;border-top:.5px solid var(--sep);padding-top:4px}
+.fuc{display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;align-items:center;padding:8px 0;font-size:13.5px}
+.fuc+.fuc{border-top:.5px solid var(--sep)}
+.fuc .who{color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fuc time{color:var(--label2);font-size:12.5px;white-space:nowrap}
+.fuc p{grid-column:1/-1;margin:2px 0 0;white-space:pre-wrap;line-height:1.35}
+.fuc .x{color:var(--label3);font-size:16px;padding:0 2px}
+.fumore{color:var(--blue);font-weight:600;font-size:13.5px;justify-self:start;padding:4px 0}
+.outs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.outs button{display:flex;gap:8px;align-items:center;text-align:left;background:var(--card);border-radius:11px;padding:11px 12px;font-weight:600;font-size:14px;border:2px solid transparent}
+.outs button i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.outs button[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--card))}
+.callwho{margin:-6px 4px 0;color:var(--label2);font-size:14px}
+.lostrow .why{color:var(--label)}
 .lstate{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;background:color-mix(in srgb,var(--c) 10%,var(--card));border-radius:12px;padding:10px 12px;margin-bottom:10px}
 .lstate>i{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
 .lstate>b{font-size:14px;flex:1;min-width:150px}
@@ -834,6 +857,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   <button class="navbtn" data-tab="cust" aria-selected="false"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em id="custCount" hidden></em></button>
   <button class="navbtn" data-tab="part" aria-selected="false"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em id="partCount" hidden></em></button>
   <button class="navbtn" data-tab="crew" aria-selected="false"><span class="ni" style="--nc:#a2845e"><svg class="i" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M2.5 15h19v2.5h-19z"/><path d="M10 7.2V5h4v2.2"/></svg></span>Contractors<em class="scount" hidden></em></button>
+  <button class="navbtn" data-tab="lost" aria-selected="false"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg></span>Not Interested<em class="ncount" hidden></em></button>
   <button class="navbtn" data-tab="cal" aria-selected="false"><span class="ni" style="--nc:var(--orange)"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>Calendar</button>
   <button class="navbtn" data-tab="map" aria-selected="false"><span class="ni" style="--nc:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>Map</button>
   <button class="newbtn" id="addBtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New Customer</button>
@@ -877,6 +901,11 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <div class="tools"><button class="iconbtn dark" id="crewAdd" aria-label="Add contractor"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
     <label class="searchbox"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="crq" type="search" placeholder="Search name, trade, phone" aria-label="Search contractors"></label>
     <div class="scroll"><div class="wrap" id="pCrew"></div></div>
+  </section>
+  <section class="screen" id="sLost" hidden>
+    <header class="lt"><div><h1>Not Interested</h1><div class="sub" id="lostSub">Leads that said no · kept for later</div></div></header>
+    <label class="searchbox"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lostq" type="search" placeholder="Search name, phone, city, reason" aria-label="Search not interested"></label>
+    <div class="scroll"><div class="wrap" id="pLost"></div></div>
   </section>
   <section class="screen" id="sCal" hidden>
     <header class="lt"><div><h1 id="calTitle">Calendar</h1></div>
@@ -1024,6 +1053,25 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   </form>
 </div>
 
+<div class="scrim" id="callModal" hidden>
+  <form class="sheet" id="callForm" novalidate>
+    <header><button type="button" id="callCancel">Cancel</button><h3 id="callTitleH">Log Call</h3><button type="submit" class="save" id="callSave">Save</button></header>
+    <div class="body">
+      <p class="callwho" id="callWho"></p>
+      <div><div class="label">What happened</div><div class="outs" id="c-outs"></div></div>
+      <div class="fg">
+        <label><span>Contact by</span><select id="c-via"></select></label>
+        <label><span>Done by</span><select id="c-by"></select></label>
+      </div>
+      <div class="fg" id="c-visitg" hidden><label><span>Visit date</span><input type="date" id="c-vd"></label><label><span>Time</span><input type="time" id="c-vt"></label></div>
+      <div class="fg" id="c-whyg" hidden><label><span>Reason</span><select id="c-why"></select></label></div>
+      <div id="c-nextg" style="display:grid;gap:10px"><div class="fg"><label><span>Next follow-up</span><input type="date" id="c-next"></label></div>
+        <div class="durs" id="c-quick"><span>Quick</span><button type="button" data-cn="1">Tomorrow</button><button type="button" data-cn="2">2 days</button><button type="button" data-cn="7">1 week</button><button type="button" data-cn="30">1 month</button><button type="button" data-cn="0">None</button></div></div>
+      <div class="fg"><label class="ta"><span>What they said</span><textarea id="c-note" placeholder="Budget, timing, what they want, who decides…"></textarea></label></div>
+    </div>
+  </form>
+</div>
+
 <div class="scrim" id="expModal" hidden>
   <form class="sheet" id="expForm" novalidate>
     <header><button type="button" id="expCancel">Cancel</button><h3 id="expTitleH">New Expense</h3><button type="submit" class="save" id="expSave">Add</button></header>
@@ -1065,6 +1113,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <button class="row" data-more="cust"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em class="ccount" hidden></em></button>
       <button class="row" data-more="part"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em class="pcount" hidden></em></button>
       <button class="row" data-more="crew"><span class="ni" style="--nc:#a2845e"><svg class="i" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M2.5 15h19v2.5h-19z"/><path d="M10 7.2V5h4v2.2"/></svg></span>Contractors<em class="scount" hidden></em></button>
+      <button class="row" data-more="lost"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg></span>Not Interested<em class="ncount" hidden></em></button>
     </div><div class="group"><button class="row" data-more="acct"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>Account & notifications</button></div></div>
   </div>
 </div>
@@ -1227,7 +1276,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.31 (Nov 4) · Expenses: store, contractor, who paid';
+const APP_VERSION='1.32 (Nov 4) · Lead follow-up & Not Interested';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1425,7 +1474,7 @@ let remoteT=null;
 function onRemote(){clearTimeout(remoteT);remoteT=setTimeout(refreshFromServer,700)}
 async function refreshFromServer(force){
   if(!me)return;
-  if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden||!$('docModal').hidden||!$('partModal').hidden||!$('meetModal').hidden||!$('feeModal').hidden||!$('psetModal').hidden||!$('planModal').hidden||!$('expModal').hidden||!$('schedModal').hidden||!$('subModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
+  if(!force&&(dirty||syncing||placingId||inlinePay||!$('modal').hidden||!$('evModal').hidden||!$('docModal').hidden||!$('partModal').hidden||!$('meetModal').hidden||!$('feeModal').hidden||!$('psetModal').hidden||!$('planModal').hidden||!$('expModal').hidden||!$('callModal').hidden||!$('schedModal').hidden||!$('subModal').hidden)){remoteT=setTimeout(refreshFromServer,1500);return}
   const inBefore=new Set((db.pmsgs||[]).filter(m=>m.dir==='in').map(m=>m.id)),hadMsgs=(db.pmsgs||[]).length>0;
   const before=new Set(data.map(r=>r.id)),signedBefore=new Set((db.docs||[]).filter(x=>x.status==='accepted').map(x=>x.id));
   try{await fetchAll()}catch(e){console.error(e);return}
@@ -2063,7 +2112,8 @@ function leadState(r){if(r.lost)return 'lost';const lm=jmails(r).at(-1);
   if(lm&&lm.dir==='in')return 'reply';
   if(!stepDone(r,'contacted')&&!(lm&&lm.dir==='out'))return 'new';
   return 'replied'}
-const leadNeeds=r=>isLead(r)&&['reply','new'].includes(leadState(r));
+const fuDue=r=>!r.lost&&!!r.follow&&r.follow<=today();
+const leadNeeds=r=>isLead(r)&&!r.lost&&(['reply','new'].includes(leadState(r))||fuDue(r));
 const LST={new:{n:'New · not contacted',c:'--p1'},reply:{n:'Needs reply',c:'--blue'},replied:{n:'Replied',c:'--green'},lost:{n:'Lost',c:'--p0'}};
 let leadSrc='all',leadFilter='all',leadQuery='',leadView='list';
 let metaSt=null,metaLoading=false;
@@ -2085,7 +2135,7 @@ function renderLeads(){
   const S=[{k:'all',n:'All'},...Object.entries(SRC).map(([k,v])=>({k,n:v.n}))];
   const inSrc=r=>leadSrc==='all'||srcKey(r)===leadSrc;
   const F=[{k:'all',n:'Open',f:r=>!r.lost},{k:'needs',n:'Needs you',f:leadNeeds},{k:'new',n:'New',f:r=>leadState(r)==='new'},{k:'reply',n:'Needs reply',f:r=>leadState(r)==='reply'},{k:'replied',n:'Replied',f:r=>!r.lost&&leadState(r)==='replied'&&stageOf(r)==='lead'},
-    {k:'visit',n:'Site visit',f:r=>!r.lost&&['visit','quote'].includes(stageOf(r))},{k:'estimate',n:'Estimate sent',f:r=>!r.lost&&stageOf(r)==='sent'},{k:'lost',n:'Lost',f:r=>r.lost}];
+    {k:'visit',n:'Site visit',f:r=>!r.lost&&['visit','quote'].includes(stageOf(r))},{k:'estimate',n:'Estimate sent',f:r=>!r.lost&&stageOf(r)==='sent'},{k:'follow',n:'Follow-up due',f:fuDue},{k:'nofu',n:'No follow-up set',f:r=>!r.lost&&!r.follow&&stepDone(r,'contacted')&&['lead','sent'].includes(stageOf(r))}];
   const fl=F.find(x=>x.k===leadFilter)||F[0];
   const base=L.filter(inSrc);
   const list=base.filter(r=>fl.f(r)&&(!q||[r.name,r.email,r.phone,r.city,r.address,r.type,r.notes].join(' ').toLowerCase().includes(q)))
@@ -2103,12 +2153,12 @@ function renderLeads(){
 const leadAt=r=>{const lm=jmails(r).at(-1);return lm?lm.at:(r.history?.[0]?.d||r.date||'')};
 function leadRow(r){const sk=srcKey(r),st=leadState(r),lm=jmails(r).at(-1),un=jUnread(r),stg=stageOf(r);
   const stage=stg==='visit'&&r.ms.visit?.date?`Visit ${fmtDate(r.ms.visit.date)}`:stg==='quote'?'Visited · quote needed':stg==='sent'?`Estimate${total(r)?' '+kmoney(total(r)):''} sent`:'';
-  const snip=lm?(lm.dir==='out'?(lm.from==='homestars'?'Replied on HomeStars':lm.from==='phone'?'Called':'You: '+lm.body):lm.body):(r.notes?r.notes.split('\n')[0]:'No messages yet');
+  const snip=lm?(lm.dir==='out'?(lm.from==='homestars'?'Replied on HomeStars':lm.from==='phone'?lm.body:'You: '+lm.body):lm.body):(r.notes?r.notes.split('\n')[0]:'No messages yet');
   return `<button class="row crow${r.lost?' dim':''}${selId===r.id?' sel':''}" data-lead="${r.id}">
    <span class="av" style="--c:${SRC[sk].c}">${esc(initials(r.name))}</span>
    <span class="rt"><b>${un?'<span class="unread"></span>':''}${esc(r.name)}<span class="stag" style="--c:${SRC[sk].c}">${SRC[sk].n}</span></b><span>${esc([r.type,r.city].filter(Boolean).join(' · '))}</span>
      <span class="psnip${lm?.dir==='in'?' in':''}">${esc(String(snip||'').replace(/\s+/g,' ').slice(0,110))}</span>
-     <span class="needs"><span class="pst" style="--c:var(${LST[st].c})"><i></i>${LST[st].n}</span>${stage?`<span class="pst" style="--c:var(--s-visit)"><i></i>${esc(stage)}</span>`:''}</span></span>
+     <span class="needs"><span class="pst" style="--c:var(${LST[st].c})"><i></i>${LST[st].n}</span>${fuDue(r)?`<span class="pst" style="--c:var(--red)"><i></i>Follow-up ${r.follow<today()?'overdue':'today'}</span>`:''}${(r.ms.calls||[]).length?`<span class="pst" style="--c:var(${OUTS[(r.ms.calls.at(-1)).out]?.c||'--label3'})"><i></i>${esc(OUTS[(r.ms.calls.at(-1)).out]?.n||'')}</span>`:''}${stage?`<span class="pst" style="--c:var(--s-visit)"><i></i>${esc(stage)}</span>`:''}</span></span>
    <span class="rv"><em>${whenShort(lm?lm.at:(r.history?.[0]?.d?r.history[0].d+'T12:00':''))}</em>${ico('chev')}</span></button>`}
 function oppsHtml(opps){
   if(!opps.length)return `<div class="pempty">${ico('star','i big')}<b>No opportunities right now</b><p>HomeStars invites and new leads in your area show up here. Buy the ones you want on HomeStars; once you start the conversation, the customer moves to Leads automatically.</p></div>`;
@@ -2143,7 +2193,7 @@ function leadConvHtml(r){
   const st=leadState(r);
   return `<div class="block" id="jConv"><div class="label">Messages${ms.length?` <span>${jmails(r).length}</span>`:''}</div>
     ${isLead(r)&&!r.lost?`<div class="lstate" style="--c:var(${LST[st].c})"><i></i><b>${st==='reply'?'Waiting for your reply':st==='new'?'New lead · not contacted yet':'You replied'}</b>
-      <span class="qa">${hs&&hsUrl?`<a class="btn gray" href="${esc(hsUrl)}" target="_blank" rel="noopener">Open HomeStars</a>`:''}${st!=='replied'?`${hs?'<button class="btn gray" data-qa="homestars">Replied on HomeStars</button>':''}<button class="btn gray" data-qa="phone">I called</button>`:''}</span></div>`:''}
+      <span class="qa">${hs&&hsUrl?`<a class="btn gray" href="${esc(hsUrl)}" target="_blank" rel="noopener">Open HomeStars</a>`:''}${st!=='replied'?`${hs?'<button class="btn gray" data-qa="homestars">Replied on HomeStars</button>':''}<button class="btn gray" data-qa="phone">Log call</button>`:''}</span></div>`:''}
     <div class="thread" id="jThread">${threadHtml(ms,r.email,r.email?'No emails with this customer yet.':hs?'Messages from HomeStars show up here.':'Add an email address to write from here.')}</div>
     ${r.email?`<div class="composer inline" id="jComp">
       <div class="tpls">${Object.entries(LTPL).map(([k,t])=>`<button data-ltpl="${k}">${t.n}</button>`).join('')}</div>
@@ -2153,7 +2203,7 @@ function leadConvHtml(r){
 }
 function bindLeadConv(r){
   const el=$('jConv');if(!el)return;bindThread(el);
-  el.querySelectorAll('[data-qa]').forEach(b=>b.onclick=()=>leadQuick(r,b.dataset.qa));
+  el.querySelectorAll('[data-qa]').forEach(b=>b.onclick=()=>b.dataset.qa==='phone'?openCall(r):leadQuick(r,b.dataset.qa));
   const body=$('jBody');if(!body)return;
   const keep=()=>{drafts['j:'+r.id]={s:$('jSubj').value,t:$('jBody').value}};
   const grow=()=>{body.style.height='auto';body.style.height=Math.min(body.scrollHeight+2,Math.max(120,Math.round(innerHeight*.35)))+'px'};
@@ -2261,6 +2311,120 @@ function planCard(r){
     <div class="pbar"><i style="width:${ts.length?dn/ts.length*100:0}%"></i>${T>=s&&T<=e?`<u style="left:${pos}%"></u>`:''}</div>
     <div class="pc2"><span>${ts.length?`${dn}/${ts.length} tasks done`:'No tasks yet'}</span>${cur?`<span>${taskState(cur)==='late'?'⚠︎ ':''}${esc(cur.title)}${cur.subId?' · '+esc(subName(cur.subId)):''}</span>`:''}${cost?`<span>Contractors ${money(cost)}${paidC?` · paid ${money(paidC)}`:''}</span>`:''}</div></button>`;
 }
+
+/* ---------- lead follow-up: call log, next follow-up, not interested ---------- */
+const OUTS={visit:{n:'Booked site visit',c:'--green'},interested:{n:'Interested · call back',c:'--blue'},photos:{n:'Sending photos / info',c:'--s-sent'},noanswer:{n:'No answer',c:'--orange'},voicemail:{n:'Left voicemail',c:'--orange'},notint:{n:'Not interested',c:'--red'}};
+const OUT_NEXT={interested:3,photos:2,noanswer:1,voicemail:2};
+const VIAS={call:'Phone call',text:'Text',whatsapp:'WhatsApp',email:'Email',person:'In person'};
+const LOST_WHY=['Price too high','Hired someone else','Project cancelled / postponed','Just getting prices','Outside our area','Too small / not our type of work','No response after follow-ups','Wrong number / spam','Other'];
+const TEAM3=['Kevin','Raf','Shirin'];
+const meWho=()=>{const n=(me?.name||'').toLowerCase();return TEAM3.find(x=>n.startsWith(x.toLowerCase())||(x==='Raf'&&n.startsWith('raouf')))||''};
+const callsOf=r=>[...(r.ms.calls||[])].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+const atTime=a=>{try{return new Date(a).toLocaleTimeString('en-CA',{hour:'numeric',minute:'2-digit'})}catch(e){return ''}};
+let fuAll=null;
+function fuCallRow(c){const o=OUTS[c.out]||{n:c.out||'Contact',c:'--label3'};
+  return `<div class="fuc"><span class="pst" style="--c:var(${o.c})"><i></i>${esc(o.n)}</span><span class="who">${esc(c.by||'')}${c.via&&c.via!=='call'?' · '+esc(VIAS[c.via]||c.via):''}</span><span><time>${fmtDate(c.d)}${c.at?' '+atTime(c.at):''}</time> <button class="x" data-fudel="${c.id}" aria-label="Remove">×</button></span>${c.note?`<p>${esc(c.note)}</p>`:''}</div>`}
+function fuCard(r){
+  if(!r.lost&&!isLead(r))return '';
+  const calls=callsOf(r),T=today();
+  const list=calls.length?`<div class="fucalls">${calls.slice(0,fuAll===r.id?999:3).map(fuCallRow).join('')}${calls.length>3&&fuAll!==r.id?`<button class="fumore" id="fuAll">Show all ${calls.length} contacts</button>`:''}</div>`:'';
+  if(r.lost){const m=r.ms;
+    return `<div class="fucard"><div class="fuhead"><span class="gl" style="--c:var(--s-lost)">${ico('lost')}</span><div><b>Not interested</b><p>${esc(m.lostWhy||'No reason saved')}</p><small>${m.lostAt?'Marked '+fmtDate(m.lostAt):''}${m.lostBy?' by '+esc(m.lostBy):''} · kept in Not Interested</small></div></div>
+      <div class="fuacts"><button class="btn" id="fuReopen">Reopen lead</button><button class="btn gray" id="fuLog">Log contact</button></div>${list}</div>`}
+  const contacted=stepDone(r,'contacted')||calls.length>0,last=calls[0];
+  const came=r.history?.[0]?.d||r.date||T,age=Math.max(0,dayDiff(T,came));
+  let gc,title,sub;
+  if(!contacted){gc='--red';title='Not contacted yet';sub=`Came in ${age===0?'today':age===1?'yesterday':age+' days ago'} · call them first`}
+  else if(last){const o=OUTS[last.out]||{n:'Contacted',c:'--green'};gc=o.c;title=o.n;
+    let miss=0;for(const c of calls){if(['noanswer','voicemail'].includes(c.out))miss++;else break}
+    sub=`Last contact ${fmtDate(last.d).toLowerCase()==='today'?'today':fmtDate(last.d)} · ${esc(last.by||'—')} · ${calls.length} contact${calls.length>1?'s':''}${miss>1?` · ${miss} tries without an answer`:''}`}
+  else{gc='--green';title='Contacted';sub='No call notes yet — log what they said'}
+  let fl;const vis=r.ms.visit;
+  if(stageOf(r)==='visit'&&vis?.date&&!r.follow)fl=`<div class="fuline" style="--c:var(--green)"><i></i><span>Site visit ${fmtDate(vis.date)}${vis.time?' at '+fmtTime(vis.time):''}</span></div>`;
+  else if(r.follow){const n=dayDiff(r.follow,T);
+    fl=`<div class="fuline" style="--c:var(${n<0?'--red':n===0?'--orange':'--blue'})"><i></i><span>${n<0?`Follow-up overdue · was due ${fmtDate(r.follow)}`:n===0?'Follow up today':`Next follow-up ${fmtDate(r.follow)}`}</span><input type="date" id="fuDate" value="${r.follow}" aria-label="Follow-up date"></div>`}
+  else fl=`<div class="fuline" style="--c:var(${contacted?'--orange':'--red'})"><i></i><span>${contacted?'No follow-up date set':'Call today'}</span><input type="date" id="fuDate" value="" aria-label="Set follow-up date"></div>`;
+  return `<div class="fucard"><div class="fuhead"><span class="gl" style="--c:var(${gc})">${ico('follow')}</span><div><b>Follow-up</b><p>${esc(title)}</p><small>${sub}</small></div></div>
+    ${fl}<div class="fuacts"><button class="btn" id="fuLog">Log call</button><button class="btn gray" id="fuNo">Not interested</button></div>${list}</div>`;
+}
+function bindFu(r,v){
+  if($('fuLog'))$('fuLog').onclick=()=>openCall(r);
+  if($('fuNo'))$('fuNo').onclick=()=>openCall(r,'notint');
+  if($('fuReopen'))$('fuReopen').onclick=()=>reopenLead(r);
+  if($('fuAll'))$('fuAll').onclick=()=>{fuAll=r.id;openDetail(r.id)};
+  if($('fuDate'))$('fuDate').onchange=e=>{r.follow=e.target.value||'';log(r,r.follow?`Follow-up set for ${fmtDate(r.follow)}`:'Follow-up cleared');save();render();openDetail(r.id);toast(r.follow?'Follow-up on your calendar':'Follow-up cleared')};
+  v.querySelectorAll('[data-fudel]').forEach(b=>b.onclick=()=>{if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent='Remove';setTimeout(()=>{if(b.isConnected){b.classList.remove('sure');b.textContent='×'}},3000);return}
+    r.ms.calls=(r.ms.calls||[]).filter(c=>c.id!==b.dataset.fudel);save();openDetail(r.id);toast('Removed')});
+}
+function reopenLead(r){snapshot();r.lost=false;if(!r.follow)r.follow=addDays(today(),1);log(r,'Reopened · back in Leads');save();render();openDetail(r.id);toast('Back in Leads · follow up tomorrow',true)}
+let callFor=null,callOut='';
+function openCall(r,preset){callFor=r;callOut=preset||'';
+  $('callTitleH').textContent=preset==='notint'?'Not Interested':'Log Call';
+  $('callWho').textContent=`${r.name}${r.phone?' · '+r.phone:''}${r.type?' · '+r.type:''}`;
+  const meN=meWho();
+  $('c-by').innerHTML=`<option value="">Choose</option>`+TEAM3.map(n=>`<option${n===meN?' selected':''}>${n}</option>`).join('');
+  $('c-via').innerHTML=Object.entries(VIAS).map(([k,n])=>`<option value="${k}">${n}</option>`).join('');
+  $('c-why').innerHTML=`<option value="">Choose a reason</option>`+LOST_WHY.map(n=>`<option>${n}</option>`).join('');
+  $('c-vd').value=r.ms.visit?.date||addDays(today(),2);$('c-vt').value=r.ms.visit?.time||'10:00';
+  $('c-note').value='';$('c-next').value='';
+  paintCall();showModal('callModal')}
+function paintCall(){
+  $('c-outs').innerHTML=Object.entries(OUTS).map(([k,o])=>`<button type="button" data-out="${k}" aria-pressed="${callOut===k}" style="--c:var(${o.c})"><i></i>${o.n}</button>`).join('');
+  $('c-visitg').hidden=callOut!=='visit';$('c-whyg').hidden=callOut!=='notint';$('c-nextg').hidden=['visit','notint'].includes(callOut);
+  $('callSave').textContent=callOut==='notint'?'Move':'Save'}
+$('c-outs').onclick=e=>{const b=e.target.closest('[data-out]');if(!b)return;callOut=b.dataset.out;
+  if(OUT_NEXT[callOut])$('c-next').value=addDays(today(),OUT_NEXT[callOut]);paintCall();
+  if(callOut==='notint')setTimeout(()=>$('c-why').focus(),50)};
+$('c-quick').onclick=e=>{const b=e.target.closest('[data-cn]');if(!b)return;const n=+b.dataset.cn;$('c-next').value=n?addDays(today(),n):''};
+$('callCancel').onclick=()=>hideModal('callModal');
+$('callModal').onclick=e=>{if(e.target.id==='callModal')hideModal('callModal')};
+$('callForm').onsubmit=async e=>{e.preventDefault();const r=callFor;if(!r)return;
+  if(!callOut){toast('What happened on the call?');return}
+  const by=$('c-by').value,via=$('c-via').value,note=$('c-note').value.trim();
+  if(!by){toast('Who made the call?');$('c-by').focus();return}
+  if(callOut==='visit'&&!$('c-vd').value){toast('Pick the visit date');$('c-vd').focus();return}
+  if(callOut==='notint'&&!$('c-why').value){toast('Pick a reason');$('c-why').focus();return}
+  snapshot();
+  const c={id:uid(),at:new Date().toISOString(),d:today(),by,via,out:callOut,note};
+  if(callOut==='notint')c.why=$('c-why').value;else if(callOut!=='visit')c.next=$('c-next').value||'';
+  r.ms.calls=[...(r.ms.calls||[]),c];
+  if(!stepDone(r,'contacted'))r.ms.contacted={done:true,date:today()};
+  if(callOut==='visit'){r.ms.visit=Object.assign(r.ms.visit||{},{date:$('c-vd').value,time:$('c-vt').value});r.follow=''}
+  else if(callOut==='notint'){r.lost=true;r.ms.lostWhy=c.why;r.ms.lostAt=today();r.ms.lostBy=by;r.follow=''}
+  else r.follow=c.next;
+  if(r.lost&&callOut!=='notint'){r.lost=false;log(r,'Reopened · back in Leads')}
+  const line=`${VIAS[via]||'Contact'} · ${OUTS[callOut].n}${c.why?' · '+c.why:''}${note?' — '+note:''}`;
+  log(r,`${line} (${by})`);save();hideModal('callModal');
+  if(partReady){const m=addMsg({id:uid(),jobId:r.id,partnerId:null,dir:'out',from:'phone',body:line,subject:'',att:[],unread:false,at:c.at});
+    try{await flush();await must(sb.from('partner_messages').insert({id:m.id,job_id:r.id,dir:'out',from_email:'phone',body:m.body,at:m.at,created_by:me?.email||''}))}catch(err){console.error(err)}}
+  render();if(selId===r.id)openDetail(r.id);
+  toast(callOut==='notint'?'Moved to Not Interested':callOut==='visit'?`Site visit ${fmtDate($('c-vd').value)} added to calendar`:c.next?`Saved · follow up ${fmtDate(c.next)}`:'Call saved',true)};
+
+/* Not Interested section */
+let lostWhyF='all',lostQ='';
+const lostList=()=>data.filter(r=>r.lost&&isLead(r));
+function renderLostCount(){const n=lostList().length;document.querySelectorAll('.ncount').forEach(x=>{x.textContent=n;x.hidden=!n})}
+function renderLost(){
+  const L=lostList(),q=lostQ.toLowerCase(),wf=r=>r.ms.lostWhy||'No reason saved';
+  const whys=[...new Set(L.map(wf))].sort((a,b)=>L.filter(r=>wf(r)===b).length-L.filter(r=>wf(r)===a).length);
+  if(lostWhyF!=='all'&&!whys.includes(lostWhyF))lostWhyF='all';
+  const list=L.filter(r=>(lostWhyF==='all'||wf(r)===lostWhyF)&&(!q||[r.name,r.phone,r.email,r.city,r.address,r.type,wf(r),r.notes].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>String(b.ms.lostAt||'').localeCompare(String(a.ms.lostAt||'')));
+  const est=L.filter(r=>stepDone(r,'estimate'));
+  $('lostSub').textContent=`${L.length} lead${L.length===1?'':'s'} · kept for later`;
+  $('pLost').innerHTML=!L.length?`<div class="pempty">${ico('lost','i big')}<b>Nobody here yet</b><p>When a lead says no, tap <b>Not interested</b> on their card. They move here with the reason, so you can call them again later.</p></div>`
+   :`<div class="pstats"><div class="mt"><b>${L.length}</b><span>Not interested</span></div><div class="mt"><b>${L.filter(r=>(r.ms.lostAt||'')>=addDays(today(),-30)).length}</b><span>Last 30 days</span></div><div class="mt"><b>${est.length}</b><span>Had an estimate${est.length?' · '+kmoney(est.reduce((t,r)=>t+total(r),0)):''}</span></div><div class="mt"><b>${whys[0]?esc(whys[0].split(' /')[0]):'—'}</b><span>Top reason</span></div></div>
+    <div class="cfil"><button data-lw="all" aria-pressed="${lostWhyF==='all'}">All<em>${L.length}</em></button>${whys.map(w=>`<button data-lw="${esc(w)}" aria-pressed="${lostWhyF===w}">${esc(w)}<em>${L.filter(r=>wf(r)===w).length}</em></button>`).join('')}</div>
+    ${list.length?`<div class="group">${list.map(r=>{const sk=srcKey(r),lc=callsOf(r).find(c=>c.note);return `<button class="row crow lostrow${selId===r.id?' sel':''}" data-lostjob="${r.id}">
+      <span class="av" style="--c:${SRC[sk].c}">${esc(initials(r.name))}</span>
+      <span class="rt"><b>${esc(r.name)}<span class="stag" style="--c:${SRC[sk].c}">${SRC[sk].n}</span></b><span>${esc([r.type,r.city,r.phone].filter(Boolean).join(' · '))}</span>
+        ${lc?`<span class="psnip">“${esc(lc.note.replace(/\s+/g,' ').slice(0,110))}”</span>`:''}
+        <span class="needs"><span class="pst why" style="--c:var(--red)"><i></i>${esc(wf(r))}</span>${stepDone(r,'estimate')&&total(r)?`<span class="pst" style="--c:var(--s-sent)"><i></i>Estimate ${kmoney(total(r))}</span>`:''}</span></span>
+      <span class="rv"><em>${r.ms.lostAt?fmtDate(r.ms.lostAt):''}</em>${ico('chev')}</span></button>`}).join('')}</div>`:`<div class="pempty"><b>No matches</b></div>`}`;
+}
+$('pLost').addEventListener('click',e=>{const w=e.target.closest('[data-lw]');if(w){lostWhyF=w.dataset.lw;renderLost();return}
+  const r=e.target.closest('[data-lostjob]');if(r)openDetail(r.dataset.lostjob,true)});
+$('lostq').oninput=e=>{lostQ=e.target.value.trim();renderLost()};
 
 /* ---------- job expenses with receipt photos ---------- */
 const EXP_CATS=['Materials','Subcontractor','Tools / rental','Bin / disposal','Permit / fees','Fuel / travel','Food / crew','Other'];
@@ -2588,8 +2752,8 @@ const subFiles=id=>(db.files||[]).filter(f=>f.contractor_id===id).sort((a,b)=>St
 /* ---------- tabs ---------- */
 function setTab(t){tab=t;
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('moreBtn').setAttribute('aria-selected',['cust','part','crew'].includes(t));
-  ['today','leads','jobs','cust','part','crew','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',crew:'sCrew',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
+  $('moreBtn').setAttribute('aria-selected',['cust','part','crew','lost'].includes(t));
+  ['today','leads','jobs','cust','part','crew','lost','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',crew:'sCrew',lost:'sLost',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
   if(t!=='map'&&isPhone()&&selId&&false)closeDetail();
   render();
   if(t==='part'&&gmailSt.connected&&Date.now()-lastCheck>60000)checkMail(false);
@@ -2633,6 +2797,7 @@ function openDetail(id,pan){
       <a class="act" target="_blank" rel="noopener" href="${wa?'https://wa.me/1'+wa:'#'}" aria-disabled="${!wa}">${ico('msg')}WhatsApp</a>
       <button class="act" id="dCal">${ico('calp')}Schedule</button>
     </div>
+    ${fuCard(r)}
     ${nx&&!r.lost?`<div class="nextcard"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
     ${planCard(r)}
     ${expBlock(r)}
@@ -2680,14 +2845,14 @@ function openDetail(id,pan){
       </div>
       <button class="row" id="dRelocate">Find on Map Again</button>
       <button class="row" id="dPin">Move Pin by Hand</button>
-      <button class="row" id="dLost">${r.lost?'Reopen Job':'Mark as Lost'}</button>
+      <button class="row" id="dLost">${r.lost?(isLead(r)?'Reopen Lead':'Reopen Job'):(isLead(r)?'Not Interested':'Mark as Lost')}</button>
       <button class="row danger" id="dDel">Delete Customer</button>
     </div>
     <div id="dConfirm"></div>
   </div>`;
   bindLeadConv(r);markLeadRead(r);
   if($('planOpen'))$('planOpen').onclick=()=>openPlan(r);if($('planSched'))$('planSched').onclick=()=>openSched(r,false);
-  bindExp(r,v);
+  bindExp(r,v);bindFu(r,v);
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
   if($('dNotesEdit'))$('dNotesEdit').onclick=()=>{openForm(r);setTimeout(()=>$('f-notes').focus(),300)};
@@ -2703,7 +2868,7 @@ function openDetail(id,pan){
     toast(p.approx?'Placed at the postal code area. Move the pin by hand if needed.':'Pin placed at the exact address');
     if(tab!=='map'&&!isPhone()){}};
   $('dShowMap').onclick=()=>{if(isPhone())closeDetail();setTab('map');mapSel=r.id;drawPins();renderCards();setTimeout(()=>{if(r.lat!=null)flyTo(r.lat,r.lng,15);scrollCard(r.id)},80)};
-  $('dLost').onclick=()=>{snapshot();r.lost=!r.lost;log(r,r.lost?'Marked as lost':'Reopened');save();render();openDetail(r.id);toast(r.lost?'Marked as lost':'Reopened',true)};
+  $('dLost').onclick=()=>{if(!r.lost&&isLead(r)){openCall(r,'notint');return}if(r.lost&&isLead(r)){reopenLead(r);return}snapshot();r.lost=!r.lost;log(r,r.lost?'Marked as lost':'Reopened');save();render();openDetail(r.id);toast(r.lost?'Marked as lost':'Reopened',true)};
   $('addPay').onclick=()=>openPay('extra');
   $('newDoc').onclick=()=>openDoc(null,r);
   if($('attachJob'))$('attachJob').onclick=()=>pickFiles(r.id);
@@ -3129,8 +3294,8 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 /* ---------- misc ---------- */
 let tt;function toast(m,canUndo,long){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.toggle('long',!!long||m.length>60);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:long?6500:2600)}
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];db.files=db.files||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('phView').hidden)$('phView').hidden=true;else if(!$('expModal').hidden)$('expCancel').click();else if(!$('moreModal').hidden)hideModal('moreModal');else if(!$('subModal').hidden)hideModal('subModal');else if(!$('schedModal').hidden)hideModal('schedModal');else if(!$('planModal').hidden)$('planClose').click();else if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel||subSel)closeDetail()}});
-function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();renderCrewCount();if(tab==='crew')renderCrew();renderMoreCount();if(tab==='cal')renderCal();drawPins();renderCards();
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('phView').hidden)$('phView').hidden=true;else if(!$('callModal').hidden)$('callCancel').click();else if(!$('expModal').hidden)$('expCancel').click();else if(!$('moreModal').hidden)hideModal('moreModal');else if(!$('subModal').hidden)hideModal('subModal');else if(!$('schedModal').hidden)hideModal('schedModal');else if(!$('planModal').hidden)$('planClose').click();else if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel||subSel)closeDetail()}});
+function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();renderCrewCount();if(tab==='crew')renderCrew();renderLostCount();if(tab==='lost')renderLost();renderMoreCount();if(tab==='cal')renderCal();drawPins();renderCards();
   if('setAppBadge' in navigator&&loaded){const n=data.filter(leadNeeds).length+(db.partners||[]).filter(pUnread).length;(n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{})}}
 let locating=false;
 async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
