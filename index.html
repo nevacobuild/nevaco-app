@@ -236,6 +236,8 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .paysum .nums div:last-child{text-align:right}
 .bar{height:8px;border-radius:4px;background:var(--card2);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--green);border-radius:4px;transition:width .5s var(--ease)}
+select.paym{margin-left:8px;border:0;background:var(--card2);border-radius:7px;font-size:12.5px;padding:2px 4px;color:var(--label2)}
+#payHow{border:0;background:var(--card2);border-radius:9px;padding:9px 6px;font-size:15px}
 .pay{display:flex;justify-content:space-between;padding:10px 14px;position:relative;font-size:14px}
 .pay::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
 .pay span{color:var(--label2)}
@@ -757,8 +759,8 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .rp-brand b{font-size:17px;letter-spacing:.06em;display:block}.rp-brand small,.rp-tt small{color:#f5a623;font-size:10px;letter-spacing:.08em}
 .rp-tt b{display:block;font-size:14px;letter-spacing:.08em}.rp-tt small{color:#c7c7cc;letter-spacing:.02em}
 .rp-id{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:1px;margin:0;background:#3a3a3c}.rp-id div{background:#2c2c2e;padding:5px 8px}.rp-id dt{font-size:9px;color:#aeaeb2;text-transform:uppercase;letter-spacing:.06em}.rp-id dd{margin:0;font-weight:700;font-size:12px;color:#fff6d5}
-.rp-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 18px 6px}
-.rp-kpi div{border-top:4px solid var(--k);background:#f7f7f9;padding:8px 10px;text-align:center}.rp-kpi span{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--k);font-weight:700}.rp-kpi b{font-size:17px}
+.rp-kpi{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px 18px 6px}
+.rp-kpi div{border-top:4px solid var(--k);background:#f7f7f9;padding:8px 10px;text-align:center}.rp-kpi span{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--k);font-weight:700}.rp-kpi b{font-size:17px}.rp-kpi small{display:block;font-size:9px;color:#8e8e93}
 .rp-page section{padding:8px 18px}.rp-page h4{margin:6px 0 6px;background:#1d1d1f;color:#fff;text-align:center;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px}
 .rp-two{display:grid;grid-template-columns:1fr 1.5fr}.rp-three{display:grid;grid-template-columns:1fr 1fr 1fr}
 .rp-t{width:100%;border-collapse:collapse}.rp-t th{background:#2c2c2e;color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:4px 5px;text-align:left;font-weight:700}
@@ -781,7 +783,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
   html:has(body.rep-open),body.rep-open{height:auto!important;min-height:0!important;overflow:visible!important;position:static!important;background:#fff!important}
   #repView{position:static;display:block;background:#fff}.rp-bar{display:none}.rp-scroll{overflow:visible;padding:0}
   .rp-page{box-shadow:none;max-width:none;font-size:9.5px}.rp-page *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .rp-two,.rp-three{grid-template-columns:1fr 1.5fr}.rp-three{grid-template-columns:1fr 1fr 1fr}.rp-top{grid-template-columns:1fr 1.3fr 1.6fr}.rp-kpi{grid-template-columns:repeat(5,1fr)}
+  .rp-two,.rp-three{grid-template-columns:1fr 1.5fr}.rp-three{grid-template-columns:1fr 1fr 1fr}.rp-top{grid-template-columns:1fr 1.3fr 1.6fr}.rp-kpi{grid-template-columns:repeat(6,1fr)}
   .rp-t{min-width:0}.rp-page section{break-inside:avoid;overflow:visible}.rp-t tr{break-inside:avoid}
 }
 
@@ -1409,7 +1411,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.42 (Nov 7) · Change orders';
+const APP_VERSION='1.43 (Nov 7) · HST received';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -2580,6 +2582,11 @@ const CO_ST={approved:'Approved',done:'Done',pending:'Waiting for OK',declined:'
 const changes=r=>Array.isArray(r.ms.changes)?r.ms.changes:[];
 const coCounts=c=>c.status==='approved'||c.status==='done';
 const PARTNERS=['Kevin','Raf','Shirin'];
+const PMETH=['e-Transfer','Cheque','Cash','Other'];
+const paySegs=p=>String(p.note||'').split(' · ').map(x=>x.trim()).filter(Boolean);
+const pmOf=p=>{const s=paySegs(p).find(x=>PMETH.some(m=>m.toLowerCase()===x.toLowerCase()));return s?PMETH.find(m=>m.toLowerCase()===s.toLowerCase()):''};
+const payNoteRest=p=>paySegs(p).filter(x=>!PMETH.some(m=>m.toLowerCase()===x.toLowerCase())).join(' · ');
+const isCashPay=p=>pmOf(p)==='Cash';
 const r2=v=>Math.round((Number(v)||0)*100)/100;
 const FCATS=[['Materials',['Materials']],['Labour',['Labour','Subcontractor']],['Equipment / Tools',['Tools / rental']],['Permits / Fees',['Permit / fees']],['Other',null]];
 const fcat=c=>{for(const[n,l]of FCATS)if(l&&l.includes(c))return n;return 'Other'};
@@ -2595,7 +2602,7 @@ function fin(r){
   const split=p=>{if(!hani){const t=thirds(p);return PARTNERS.map((n,i)=>[n,t[i]])}const hc=Math.round(p*100),h=Math.trunc(hc/2)/100,t=thirds(r2(p-h));return[['Hani',h],...PARTNERS.map((n,i)=>[n,t[i]])]};
   const own=Object.fromEntries(PARTNERS.map(n=>[n,0]));let ownOther=0;
   xs.filter(x=>x.pm==='personal').forEach(x=>{const n=PARTNERS.find(p=>p.toLowerCase()===String(x.by||'').toLowerCase());if(n)own[n]=r2(own[n]+x.amount);else ownOther=r2(ownOther+x.amount)});
-  return{own,ownOther,base,co,tcv,rec,recv:r2(Math.max(0,tcv-rec)),xs,ex,ret,labT,owed,spent,returns,net,cats,profit,expected,hani,split,hstIn:r.hst?r2(rec*(typeof r.ms.tax==='number'?r.ms.tax/(((+r.value||0)+r.ms.tax)||1):13/113)):0}}
+  return{own,ownOther,base,co,tcv,rec,recv:r2(Math.max(0,tcv-rec)),xs,ex,ret,labT,owed,spent,returns,net,cats,profit,expected,hani,split,get hstIn(){return r2(paySched(r).reduce((t,x)=>t+(x.hstGot||0),0))}}}
 function conFor(r){const cs=docsFor(r.id).filter(isCon);return cs.find(d=>d.status==='accepted')||cs.find(d=>d.status==='sent')||cs[0]||null}
 function paySched(r){
   const con=conFor(r),est=docsFor(r.id).filter(d=>(d.kind||'estimate')==='estimate').find(d=>d.status==='accepted')||docsFor(r.id).find(d=>(d.kind||'estimate')==='estimate'&&d.status!=='draft');
@@ -2603,12 +2610,13 @@ function paySched(r){
   let rows=con&&con.extra?.schedule?.length?con.extra.schedule.map(x=>({d:x.d,pct:+x.pct||0,hst:x.hst})):(()=>{const p=est?.depositPct||30;return[{d:`Deposit (${p}%)`,pct:p},{d:`Final payment (${100-p}%)`,pct:100-p}]})();
   const cDate=r.ms.contract?.date||con?.date||'';
   const perRow=con&&con.extra?.schedule?.some(x=>x.hst!==undefined),sub=+r.value||0;
-  rows=rows.map((x,i)=>({d:x.d+(perRow&&x.hst?' + HST':''),due:i===0?cDate:i===rows.length-1?e:(s&&e?addDays(s,Math.round(dayDiff(e,s)/2)):s),amt:perRow?r2(payBase(x,sub)+payHst(x,sub)):r2(x.pct*base/100),got:0,notes:[]}));
-  changes(r).filter(coCounts).forEach(c=>rows.push({d:'Extra: '+(c.title||'Change order'),due:c.date||'',amt:r2(c.amount),got:0,notes:[]}));
-  chgApproved(r).forEach(c=>rows.push({d:'Change order '+c.number,due:c.date||'',amt:r2(c.total),got:0,notes:[]}));
+  const legacyRate=!perRow&&(typeof r.ms.tax==='number'?r.ms.tax>0:r.hst)?(typeof r.ms.tax==='number'?r.ms.tax/(((+r.value||0)+r.ms.tax)||1):13/113):0;
+  rows=rows.map((x,i)=>({d:x.d+(perRow&&x.hst?' + HST':''),due:i===0?cDate:i===rows.length-1?e:(s&&e?addDays(s,Math.round(dayDiff(e,s)/2)):s),amt:perRow?r2(payBase(x,sub)+payHst(x,sub)):r2(x.pct*base/100),rate:perRow?(x.hst?13/113:0):legacyRate,pct:x.pct,hst:perRow?!!x.hst:legacyRate>0,got:0,hstGot:0,notes:[]}));
+  changes(r).filter(coCounts).forEach(c=>rows.push({d:'Extra: '+(c.title||'Change order'),due:c.date||'',amt:r2(c.amount),rate:0,got:0,hstGot:0,notes:[]}));
+  chgApproved(r).forEach(c=>rows.push({d:'Change order '+c.number+(c.tax?' + HST':''),due:c.date||'',amt:r2(c.total),rate:c.total?(+c.tax||0)/c.total:0,got:0,hstGot:0,notes:[]}));
   const pays=[...(r.payments||[])].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-  for(const p of pays){let left=+p.amount||0;for(const x of rows){if(left<=0)break;const need=r2(x.amt-x.got);if(need<=0)continue;const take=Math.min(need,left);x.got=r2(x.got+take);left=r2(left-take);x.notes.push(fmtDate(p.date)+(p.note?' · '+p.note:''))}
-    if(left>0.004){const o=rows.find(x=>x.other)||(rows.push({d:'Other payments',due:'',amt:0,got:0,notes:[],other:true}),rows.at(-1));o.got=r2(o.got+left);o.notes.push(fmtDate(p.date)+(p.note?' · '+p.note:''))}}
+  for(const p of pays){let left=+p.amount||0;const cash=isCashPay(p);for(const x of rows){if(left<=0)break;const need=r2(x.amt-x.got);if(need<=0)continue;const take=Math.min(need,left);x.got=r2(x.got+take);if(!cash)x.hstGot+=take*x.rate;left=r2(left-take);x.notes.push(fmtDate(p.date)+(p.note?' · '+p.note:''))}
+    if(left>0.004){const o=rows.find(x=>x.other)||(rows.push({d:'Other payments',due:'',amt:0,rate:0,got:0,hstGot:0,notes:[],other:true}),rows.at(-1));o.got=r2(o.got+left);o.notes.push(fmtDate(p.date)+(p.note?' · '+p.note:''))}}
   const T=today();rows.forEach(x=>x.st=x.other?'Paid':x.got>=x.amt-0.5&&x.amt>0?'Paid':x.got>0?'Partial':x.due&&x.due<T?'Overdue':'Due');
   return rows}
 const progressOf=r=>{const ts=jtasks(r);if(ts.length)return Math.round(ts.filter(t=>t.done).length/ts.length*100);return stageOf(r)==='done'?100:0};
@@ -2616,7 +2624,7 @@ function finBlock(r){if(!showExp(r))return '';const f=fin(r),cs=changes(r);
   return `<div class="block"><div class="label">Money <span><button id="finCo">+ Change order</button>&nbsp;&nbsp;<button id="finRep">Report / PDF</button></span></div>
     <div class="group"><div class="fink">
       <div><span>Contract value</span><b>${money(f.tcv)||'$0'}</b>${f.co?`<small>incl. ${money(f.co)} extras</small>`:''}</div>
-      <div><span>Received</span><b style="color:var(--green)">${money(f.rec)||'$0'}</b><small>${f.recv>0.5?money(f.recv)+' to collect':'All collected'}</small></div>
+      <div><span>Received</span><b style="color:var(--green)">${money(f.rec)||'$0'}</b><small>${f.hstIn?'incl. '+cents(f.hstIn)+' HST · ':''}${f.recv>0.5?money(f.recv)+' to collect':'All collected'}</small></div>
       <div><span>Expenses</span><b style="color:var(--red)">${cents(f.net)}</b>${f.owed?`<small>+ ${money(f.owed)} labour to pay</small>`:''}</div>
       <div><span>Profit so far</span><b style="color:${f.profit<0?'var(--red)':'var(--purple,#af52de)'}">${f.profit<0?'−':''}${cents(Math.abs(f.profit))}</b><small>Expected ${f.expected<0?'−':''}${money(Math.abs(f.expected))}</small></div>
     </div>
@@ -2650,7 +2658,7 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
   const f=fin(r),sch=paySched(r),con=conFor(r),cs=changes(r),st=STAGES[stageOf(r)],pg=progressOf(r),T=today();
   const neg=v=>v<0?`(${cents(-v)})`:cents(v);
   const terms=sch.filter(x=>!x.other&&!x.d.startsWith('Extra: ')).map(x=>`${base0(x)}`).join(' · ');
-  function base0(x){const b=total(r);return b?`${Math.round(x.amt/b*100)}% ${x.d.replace(/\s*\(\d+%\)/,'')}`:x.d}
+  function base0(x){return x.pct!=null?`${x.pct}% ${x.d.replace(/\s*\(\d+%\)/,'').replace(/ \+ HST$/,'')}${x.hst?' (+HST)':''}`:x.d}
   const lines=[...f.ex.map(x=>({date:x.date,cat:x.cat==='Subcontractor'?'Labour':x.cat||'Other',d:x.title||x.vendor||expWho(x)||x.cat,who:expWho(x)||x.vendor||'',by:x.by,ref:x.photos.length?'Receipt'+(x.photos.length>1?' ×'+x.photos.length:''):(x.via?'Via link':''),pm:pmShort(x.pm)||'',amt:x.amount,notes:x.notes})),
     ...f.labT.map(t=>({date:t.paidAt||t.end||t.start||'',cat:'Labour',d:t.title||'Job plan task',who:subName(t.subId)||'',by:'',ref:'Job plan',pm:'',amt:+t.cost||0,notes:''}))].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
   const catRows=FCATS.map(([n])=>[n,r2(f.cats[n])]);
@@ -2662,6 +2670,7 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
     <div class="rp-kpi">
       <div style="--k:#0a84ff"><span>Total contract value</span><b>${cents(f.tcv)}</b></div>
       <div style="--k:#30d158"><span>Total payments received</span><b>${cents(f.rec)}</b></div>
+      <div style="--k:#5ac8fa"><span>HST received</span><b>${cents(f.hstIn)}</b><small>included in payments · to remit</small></div>
       <div style="--k:#ff9f0a"><span>Remaining receivable</span><b>${cents(f.recv)}</b></div>
       <div style="--k:#ff453a"><span>Total expenses (net)</span><b>${cents(f.net)}</b></div>
       <div style="--k:#bf5af2"><span>Project profit / (loss)</span><b style="color:${f.profit<0?'#d70015':'#8944ab'}">${neg(f.profit)}</b></div></div>
@@ -2679,7 +2688,7 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
         ${sch.map(x=>`<tr><td>${x.due?fmtDate(x.due):''}</td><td>${esc(x.d)}</td><td class="n">${x.amt?cents(x.amt):''}</td><td class="n">${x.got?cents(x.got):''}</td><td><span class="rp-st ${x.st.toLowerCase()}">${x.st}</span></td><td class="sm">${esc(x.notes.join(', '))}</td></tr>`).join('')}
         </tbody><tfoot><tr><td></td><td>Total</td><td class="n">${cents(sch.reduce((t,x)=>t+x.amt,0))}</td><td class="n">${cents(f.rec)}</td><td colspan="2"></td></tr></tfoot></table>
         <table class="rp-kv rp-sum"><tr><th>Contract amount (base)${r.hst?' incl. HST':''}</th><td>${cents(f.base)}</td></tr><tr><th>Extra jobs / change orders (+)</th><td>${cents(f.co)}</td></tr><tr class="b"><th>Total contract value (=)</th><td>${cents(f.tcv)}</td></tr>
-          <tr><th>Total payments received</th><td>${cents(f.rec)}</td></tr><tr><th>Remaining receivable</th><td>${cents(f.recv)}</td></tr><tr><th>Total expenses (net of returns)</th><td>${cents(f.net)}</td></tr>
+          <tr><th>Total payments received</th><td>${cents(f.rec)}</td></tr><tr><th class="sm">of which HST received</th><td class="sm">${cents(f.hstIn)}</td></tr><tr><th>Remaining receivable</th><td>${cents(f.recv)}</td></tr><tr><th>Total expenses (net of returns)</th><td>${cents(f.net)}</td></tr>
           <tr class="b p"><th>Project profit / (loss)</th><td>${neg(f.profit)}</td></tr></table></section></div>
     <section><h4>Project expenses</h4>
       <table class="rp-t rp-cats"><thead><tr><th>Category</th><th class="n">Actual</th><th class="n">% of expenses</th></tr></thead><tbody>
@@ -2700,7 +2709,7 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
       return `<table class="rp-t rp-split"><thead><tr><th>Partner</th><th>Share</th><th class="n">Share of profit</th><th class="n">Paid from own pocket</th><th class="n">Takes now</th><th class="n">Expected at completion</th></tr></thead><tbody>
         ${pay.map(([n,v,o,t],i)=>`<tr><td><b>${n}</b></td><td>${n==='Hani'?'1/2':f.hani?'1/3 of the other half':'1/3'}</td><td class="n">${neg(v)}</td><td class="n">${o?cents(o):'—'}</td><td class="n"><b>${neg(t)}</b></td><td class="n sm">${neg(ex[i][1])}</td></tr>`).join('')}</tbody>
         <tfoot><tr><td colspan="2">Total</td><td class="n">${neg(f.profit)}</td><td class="n">${cents(PARTNERS.reduce((t,n)=>t+(f.own[n]||0),0))}</td><td class="n">${neg(r2(pay.reduce((t,x)=>t+x[3],0)))}</td><td class="n">${neg(f.expected)}</td></tr></tfoot></table>
-        <p class="rp-note">Profit so far = payments received ${cents(f.rec)} − expenses ${cents(f.net)} = <b>${neg(f.profit)}</b>, split ${f.hani?'1/2 to Hani, and the other half':''} into exact thirds. <b>Takes now</b> = share of profit + what that partner paid from their own pocket (expenses marked “Personal”), so everyone gets their money back first.${f.ownOther?` ${cents(f.ownOther)} was paid personally by someone who is not a partner and is not included.`:''}${f.hstIn?` Payments include about ${money(f.hstIn)} HST.`:''}</p>`})()}</section>
+        <p class="rp-note">Profit so far = payments received ${cents(f.rec)} − expenses ${cents(f.net)} = <b>${neg(f.profit)}</b>, split ${f.hani?'1/2 to Hani, and the other half':''} into exact thirds. <b>Takes now</b> = share of profit + what that partner paid from their own pocket (expenses marked “Personal”), so everyone gets their money back first.${f.ownOther?` ${cents(f.ownOther)} was paid personally by someone who is not a partner and is not included.`:''}${f.hstIn?` Payments include ${cents(f.hstIn)} HST.`:''}</p>`})()}</section>
     <div class="rp-two">
       <section><h4>Cash flow overview</h4><div class="rp-bars">${[['Contract value',f.tcv,'#0a84ff'],['Received',f.rec,'#30d158'],['Expenses',f.net,'#ff453a'],['Profit',f.profit,'#bf5af2']].map(([n,v,c])=>`<div><i style="height:${Math.max(2,Math.abs(v)/mx*100)}%;background:${c}"></i><b>${v<0?'−':''}${kmoney(Math.abs(v))}</b><span>${n}</span></div>`).join('')}</div></section>
       <section><h4>Progress tracker</h4><div class="rp-prog"><b>${pg}%</b><span>Overall progress</span><div><i style="width:${pg}%"></i></div><small>${jtasks(r).length?`${jtasks(r).filter(t=>t.done).length} of ${jtasks(r).length} job plan tasks done`:'Add a job plan to track progress'}</small></div></section></div>
@@ -3129,14 +3138,14 @@ function openDetail(id,pan){
         return `<div class="step${on?' on':''}${s.i===curI?' cur':''}" style="--c:var(${s.c})"><span class="line"></span>
           <button class="chk${on?' on':''}" data-s="${s.k}" aria-label="${on?'Undo':'Mark'} ${s.n}">${ico('check')}</button>
           <span class="sx"><b>${s.n}</b>${sub?`<span>${sub}</span>`:''}</span>${dt}</div>
-          ${inlinePay===s.k?`<div class="inline"><input id="payAmt" inputmode="decimal" value="${s.k==='deposit'?(T?Math.round(T*.3):''):(B||'')}" placeholder="Amount"><button class="btn" id="payOk">Record</button><button class="btn gray" id="payNo">Cancel</button></div>`:''}`}).join('')}
+          ${inlinePay===s.k?`<div class="inline"><input id="payAmt" inputmode="decimal" value="${s.k==='deposit'?(T?Math.round(T*.3):''):(B||'')}" placeholder="Amount"><select id="payHow" aria-label="How they paid"><option>e-Transfer</option><option>Cheque</option><option>Cash</option><option>Other</option></select><button class="btn" id="payOk">Record</button><button class="btn gray" id="payNo">Cancel</button></div>`:''}`}).join('')}
       </div></div>
     <div class="block"><div class="label">Payments <button id="addPay">Record Payment</button></div>
       <div class="group">
         <div class="paysum"><div class="nums"><div><span>Contract${r.hst?' + HST':''}${coTotal(r)?' + extras':''}</span><b>${T?money(T+coTotal(r)):'—'}</b></div><div><span>Paid</span><b>${money(P)||'$0'}</b></div><div><span>Balance</span><b style="color:${B>0.5?'var(--s-pay)':'var(--green)'}">${T?money(B):'—'}</b></div></div>
           <div class="bar"><i style="width:${T?Math.min(100,P/(T+coTotal(r))*100):0}%"></i></div></div>
-        ${r.payments.map((p,i)=>`<div class="pay"><span>${fmtDate(p.date)}${p.note?' · '+esc(p.note):''}</span><span><b>${money(p.amount)}</b><button data-delpay="${i}" aria-label="Remove payment">${ico('x')}</button></span></div>`).join('')}
-        ${inlinePay==='extra'?`<div class="inline" style="padding-left:14px"><input id="payAmt" inputmode="decimal" placeholder="Amount" value="${B||''}"><button class="btn" id="payOk">Record</button><button class="btn gray" id="payNo">Cancel</button></div>`:''}
+        ${r.payments.map((p,i)=>{const m=pmOf(p),rest=payNoteRest(p);return `<div class="pay"><span>${fmtDate(p.date)}${rest?' · '+esc(rest):''}<select class="paym" data-paym="${i}" aria-label="How they paid">${['','e-Transfer','Cheque','Cash','Other'].map(o=>`<option value="${o}"${o===m?' selected':''}>${o||'How paid?'}</option>`).join('')}</select></span><span><b>${money(p.amount)}</b><button data-delpay="${i}" aria-label="Remove payment">${ico('x')}</button></span></div>`}).join('')}
+        ${inlinePay==='extra'?`<div class="inline" style="padding-left:14px"><input id="payAmt" inputmode="decimal" placeholder="Amount" value="${B||''}"><select id="payHow" aria-label="How they paid"><option>e-Transfer</option><option>Cheque</option><option>Cash</option><option>Other</option></select><button class="btn" id="payOk">Record</button><button class="btn gray" id="payNo">Cancel</button></div>`:''}
       </div></div>
     ${evs.length?`<div class="block"><div class="label">Scheduled</div><div class="group">${evs.map(e=>calRow({key:'e:'+e.id,type:e.type,title:e.title,time:e.time,date:e.date,done:e.done,job:null})).join('')}</div></div>`:''}
     <div class="block"><div class="label">Details</div>
@@ -3201,10 +3210,11 @@ function openDetail(id,pan){
     if(t){r.ms[t]=r.ms[t]||{};r.ms[t].time=e.target.value}
     save();render();openDetail(r.id);if(d)toast('Added to calendar')};
   const ok=$('payOk');if(ok){const go=()=>{const a=Number(($('payAmt').value||'').replace(/[^0-9.]/g,''));if(!a){$('payAmt').focus();return}
-      snapshot();r.payments.push({date:today(),amount:a,note:inlinePay==='deposit'?'Deposit':inlinePay==='final'?'Final payment':''});
+      snapshot();r.payments.push({date:today(),amount:a,note:[inlinePay==='deposit'?'Deposit':inlinePay==='final'?'Final payment':'',$('payHow')?.value||''].filter(Boolean).join(' · ')});
       if(inlinePay==='deposit'&&!stepDone(r,'contract'))setStep(r,'contract',true);
-      log(r,`Payment received ${money(a)}`);inlinePay=null;save();render();openDetail(r.id);toast(`${money(a)} recorded`,true)};
+      log(r,`Payment received ${money(a)}${$('payHow')?' by '+$('payHow').value:''}`);inlinePay=null;save();render();openDetail(r.id);toast(`${money(a)} recorded`,true)};
     ok.onclick=go;$('payAmt').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}};$('payNo').onclick=()=>{inlinePay=null;openDetail(r.id)}}
+  v.querySelectorAll('[data-paym]').forEach(sl=>sl.onchange=()=>{const p=r.payments[+sl.dataset.paym];if(!p)return;p.note=[payNoteRest(p),sl.value].filter(Boolean).join(' · ');log(r,`Payment of ${money(p.amount)} marked as ${sl.value||'not set'}`);save();render();openDetail(r.id)});
   v.querySelectorAll('[data-delpay]').forEach(b=>b.onclick=()=>{snapshot();const p=r.payments.splice(+b.dataset.delpay,1)[0];log(r,`Payment removed ${money(p.amount)}`);save();render();openDetail(r.id);toast('Payment removed',true)});
   v.querySelectorAll('[data-cal]').forEach(b=>b.onclick=()=>{const e=db.events.find(x=>'e:'+x.id===b.dataset.cal);if(e)openEvent(e)});
   $('dDel').onclick=()=>{$('dConfirm').innerHTML=`<div class="group linkbtns"><div style="padding:14px;text-align:center;color:var(--label2);font-size:13px">Delete ${esc(r.name)}? This can’t be undone.</div><button class="row danger" id="dYes" style="font-weight:600">Delete</button><button class="row" id="dNo">Cancel</button></div>`;
