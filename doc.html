@@ -129,7 +129,7 @@ if(!token){$('root').innerHTML='<div class="msg"><b>Link not valid</b>Please use
 let d;
 try{const r=await sb.rpc('get_shared_doc',{p_token:token});if(r.error)throw r.error;d=r.data}catch(e){$('root').innerHTML='<div class="msg"><b>Could not load</b>Check your connection and try again.</div>';return}
 if(!d){$('root').innerHTML='<div class="msg"><b>Document not found</b>This link may have been replaced. Please contact NEVACO BUILD at 437-432-2252.</div>';return}
-const inv=d.kind==='invoice',con=d.kind==='contract',KIND=inv?'Invoice':con?'Contract':'Estimate';
+const inv=d.kind==='invoice',con=d.kind==='contract',chg=d.kind==='change',two=con||chg,KIND=inv?'Invoice':con?'Contract':chg?'Change Order':'Estimate';
 const FN='https://pnomirvkekhurtuigxol.supabase.co/functions/v1/gmail/doc',KEY='sb_publishable_hZvLBt3e7q6Ycvm1k6yEBA_YMfivV53';
 const post=(b)=>fetch(FN,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify(Object.assign({token},b))});
 const x=d.extra||{};
@@ -153,19 +153,20 @@ function render(){accepted=d.status==='accepted';
   <div class="inner">
     <div class="lh"><img src="logo-dark.png" alt="NEVACO BUILD">
       <div class="contact"><b>NEVACO BUILD INC.</b><br>Renovation & General Contracting<br>Toronto, Ontario<br>437-432-2252<br>nevacobuild@gmail.com<br>nevacobuild.ca</div></div>
-    <div class="head"><h1>${inv?'INVOICE':con?'CONTRACT':'ESTIMATE'}<span>${esc(d.title||(inv?'Renovation Invoice':con?'Renovation Contract':'Renovation Estimate'))}</span></h1>
-      <dl class="meta"><dt>${KIND} no.</dt><dd>${esc(d.number)}</dd><dt>Date</dt><dd>${fdate(d.date)}</dd>${inv?`<dt>Due</dt><dd>${d.due_date&&d.due_date!==d.date?fdate(d.due_date):'On receipt'}</dd>${d.ref?`<dt>Estimate</dt><dd>${esc(d.ref)}</dd>`:''}${HST_NO?`<dt>HST no.</dt><dd>${esc(HST_NO)}</dd>`:''}`:con?`${d.ref?`<dt>Estimate</dt><dd>${esc(d.ref)}</dd>`:''}${HST_NO?`<dt>HST no.</dt><dd>${esc(HST_NO)}</dd>`:''}`:(d.valid_until?`<dt>Valid until</dt><dd>${fdate(d.valid_until)}</dd>`:'')}</dl></div>
+    <div class="head"><h1>${inv?'INVOICE':con?'CONTRACT':chg?'CHANGE ORDER':'ESTIMATE'}<span>${esc(d.title||(inv?'Renovation Invoice':con?'Renovation Contract':chg?'Extra work':'Renovation Estimate'))}</span></h1>
+      <dl class="meta"><dt>${KIND} no.</dt><dd>${esc(d.number)}</dd><dt>Date</dt><dd>${fdate(d.date)}</dd>${inv?`<dt>Due</dt><dd>${d.due_date&&d.due_date!==d.date?fdate(d.due_date):'On receipt'}</dd>${d.ref?`<dt>Estimate</dt><dd>${esc(d.ref)}</dd>`:''}${HST_NO?`<dt>HST no.</dt><dd>${esc(HST_NO)}</dd>`:''}`:two?`${d.ref?`<dt>${chg?'Contract':'Estimate'}</dt><dd>${esc(d.ref)}</dd>`:''}${HST_NO?`<dt>HST no.</dt><dd>${esc(HST_NO)}</dd>`:''}`:(d.valid_until?`<dt>Valid until</dt><dd>${fdate(d.valid_until)}</dd>`:'')}</dl></div>
     <div class="parties">
-      ${con?`<div><div class="lbl">Contractor</div><p><b>NEVACO BUILD INC.</b><br>Toronto, Ontario<br>437-432-2252<br>nevacobuild@gmail.com</p></div>
+      ${two?`<div><div class="lbl">Contractor</div><p><b>NEVACO BUILD INC.</b><br>Toronto, Ontario<br>437-432-2252<br>nevacobuild@gmail.com</p></div>
       <div><div class="lbl">Owner</div><p><b>${esc(c.name)}</b>${c.phone?'<br>'+esc(c.phone):''}${c.email?'<br>'+esc(c.email):''}</p></div>`
       :`<div><div class="lbl">${inv?'Bill to':'Prepared for'}</div><p><b>${esc(c.name)}</b><br>${esc(place)}${c.phone?'<br>'+esc(c.phone):''}${c.email?'<br>'+esc(c.email):''}</p></div>`}
-      ${con?'':`<div><div class="lbl">Project address</div><p>${esc(place)||'—'}</p></div>`}
+      ${two?'':`<div><div class="lbl">Project address</div><p>${esc(place)||'—'}</p></div>`}
     </div>
     ${con?`<p style="margin:-8px 0 18px;color:var(--ink2)">This contract is made on ${fdate(d.date)} between NEVACO BUILD INC. (the “Contractor”) and ${esc(c.name)} (the “Owner”) for the work described below at:</p>
     <div class="keys"><div style="grid-column:1/-1"><small>Project address</small><b>${esc(place)||'—'}</b></div>
       <div><small>Start date</small><b>${x.start?fdate(x.start):'To be scheduled'}</b></div><div><small>Completion (estimated)</small><b>${x.end?fdate(x.end):'To be scheduled'}</b></div>
       <div><small>Warranty</small><b>${esc(x.warranty||'1 year')} on workmanship</b></div><div><small>Permits</small><b>${esc(x.permits||'Not required')}</b></div></div>`:''}
-    <div class="lbl">${inv?'Description':'Scope of work'}</div>
+    ${chg?`<p style="margin:-8px 0 18px;color:var(--ink2)">This change order adds the extra work below to ${d.ref?'contract '+esc(d.ref):'the contract'} between NEVACO BUILD INC. (the “Contractor”) and ${esc(c.name)} (the “Owner”) for the project at <b style="color:var(--ink)">${esc(place)||'—'}</b>. All other terms of the contract stay the same.</p>`:''}
+    <div class="lbl">${inv?'Description':chg?'Extra work':'Scope of work'}</div>
     <table><thead><tr><th style="width:28px">#</th><th>Description</th><th>${priced?'Amount':''}</th></tr></thead>
       <tbody>${items.map((i,k)=>`<tr><td class="n">${k+1}</td><td class="desc">${esc(i.d)}</td><td class="amt">${Number(i.a)>0?money(i.a):''}</td></tr>`).join('')}</tbody></table>
     <div class="totals">
@@ -184,19 +185,24 @@ function render(){accepted=d.status==='accepted';
         <tfoot><tr><td>Total</td><td>${money(sub0)}</td><td>${money(d.tax)}</td><td><b>${money(d.total)}</b></td></tr></tfoot></table>`
       :sched.map(r=>`<div class="row"><span>${esc(r.d)} (${Number(r.pct)}%)</span><b>${money(Math.round(Number(r.pct)*Number(d.total||0))/100)}</b></div>`).join('')}
       <div class="row"><small>Payment by Interac e-Transfer to nevacobuild@gmail.com, cheque payable to NEVACO BUILD INC., or cash with a receipt.</small></div></div>`:''}
-    ${!inv&&!con&&Number(d.deposit_pct)>0?`<div class="sched"><div class="lbl">Payment schedule</div>
+    ${chg?`<div class="sched"><div class="lbl">Contract total</div>
+      ${x.prevTotal!=null?`<div class="row"><span>Contract total before this change${x.prevCount?' (including '+x.prevCount+' earlier change'+(x.prevCount>1?'s':'')+')':''}</span><b>${money(x.prevTotal)}</b></div>`:''}
+      <div class="row"><span>This change order</span><b>${money(d.total)}</b></div>
+      ${x.prevTotal!=null?`<div class="row" style="border-top:1px solid var(--line);margin-top:4px;padding-top:6px"><span><b>New contract total</b></span><b>${money(Number(x.prevTotal)+Number(d.total||0))}</b></div>`:''}
+      <div class="row"><small>Payment: ${esc(x.payWhen||'Added to the final payment')}.</small></div></div>`:''}
+    ${!inv&&!con&&!chg&&Number(d.deposit_pct)>0?`<div class="sched"><div class="lbl">Payment schedule</div>
       <div class="row"><span>Deposit at signing (${Number(d.deposit_pct)}%)</span><b>${money(dep)}</b></div>
       <div class="row"><span>Balance on completion</span><b>${money(Number(d.total)-dep)}</b></div></div>`:''}
     ${d.notes?`<div class="block"><div class="lbl">${con?'Special conditions':'Notes'}</div><p>${esc(d.notes)}</p></div>`:''}
-    ${d.terms?(con?`<div class="block clauses"><div class="lbl">Terms and conditions</div>${clauses(d.terms)}</div>`:`<div class="block"><div class="lbl">Terms</div><p>${esc(d.terms)}</p></div>`):''}
+    ${d.terms?(two?`<div class="block clauses"><div class="lbl">Terms and conditions</div>${clauses(d.terms)}</div>`:`<div class="block"><div class="lbl">Terms</div><p>${esc(d.terms)}</p></div>`):''}
     ${inv?'<div class="block"><p style="color:var(--ink)">Thank you for choosing NEVACO BUILD.</p></div>':''}
     <div class="sign" ${inv?'hidden':''}>
       <div><div class="sigline">${accepted&&d.signature?`<img src="${esc(d.signature)}" alt="Customer signature">`:''}</div>
-        <div class="sigcap">${con?'Owner':'Customer'} signature${accepted?` · ${esc(d.accepted_name)} · ${fdate(d.accepted_at)}`:''}</div>
-        ${accepted?`<div class="stamp">✓ ${con?'Signed':'Accepted'} online ${new Date(d.accepted_at).toLocaleString('en-CA',{dateStyle:'medium',timeStyle:'short'})}</div>`:''}</div>
+        <div class="sigcap">${two?'Owner':'Customer'} signature${accepted?` · ${esc(d.accepted_name)} · ${fdate(d.accepted_at)}`:''}</div>
+        ${accepted?`<div class="stamp">✓ ${con?'Signed':chg?'Approved':'Accepted'} online ${new Date(d.accepted_at).toLocaleString('en-CA',{dateStyle:'medium',timeStyle:'short'})}</div>`:''}</div>
       <div><div class="sigline">${d.owner_signature?`<img src="${esc(d.owner_signature)}" alt="NEVACO BUILD signature">`:''}</div><div class="sigcap">NEVACO BUILD INC.${d.owner_signed_at?' · '+fdate(d.owner_signed_at):''}</div></div>
     </div>
-    ${accepted&&con?`<div class="audit"><div class="lbl">Electronic signature record</div>
+    ${accepted&&two?`<div class="audit"><div class="lbl">Electronic signature record</div>
       <div><span>Signed by</span><b>${esc(d.accepted_name)}</b></div><div><span>Date and time</span>${fdt(d.accepted_at)}</div>
       ${d.sign_meta&&d.sign_meta.ip?`<div><span>IP address</span>${esc(d.sign_meta.ip)}</div>`:''}
       <div><span>Method</span>Typed name and drawn signature on a secure link sent by NEVACO BUILD${c.email?' to '+esc(c.email):''}</div>
@@ -204,14 +210,14 @@ function render(){accepted=d.status==='accepted';
   </div>
   <div class="foot"><span>NEVACO BUILD INC. · nevacobuild.ca</span><span>${KIND} ${esc(d.number)}</span></div>
   </article>
-  ${d.status==='draft'?`<div class="accept"><div class="done" style="background:#f2f2f5;color:#5f5f64">Draft preview. This ${KIND.toLowerCase()} has not been sent yet.</div></div>`:inv?'':accepted?`<div class="accept"><div class="done">${con?'This contract is signed. Thank you! A copy has been sent to your email. You can also download it with the button above.':'This estimate was accepted. Thank you! NEVACO BUILD will contact you to schedule the work.'}</div></div>`:`
+  ${d.status==='draft'?`<div class="accept"><div class="done" style="background:#f2f2f5;color:#5f5f64">Draft preview. This ${KIND.toLowerCase()} has not been sent yet.</div></div>`:inv?'':accepted?`<div class="accept"><div class="done">${con?'This contract is signed. Thank you! A copy has been sent to your email. You can also download it with the button above.':chg?'This change order is approved. Thank you! A copy has been sent to your email. We will add the work to your project.':'This estimate was accepted. Thank you! NEVACO BUILD will contact you to schedule the work.'}</div></div>`:`
   ${d.status!=='sent'?'':`<form class="accept" id="acc" novalidate>
-    <h2>${con?'Sign this contract':'Accept this estimate'}</h2>
-    <p>${con?'Please read the whole contract above. To sign, type your full name and draw your signature below.':'Review the scope and price above. To accept, type your name and sign below.'}</p>
+    <h2>${con?'Sign this contract':chg?'Approve this change order':'Accept this estimate'}</h2>
+    <p>${con?'Please read the whole contract above. To sign, type your full name and draw your signature below.':chg?'Please review the extra work and price above. To approve it, type your full name and sign below.':'Review the scope and price above. To accept, type your name and sign below.'}</p>
     <label for="nm">Full name</label><input type="text" id="nm" autocomplete="name" value="">
     <label>Signature</label><div class="pad"><canvas id="pad"></canvas><button type="button" id="clr">Clear</button><span id="hint">Sign here with your finger or mouse</span></div>
-    <label class="check"><input type="checkbox" id="ok"><span>${con?'I have read and agree to this contract, including the scope, price, payment schedule and terms above. I agree that my electronic signature is as valid as a handwritten signature.':'I accept this estimate, including the scope, price, payment schedule and terms above.'}</span></label>
-    <button class="big" id="go" type="submit" disabled>${con?'Sign Contract':'Accept & Sign'}</button>
+    <label class="check"><input type="checkbox" id="ok"><span>${chg?'I approve this change order. I agree that the extra work and price above are added to my contract, and that my electronic signature is as valid as a handwritten signature.':con?'I have read and agree to this contract, including the scope, price, payment schedule and terms above. I agree that my electronic signature is as valid as a handwritten signature.':'I accept this estimate, including the scope, price, payment schedule and terms above.'}</span></label>
+    <button class="big" id="go" type="submit" disabled>${con?'Sign Contract':chg?'Approve & Sign':'Accept & Sign'}</button>
     <div class="err" id="err"></div>
   </form>`}`}`;
   $('bar').hidden=false;$('signBtn').hidden=!$('acc');$('pdfBtn').className=$('acc')?'':'primary';
@@ -236,7 +242,7 @@ function setupPad(){
     try{const res=await post({action:'sign',name:nm,signature:sig,tz:Intl.DateTimeFormat().resolvedOptions().timeZone});const j=await res.json().catch(()=>({}));
       if(!res.ok){if(res.status===400&&j.error)errMsg=j.error;else throw new Error('server')}}
     catch(e){const r=await sb.rpc('accept_shared_doc',{p_token:token,p_name:nm,p_signature:sig});if(r.error)errMsg=r.error.message||'Could not save. Please try again.'}
-    if(errMsg){$('err').textContent=errMsg;$('go').disabled=false;$('go').textContent=con?'Sign Contract':'Accept & Sign';return}
+    if(errMsg){$('err').textContent=errMsg;$('go').disabled=false;$('go').textContent=con?'Sign Contract':chg?'Approve & Sign':'Accept & Sign';return}
     const again=await sb.rpc('get_shared_doc',{p_token:token});if(again.data)d=again.data;render();window.scrollTo({top:0,behavior:'smooth'})};
 }
 $('pdfBtn').onclick=()=>window.print();

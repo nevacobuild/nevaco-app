@@ -970,7 +970,7 @@ async function preview(b: any) {
 
 /* ---------- customer signing page events (public, secured by the secret link) ---------- */
 const CO_SIG = "NEVACO BUILD INC.\n437-432-2252 · nevacobuild.ca";
-const KINDN = (k: string) => k === "contract" ? "Contract" : k === "invoice" ? "Invoice" : "Estimate";
+const KINDN = (k: string) => k === "contract" ? "Contract" : k === "change" ? "Change order" : k === "invoice" ? "Invoice" : "Estimate";
 async function docEvent(req: Request, b: any) {
   const token = String(b.token || "");
   if (!/^[0-9a-f]{64}$/.test(token)) throw new HttpError(400, "This link is not valid");
@@ -992,7 +992,7 @@ async function docEvent(req: Request, b: any) {
   const { data: d } = await db.from("documents").select("kind,number,title,total,extra,job_id,share_token").eq("id", data.id).maybeSingle();
   const { data: j } = await db.from("jobs").select("id,name,email").eq("id", data.job_id).maybeSingle();
   const name = String(b.name || "").trim();
-  await sendPush(`✍️ ${KINDN(data.kind)} signed`, `${name} signed ${KINDN(data.kind).toLowerCase()} ${data.number}${d?.total ? " · $" + Number(d.total).toLocaleString("en-CA") : ""}`, `/?lead=${encodeURIComponent(data.job_id)}`, "doc-" + data.number).catch(() => null);
+  await sendPush(`✍️ ${KINDN(data.kind)} ${data.kind === "change" ? "approved" : "signed"}`, `${name} signed ${KINDN(data.kind).toLowerCase()} ${data.number}${d?.total ? " · $" + Number(d.total).toLocaleString("en-CA") : ""}`, `/?lead=${encodeURIComponent(data.job_id)}`, "doc-" + data.number).catch(() => null);
   // send the customer their signed copy from nevacobuild@gmail.com
   const to = String(d?.extra?.customer?.email || j?.email || "").trim().toLowerCase();
   if (d && j && isEmail(to) && await account()) {

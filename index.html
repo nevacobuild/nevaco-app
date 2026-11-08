@@ -703,7 +703,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .dtotals .g{font-weight:700;font-size:17px;border-top:.5px solid var(--sep);padding-top:8px;margin-top:4px}
 .dtotals span{color:var(--label2)}
 .docacts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-#d-con,#d-conpay,#d-oursig{display:contents}
+#d-con,#d-conpay,#d-oursig,#d-chg{display:contents}
 .kpay{display:grid;grid-template-columns:1fr 64px 92px 28px;gap:8px;align-items:center;padding:6px 12px}.kpay+.kpay{border-top:.5px solid var(--sep)}
 .kpay input{width:100%;min-width:0;border:0;background:transparent;font-size:15px;padding:6px 0}.kpay input[data-f="pct"]{text-align:right}.kpay b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;font-size:14px}
 .kpay .rm{font-size:20px;color:var(--label3)}
@@ -1081,8 +1081,8 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
           <label><span>Phone</span><input id="k-phone" type="tel"></label>
           <label><span>Email</span><input id="k-email" type="email" placeholder="Contract is sent here"></label>
         </div>
-        <div class="fghead">Schedule</div>
-        <div class="fg">
+        <div class="fghead" id="k-schedhead">Schedule</div>
+        <div class="fg" id="k-schedfg">
           <label><span>Start date</span><input id="k-start" type="date"></label>
           <label><span>Completion</span><input id="k-end" type="date"></label>
           <label><span>Warranty</span><select id="k-warranty"><option>1 year</option><option>2 years</option><option>3 years</option><option>6 months</option></select></label>
@@ -1101,6 +1101,11 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
         <label><span>Deposit</span><select id="d-dep"><option value="0">No deposit</option><option value="10">10%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="40">40%</option><option value="50">50%</option></select></label>
       </div>
       <div class="dtotals" id="d-totals"></div>
+      <div id="d-chg" hidden>
+        <div class="fghead">Payment</div>
+        <div class="fg"><label><span>Paid</span><select id="k-paywhen"><option>Added to the final payment</option><option>Paid with the next payment</option><option>Paid before this work starts</option><option>Paid when this work is done</option></select></label></div>
+        <p class="fnote" id="k-chgnote"></p>
+      </div>
       <div id="d-conpay" hidden>
         <div class="fghead">Payment schedule</div>
         <div class="fg items" id="k-sched"></div>
@@ -1404,7 +1409,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.41 (Nov 7) · Profit split';
+const APP_VERSION='1.42 (Nov 7) · Change orders';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1473,7 +1478,7 @@ const uid=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Mat
 
 const total=r=>typeof r.ms?.tax==='number'?(+r.value||0)+r.ms.tax:(+r.value||0)*(r.hst?1.13:1);
 const paid=r=>(r.payments||[]).reduce((t,p)=>t+(+p.amount||0),0);
-const coTotal=r=>(Array.isArray(r.ms?.changes)?r.ms.changes:[]).filter(c=>c.status==='approved'||c.status==='done').reduce((t,c)=>t+(+c.amount||0),0);
+const coTotal=r=>(Array.isArray(r.ms?.changes)?r.ms.changes:[]).filter(c=>c.status==='approved'||c.status==='done').reduce((t,c)=>t+(+c.amount||0),0)+(db.docs||[]).filter(d=>d.jobId===r.id&&d.kind==='change'&&d.status==='accepted').reduce((t,d)=>t+(+d.total||0),0);
 const balance=r=>Math.max(0,Math.round((total(r)+coTotal(r)-paid(r))*100)/100);
 function stepDone(r,k){
   if(k==='plan')return !!(r.ms.plan?.done||(r.ms.start?.date&&r.ms.complete?.date&&(db.tasks||[]).some(t=>t.jobId===r.id)));
@@ -2579,7 +2584,7 @@ const r2=v=>Math.round((Number(v)||0)*100)/100;
 const FCATS=[['Materials',['Materials']],['Labour',['Labour','Subcontractor']],['Equipment / Tools',['Tools / rental']],['Permits / Fees',['Permit / fees']],['Other',null]];
 const fcat=c=>{for(const[n,l]of FCATS)if(l&&l.includes(c))return n;return 'Other'};
 function fin(r){
-  const base=r2(total(r)),co=r2(changes(r).filter(coCounts).reduce((t,c)=>t+(+c.amount||0),0)),tcv=r2(base+co),rec=r2(paid(r));
+  const base=r2(total(r)),co=r2(coTotal(r)),tcv=r2(base+co),rec=r2(paid(r));
   const xs=expsFor(r.id),ex=xs.filter(x=>x.amount>=0),ret=xs.filter(x=>x.amount<0);
   const ts=jtasks(r),labT=ts.filter(t=>t.paid&&+t.cost>0),owed=r2(ts.filter(t=>!t.paid&&+t.cost>0).reduce((s,t)=>s+(+t.cost||0),0));
   const spent=r2(ex.reduce((t,x)=>t+x.amount,0)+labT.reduce((s,t)=>s+(+t.cost||0),0)),returns=r2(-ret.reduce((t,x)=>t+x.amount,0)),net=r2(spent-returns);
@@ -2600,6 +2605,7 @@ function paySched(r){
   const perRow=con&&con.extra?.schedule?.some(x=>x.hst!==undefined),sub=+r.value||0;
   rows=rows.map((x,i)=>({d:x.d+(perRow&&x.hst?' + HST':''),due:i===0?cDate:i===rows.length-1?e:(s&&e?addDays(s,Math.round(dayDiff(e,s)/2)):s),amt:perRow?r2(payBase(x,sub)+payHst(x,sub)):r2(x.pct*base/100),got:0,notes:[]}));
   changes(r).filter(coCounts).forEach(c=>rows.push({d:'Extra: '+(c.title||'Change order'),due:c.date||'',amt:r2(c.amount),got:0,notes:[]}));
+  chgApproved(r).forEach(c=>rows.push({d:'Change order '+c.number,due:c.date||'',amt:r2(c.total),got:0,notes:[]}));
   const pays=[...(r.payments||[])].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
   for(const p of pays){let left=+p.amount||0;for(const x of rows){if(left<=0)break;const need=r2(x.amt-x.got);if(need<=0)continue;const take=Math.min(need,left);x.got=r2(x.got+take);left=r2(left-take);x.notes.push(fmtDate(p.date)+(p.note?' · '+p.note:''))}
     if(left>0.004){const o=rows.find(x=>x.other)||(rows.push({d:'Other payments',due:'',amt:0,got:0,notes:[],other:true}),rows.at(-1));o.got=r2(o.got+left);o.notes.push(fmtDate(p.date)+(p.note?' · '+p.note:''))}}
@@ -2607,17 +2613,18 @@ function paySched(r){
   return rows}
 const progressOf=r=>{const ts=jtasks(r);if(ts.length)return Math.round(ts.filter(t=>t.done).length/ts.length*100);return stageOf(r)==='done'?100:0};
 function finBlock(r){if(!showExp(r))return '';const f=fin(r),cs=changes(r);
-  return `<div class="block"><div class="label">Money <span><button id="finCo">+ Extra job</button>&nbsp;&nbsp;<button id="finRep">Report / PDF</button></span></div>
+  return `<div class="block"><div class="label">Money <span><button id="finCo">+ Change order</button>&nbsp;&nbsp;<button id="finRep">Report / PDF</button></span></div>
     <div class="group"><div class="fink">
       <div><span>Contract value</span><b>${money(f.tcv)||'$0'}</b>${f.co?`<small>incl. ${money(f.co)} extras</small>`:''}</div>
       <div><span>Received</span><b style="color:var(--green)">${money(f.rec)||'$0'}</b><small>${f.recv>0.5?money(f.recv)+' to collect':'All collected'}</small></div>
       <div><span>Expenses</span><b style="color:var(--red)">${cents(f.net)}</b>${f.owed?`<small>+ ${money(f.owed)} labour to pay</small>`:''}</div>
       <div><span>Profit so far</span><b style="color:${f.profit<0?'var(--red)':'var(--purple,#af52de)'}">${f.profit<0?'−':''}${cents(Math.abs(f.profit))}</b><small>Expected ${f.expected<0?'−':''}${money(Math.abs(f.expected))}</small></div>
     </div>
+    ${chgDocs(r).map(d=>`<button class="row corow" data-doc="${d.id}"><span class="rt"><b>${esc(d.number)} · ${esc((d.items||[]).filter(i=>String(i.d||'').trim()).map(i=>i.d).join(', ')||d.title||'Change order')}</b><span>${d.status==='accepted'?'Approved'+(d.acceptedName&&!/^Approved in person/.test(d.acceptedName)?' online by '+esc(d.acceptedName):''):d.status==='sent'?(d.viewedAt?'Opened · waiting for approval':'Sent · waiting for approval'):'Draft · not sent'} · ${fmtDate(d.date)}</span></span><span class="rv"><em style="${d.status==='accepted'?'':'color:var(--label3)'}">${money(d.total)||'$0'}</em>${ico('chev')}</span></button>`).join('')}
     ${cs.length?cs.map((c,i)=>`<button class="row corow" data-co="${i}"><span class="rt"><b>${esc(c.title||'Extra job')}</b><span>${[fmtDate(c.date),c.by,CO_ST[c.status]||''].filter(Boolean).map(esc).join(' · ')}</span></span><span class="rv"><em style="${coCounts(c)?'':'color:var(--label3);text-decoration:line-through'}">${money(c.amount)||'$0'}</em>${ico('chev')}</span></button>`).join(''):''}
     <label class="row finsw"><span>Hani partner job<small>${f.hani?'Hani 1/2, then Kevin, Raf and Shirin 1/3 each of the rest':'Profit split Kevin, Raf and Shirin 1/3 each'}</small></span><input type="checkbox" id="finHani"${f.hani?' checked':''}></label>
     </div></div>`}
-function bindFin(r){if($('finRep'))$('finRep').onclick=()=>openReport(r);if($('finCo'))$('finCo').onclick=()=>openCo(r,null);
+function bindFin(r){if($('finRep'))$('finRep').onclick=()=>openReport(r);if($('finCo'))$('finCo').onclick=()=>{if(!conReady){toast('Run the contracts setup step first');return}openDoc(null,r,'change')};
   document.querySelectorAll('#vDetail [data-co]').forEach(b=>b.onclick=()=>openCo(r,+b.dataset.co));
   if($('finHani'))$('finHani').onchange=e=>{r.ms.haniJob=e.target.checked;log(r,e.target.checked?'Marked as a Hani partner job':'No longer a Hani partner job');save();openDetail(r.id)}}
 /* change orders */
@@ -2687,7 +2694,7 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
         ${f.ret.length?f.ret.map(x=>`<tr><td>${fmtDate(x.date)}</td><td>${esc(x.cat)}</td><td>${esc(x.vendor||expWho(x)||'')}</td><td>${esc(x.title)}</td><td class="n">${cents(-x.amount)}</td><td class="sm">${esc([pmShort(x.pm),x.notes].filter(Boolean).join(' · '))}</td></tr>`).join(''):`<tr><td colspan="6" class="rp-none">No returns</td></tr>`}</tbody>
         <tfoot><tr><td colspan="4">Total returns</td><td class="n">${cents(f.returns)}</td><td></td></tr></tfoot></table></section>
       <section><h4>Extra jobs / change orders</h4><table class="rp-t"><thead><tr><th>Date</th><th>Description</th><th>Requested by</th><th class="n">Amount</th><th>Status</th></tr></thead><tbody>
-        ${cs.length?cs.map(c=>`<tr><td>${c.date?fmtDate(c.date):''}</td><td>${esc(c.title)}${c.notes?`<div class="sm">${esc(c.notes)}</div>`:''}</td><td>${esc(c.by||'')}</td><td class="n">${cents(c.amount)}</td><td>${esc(CO_ST[c.status]||'')}</td></tr>`).join(''):`<tr><td colspan="5" class="rp-none">No extra jobs</td></tr>`}</tbody>
+        ${cs.length||chgDocs(r).length?chgDocs(r).map(d=>`<tr><td>${fmtDate(d.date)}</td><td>${esc(d.number)}${(d.items||[]).filter(i=>String(i.d||'').trim()).map(i=>`<div class="sm">${esc(i.d)}${Number(i.a)>0?' · '+cents(i.a):''}</div>`).join('')}</td><td>Owner</td><td class="n">${cents(d.total)}</td><td>${d.status==='accepted'?'Approved':d.status==='sent'?'Waiting for OK':'Draft'}</td></tr>`).join('')+cs.map(c=>`<tr><td>${c.date?fmtDate(c.date):''}</td><td>${esc(c.title)}${c.notes?`<div class="sm">${esc(c.notes)}</div>`:''}</td><td>${esc(c.by||'')}</td><td class="n">${cents(c.amount)}</td><td>${esc(CO_ST[c.status]||'')}</td></tr>`).join(''):`<tr><td colspan="5" class="rp-none">No extra jobs</td></tr>`}</tbody>
         <tfoot><tr><td colspan="3">Total extra jobs (approved and done)</td><td class="n">${cents(f.co)}</td><td></td></tr></tfoot></table></section></div>
     <section><h4>Profit split</h4>${(()=>{const sp=f.split(f.profit),ex=f.split(f.expected),pay=sp.map(([n,v])=>[n,v,f.own[n]||0,r2(v+(f.own[n]||0))]);
       return `<table class="rp-t rp-split"><thead><tr><th>Partner</th><th>Share</th><th class="n">Share of profit</th><th class="n">Paid from own pocket</th><th class="n">Takes now</th><th class="n">Expected at completion</th></tr></thead><tbody>
@@ -3413,7 +3420,8 @@ $('vDetail').addEventListener('click',e=>{const o=e.target.closest('[data-file]'
 const DOC_ST={draft:{n:'Draft',c:'--p0'},sent:{n:'Sent · waiting for signature',c:'--s-sent'},accepted:{n:'Signed',c:'--green'},declined:{n:'Declined',c:'--red'},paid:{n:'Paid',c:'--green'}};
 const isInv=d=>d&&d.kind==='invoice';
 const isCon=d=>d&&d.kind==='contract';
-const KN=d=>isInv(d)?'Invoice':isCon(d)?'Contract':'Estimate';
+const isChg=d=>d&&d.kind==='change';const isTwo=d=>isCon(d)||isChg(d);
+const KN=d=>isInv(d)?'Invoice':isCon(d)?'Contract':isChg(d)?'Change order':'Estimate';
 const invDue=d=>Math.max(0,Math.round(((Number(d.total)||0)-(Number(d.credit)||0))*100)/100);
 const DEFAULT_TERMS=`1. This estimate is valid until the date shown above.
 2. The work is limited to the scope listed. Any extra work or changes will be priced separately and approved in writing before the work is done.
@@ -3424,8 +3432,8 @@ const docsFor=id=>(db.docs||[]).filter(x=>x.jobId===id).sort((a,b)=>String(b.num
 function docListRow(d){const inv=isInv(d);let st=DOC_ST[d.status]||DOC_ST.draft;
   if(inv&&d.status==='sent'){const age=d.sentAt?dayDiff(today(),ld(d.sentAt)):0;st={n:`Sent · ${money(invDue(d))} due${age?' · '+age+' day'+(age>1?'s':'')+' ago':''}`,c:age>=7?'--p1':'--p2'}}
   else if(d.status==='sent'&&d.viewedAt)st={n:'Opened · waiting for signature',c:'--s-sent'};
-  return `<button class="row" data-doc="${d.id}"><span class="gl" style="--c:var(${st.c})">${ico(inv?'pay':(d.status==='accepted'||isCon(d)?'sign':'quote'))}</span><span class="rt"><b>${esc(d.number)} · ${esc(d.title||KN(d))}</b><span>${st.n}${d.status==='accepted'&&d.acceptedName?' by '+esc(d.acceptedName):''}${d.status==='paid'&&d.paidMethod?' · '+esc(d.paidMethod):''} · ${fmtDate(d.date)}</span></span><span class="rv"><em>${money(inv?(d.status==='paid'?d.total-d.credit:invDue(d)):d.total)||'$0'}</em>${ico('chev')}</span></button>`}
-function nextDocNumber(kind){const pre=kind==='invoice'?'INV-':kind==='contract'?'C-':'E-';const re=new RegExp('^'+pre+'(\\d{1,6})$');const n=(db.docs||[]).filter(x=>(x.kind||'estimate')===(kind||'estimate')).map(x=>{const m=String(x.number).match(re);return m?parseInt(m[1],10):NaN}).filter(Number.isFinite);return pre+(n.length?Math.max(...n)+1:1001)}
+  return `<button class="row" data-doc="${d.id}"><span class="gl" style="--c:var(${st.c})">${ico(inv?'pay':(d.status==='accepted'||isTwo(d)?'sign':'quote'))}</span><span class="rt"><b>${esc(d.number)} · ${esc(d.title||KN(d))}</b><span>${st.n}${d.status==='accepted'&&d.acceptedName?' by '+esc(d.acceptedName):''}${d.status==='paid'&&d.paidMethod?' · '+esc(d.paidMethod):''} · ${fmtDate(d.date)}</span></span><span class="rv"><em>${money(inv?(d.status==='paid'?d.total-d.credit:invDue(d)):d.total)||'$0'}</em>${ico('chev')}</span></button>`}
+function nextDocNumber(kind){const pre=kind==='invoice'?'INV-':kind==='contract'?'C-':kind==='change'?'CO-':'E-';const re=new RegExp('^'+pre+'(\\d{1,6})$');const n=(db.docs||[]).filter(x=>(x.kind||'estimate')===(kind||'estimate')).map(x=>{const m=String(x.number).match(re);return m?parseInt(m[1],10):NaN}).filter(Number.isFinite);return pre+(n.length?Math.max(...n)+1:1001)}
 function buildInvoice(r){
   const ests=docsFor(r.id).filter(x=>!isInv(x)&&x.status!=='draft');const est=ests.find(x=>x.status==='accepted')||ests[0]||null;
   const title=(est?.title||r.type||'Renovation').trim();const sub=Number(r.value)||est?.subtotal||0;const hst=est?est.hst:r.hst!==false;
@@ -3444,6 +3452,9 @@ function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=
   if(isInv(d)){d.validUntil='';d.dueDate=d.date;d.credit=Number($('d-credit').value.replace(/[^0-9.]/g,''))||0}else d.validUntil=addDays(d.date,Number($('d-valid').value)||30);
   d.lump=$('d-lump').value.replace(/[^0-9.]/g,'')||null;d.hst=$('d-hst').checked;d.depositPct=Number($('d-dep').value)||0;d.notes=$('d-notes').value.trim();d.terms=$('d-terms').value.trim();
   const c=calcDoc(d);d.subtotal=c.sub;d.tax=c.tax;d.total=c.total;
+  if(isChg(d)){const x=d.extra=Object.assign({},d.extra||{});x.customer={};['name','address','city','postal','phone','email'].forEach(k=>x.customer[k]=$('k-'+k).value.trim());x.payWhen=$('k-paywhen').value;
+    if(d.status==='draft'&&docJob){const others=chgApproved(docJob).filter(o=>o.id!==d.id);x.prevTotal=Math.round((total(docJob)+coTotal(docJob)-(Number(d.status==='accepted'?d.total:0)||0))*100)/100;x.prevCount=others.length+(Array.isArray(docJob.ms?.changes)?docJob.ms.changes.filter(c=>c.status==='approved'||c.status==='done').length:0)}
+    if($('k-chgnote'))$('k-chgnote').textContent=x.prevTotal!=null?`Contract total now ${money(x.prevTotal)} → after this change ${money(x.prevTotal+c.total)}. It is added only after the customer approves it.`:''}
   if(isCon(d)){const x=d.extra=Object.assign({},d.extra||{});x.customer={};['name','address','city','postal','phone','email'].forEach(k=>x.customer[k]=$('k-'+k).value.trim());
     x.start=$('k-start').value;x.end=$('k-end').value;x.warranty=$('k-warranty').value;x.permits=$('k-permits').value;x.schedule=conSchedEdit.map(r=>({d:String(r.d||'').trim(),pct:Number(r.pct)||0,hst:!!r.hst})).filter(r=>r.d||r.pct);d.depositPct=x.schedule[0]?.pct||0;
     d.tax=c.tax=conTax(x.schedule,c.sub);d.total=c.total=Math.round((c.sub+c.tax)*100)/100;d.hst=c.tax>0}
@@ -3451,7 +3462,7 @@ function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=
 function paintTotals(){const c=readDocForm(),d=docEdit;$('d-lumprow').hidden=c.priced;if(isCon(d)&&!$('d-conpay').hidden&&$('k-sched').childElementCount){$('k-sched').querySelectorAll('.kpay:not(.kph) b').forEach((b,k)=>{const x=conSchedEdit[k];if(x)b.innerHTML=(money(payBase(x,c.sub)+payHst(x,c.sub))||'$0')+(x.hst?'<small>incl. HST</small>':'')});schedNote()}
   const hstLbl=isCon(d)&&c.tax?(()=>{const on=conSchedEdit.filter(x=>x.hst&&Number(x.pct)>0);return on.length===conSchedEdit.filter(x=>Number(x.pct)>0).length?'HST (13%)':`HST (13%) on ${on.map(x=>x.d.toLowerCase()||'payment').join(', ')}`})():'HST (13%)';
   const dep=Math.round(d.depositPct*d.total)/100;
-  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':'Contract price')}</span><b>${money(c.sub)||'$0'}</b></div>${d.hst?`<div><span>${esc(hstLbl)}</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">${isCon(d)?'Final total':'Total'}</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`}
+  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':isChg(d)?'Change order price':'Contract price')}</span><b>${money(c.sub)||'$0'}</b></div>${d.hst?`<div><span>${esc(hstLbl)}</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">${isCon(d)?'Final total':isChg(d)?'Change order total':'Total'}</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`}
 function paintItems(){$('d-items').innerHTML=docEdit.items.map(itemRow).join('');$('d-items').querySelectorAll('textarea').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})}
 const CONTRACT_TERMS=`1. Scope of work. The Contractor will supply the labour, and the materials listed in the scope, to complete the work described in this contract in a good and workmanlike manner and in line with the Ontario Building Code and good trade practice. Anything not listed in the scope is not included.
 
@@ -3489,6 +3500,19 @@ function buildContract(r){
     items:est?JSON.parse(JSON.stringify(est.items||[])):[{d:'',a:null},{d:'',a:null}],lump:est?est.lump:(r.value||null),hst:est?est.hst:r.hst!==false,depositPct:est?.depositPct||30,
     notes:'',terms:CONTRACT_TERMS,token:newToken(),ref:est?.number||'',credit:0,_new:true,
     extra:{customer:{name:r.name||'',address:r.address||'',city:r.city||'',postal:r.postal||'',phone:r.phone||'',email:r.email||''},start:jStart(r)||'',end:jEnd(r)||'',warranty:'1 year',permits:'Not required',schedule:conSched(est?.depositPct||30,est?est.hst:r.hst!==false)}}}
+const CHG_TERMS=`1. Extra work. The Contractor will do the extra work listed in this change order. It is added to the contract and follows the same terms, warranty and quality as the original contract.
+
+2. Price and payment. The price of this change order is added to the contract total and paid as shown above.
+
+3. Schedule. The extra work may add time to the project. The Contractor will tell the Owner of any change to the completion date.
+
+4. Everything else stays the same. All other terms of the original contract stay the same. This change order may be signed electronically, and an electronic signature is as valid as a handwritten one.`;
+const chgDocs=r=>docsFor(r.id).filter(isChg);
+const chgApproved=r=>chgDocs(r).filter(d=>d.status==='accepted');
+function buildChange(r){const con=conFor(r),cc=con?.extra?.customer||{};const prev=chgApproved(r);
+  return{id:uid(),jobId:r.id,kind:'change',number:nextDocNumber('change'),status:'draft',date:today(),validUntil:'',title:'Extra work',
+    items:[{d:'',a:null},{d:'',a:null},{d:'',a:null}],lump:null,hst:typeof r.ms.tax==='number'?r.ms.tax>0:!!r.hst,depositPct:0,notes:'',terms:CHG_TERMS,token:newToken(),ref:con?.number||'',credit:0,_new:true,
+    extra:{customer:{name:cc.name||r.name||'',address:cc.address||r.address||'',city:cc.city||r.city||'',postal:cc.postal||r.postal||'',phone:cc.phone||r.phone||'',email:cc.email||r.email||''},payWhen:'Added to the final payment'}}}
 let conSchedEdit=[];
 const payBase=(x,sub)=>Math.round((Number(x.pct)||0)*(Number(sub)||0))/100;
 const payHst=(x,sub)=>x.hst?Math.round(payBase(x,sub)*13)/100:0;
@@ -3518,21 +3542,23 @@ let sigDrawing=false;
 function openDoc(d,r,kind){docJob=r;
   if(!d&&kind==='invoice')d=buildInvoice(r);
   if(!d&&kind==='contract')d=buildContract(r);
+  if(!d&&kind==='change')d=buildChange(r);
   if(!d){d={id:uid(),jobId:r.id,kind:'estimate',number:nextDocNumber('estimate'),status:'draft',date:today(),validUntil:addDays(today(),30),title:r.type||'',items:[{d:'',a:null},{d:'',a:null}],lump:r.value||null,hst:r.hst!==false,depositPct:30,notes:'',terms:DEFAULT_TERMS,token:newToken(),_new:true}}
   docEdit=JSON.parse(JSON.stringify(d));if(!docEdit.items.length)docEdit.items=[{d:'',a:null}];
-  const inv=isInv(docEdit),con=isCon(docEdit);$('docTitleH').textContent=`${KN(docEdit)} ${docEdit.number}`;
-  $('d-validrow').hidden=inv||con;$('d-hstrow').hidden=con;$('d-dep').closest('label').hidden=inv||con;$('d-con').hidden=!con;$('d-conpay').hidden=!con;$('d-oursig').hidden=!con;
+  const inv=isInv(docEdit),con=isCon(docEdit),chg=isChg(docEdit),two=con||chg;$('docTitleH').textContent=`${KN(docEdit)} ${docEdit.number}`;
+  $('d-validrow').hidden=inv||two;$('d-hstrow').hidden=con;$('d-dep').closest('label').hidden=inv||two;$('d-con').hidden=!two;$('d-conpay').hidden=!con;$('d-oursig').hidden=!two;$('d-chg').hidden=!chg;$('k-schedhead').hidden=chg;$('k-schedfg').hidden=chg;
+  if(chg){const x=docEdit.extra||(docEdit.extra={}),c=x.customer||{};['name','address','city','postal','phone','email'].forEach(k=>$('k-'+k).value=c[k]||'');$('k-paywhen').value=x.payWhen||'Added to the final payment';sigDrawing=false;paintOurSig()}
   $('d-notelbl').textContent=con?'Special conditions':'Notes';$('d-notehead').textContent=con?'Special conditions and terms':'Notes and terms';$('d-terms').rows=con?14:7;
   if(con){const x=docEdit.extra||(docEdit.extra={}),c=x.customer||{};['name','address','city','postal','phone','email'].forEach(k=>$('k-'+k).value=c[k]||'');
     $('k-start').value=x.start||'';$('k-end').value=x.end||'';$('k-warranty').value=x.warranty||'1 year';$('k-permits').value=x.permits||'Not required';
     conSchedEdit=JSON.parse(JSON.stringify(x.schedule&&x.schedule.length?x.schedule:conSched(docEdit.depositPct,docEdit.hst)));if(conSchedEdit.every(z=>z.hst===undefined))conSchedEdit.forEach(z=>z.hst=!!docEdit.hst);sigDrawing=false;paintOurSig()}$('d-creditrow').hidden=!inv;$('d-credit').value=docEdit.credit||'';
-  $('d-scopehead').textContent=inv?'Description':'Scope of work';$('d-scopenote').hidden=inv;$('d-notes').placeholder=con?'e.g. Owner supplies tiles and fixtures. Work hours 8 AM to 5 PM.':'e.g. Materials supplied by customer. Timeline 5–7 working days.';$('d-termsrow').hidden=inv&&!docEdit.terms;
+  $('d-scopehead').textContent=inv?'Description':chg?'Extra work':'Scope of work';$('d-scopenote').hidden=inv||chg;$('d-notes').placeholder=con?'e.g. Owner supplies tiles and fixtures. Work hours 8 AM to 5 PM.':'e.g. Materials supplied by customer. Timeline 5–7 working days.';$('d-termsrow').hidden=inv&&!docEdit.terms;
   $('d-title').value=docEdit.title;$('d-date').value=docEdit.date;
   const vd=docEdit.validUntil?dayDiff(docEdit.validUntil,docEdit.date):30;$('d-valid').value=[15,30,60,90].includes(vd)?String(vd):'30';
   $('d-lump').value=docEdit.lump??'';$('d-hst').checked=!!docEdit.hst;$('d-dep').value=String(docEdit.depositPct||0);if(!$('d-dep').value)$('d-dep').value='30';
   $('d-notes').value=docEdit.notes;$('d-terms').value=docEdit.terms;
   const locked=docEdit.status==='accepted'||docEdit.status==='paid';$('docForm').dataset.locked=locked?'1':'0';payMode=false;
-  $('docBanner').innerHTML=con?conBanner(docEdit):inv?(docEdit.status==='paid'?`<div class="banner ok">${ico('check')} Paid ${money(docEdit.total-docEdit.credit)} on ${fmtDate(ld(docEdit.paidAt))}${docEdit.paidMethod?' by '+esc(docEdit.paidMethod):''}</div>`:docEdit.status==='sent'?`<div class="banner warn">${ico('pay')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · ${money(invDue(docEdit))} due</div>`:''):locked?`<div class="banner ok">${ico('check')} Signed by ${esc(docEdit.acceptedName||'customer')} on ${fmtDate(ld(docEdit.acceptedAt))}</div>`:docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · waiting for the customer to sign</div>`:'';
+  $('docBanner').innerHTML=two?conBanner(docEdit):inv?(docEdit.status==='paid'?`<div class="banner ok">${ico('check')} Paid ${money(docEdit.total-docEdit.credit)} on ${fmtDate(ld(docEdit.paidAt))}${docEdit.paidMethod?' by '+esc(docEdit.paidMethod):''}</div>`:docEdit.status==='sent'?`<div class="banner warn">${ico('pay')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · ${money(invDue(docEdit))} due</div>`:''):locked?`<div class="banner ok">${ico('check')} Signed by ${esc(docEdit.acceptedName||'customer')} on ${fmtDate(ld(docEdit.acceptedAt))}</div>`:docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · waiting for the customer to sign</div>`:'';
   paintItems();paintTotals();if(con)paintConSched();paintDocActs();showModal('docModal')}
 const dtm=v=>v?new Date(v).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
 function conBanner(d){if(d.status==='draft')return '';
@@ -3546,12 +3572,13 @@ function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').
   if(inv&&payMode){$('docActs').innerHTML=payBlock;return}
   $('docActs').innerHTML=d.status==='accepted'
     ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed ${KN(d)} (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>`
-    :`${d._emailed&&ph?`<div class="banner ok" style="grid-column:1/-1">${ico('check')} ${isCon(d)&&gmailSt.connected?'Contract emailed. Send a text too so they see it.':'Email ready in Gmail. Now send the text message.'}</div><button type="button" class="primary textnow" data-act="sms">${ico('msg')}Send Text to ${esc(docJob.phone)}</button>`:''}
-      <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email||isCon(d)?'mail':'sent')}${isCon(d)?(d.status==='sent'?'Send Again for Signature':'Send for Signature'):(d.status==='sent'?'Send Again':'Send to Customer')+(docJob.email?' by Email':'')}</button>
+    :`${d._emailed&&ph?`<div class="banner ok" style="grid-column:1/-1">${ico('check')} ${isTwo(d)&&gmailSt.connected?KN(d)+' emailed. Send a text too so they see it.':'Email ready in Gmail. Now send the text message.'}</div><button type="button" class="primary textnow" data-act="sms">${ico('msg')}Send Text to ${esc(docJob.phone)}</button>`:''}
+      <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email||isTwo(d)?'mail':'sent')}${isTwo(d)?(d.status==='sent'?'Send Again for '+(isChg(d)?'Approval':'Signature'):'Send for '+(isChg(d)?'Approval':'Signature')):(d.status==='sent'?'Send Again':'Send to Customer')+(docJob.email?' by Email':'')}</button>
       <button type="button" data-act="pdf">${ico('quote')}Preview / PDF</button><button type="button" data-act="copy">Copy Link</button>
-      <button type="button" data-act="mail" ${docJob.email||isCon(d)?'':'disabled style="opacity:.4" title="Add the customer email first"'}>${ico('mail')}Gmail</button><button type="button" data-act="sms" ${ph?'':'disabled style="opacity:.4" title="Add the customer phone first"'}>${ico('msg')}Text</button>
+      <button type="button" data-act="mail" ${docJob.email||isTwo(d)?'':'disabled style="opacity:.4" title="Add the customer email first"'}>${ico('mail')}Gmail</button><button type="button" data-act="sms" ${ph?'':'disabled style="opacity:.4" title="Add the customer phone first"'}>${ico('msg')}Text</button>
       <button type="button" class="wide" data-act="wa" ${ph?'':'disabled style="opacity:.4"'}>${ico('msg')}WhatsApp</button>
       ${payBlock}
+      ${isChg(d)?`<button type="button" class="wide paidbtn" data-act="approve">${ico('check')}Customer approved (in person or by text)</button>`:''}
       ${d._new?'':`<button type="button" class="wide danger" data-act="del">Delete ${KN(d)}</button>`}`}
 $('d-items').addEventListener('input',e=>{const t=e.target,k=+t.dataset.k;if(!docEdit.items[k])return;docEdit.items[k][t.dataset.f]=t.dataset.f==='a'?(t.value.replace(/[^0-9.]/g,'')||null):t.value;
   if(t.tagName==='TEXTAREA'){t.style.height='auto';t.style.height=t.scrollHeight+'px'}paintTotals()});
@@ -3563,13 +3590,15 @@ $('k-sched').addEventListener('click',e=>{const b=e.target.closest('[data-krm]')
 $('k-addpay').onclick=()=>{const sum=conSchedEdit.reduce((a,x)=>a+(Number(x.pct)||0),0);conSchedEdit.splice(Math.max(0,conSchedEdit.length-1),0,{d:'',pct:Math.max(0,100-sum)||'',hst:$('d-hst').checked});paintTotals();paintConSched()};
 ['k-start','k-end'].forEach(id=>$(id).addEventListener('change',()=>{if($('k-start').value&&$('k-end').value&&$('k-end').value<$('k-start').value)$('k-end').value=$('k-start').value}));
 $('d-addline').onclick=()=>{docEdit.items.push({d:'',a:null});paintItems();const ts=$('d-items').querySelectorAll('textarea');ts[ts.length-1].focus()};
-['d-lump','d-hst','d-dep','d-date','d-valid','d-credit'].forEach(id=>$(id).addEventListener('input',paintTotals));
+['d-lump','d-hst','d-dep','d-date','d-valid','d-credit','k-paywhen'].forEach(id=>$(id).addEventListener('input',paintTotals));
 function storeDoc(){readDocForm();const d=docEdit;d.items=d.items.filter(i=>String(i.d||'').trim()||Number(i.a)>0);if(!d.items.length)d.items=[{d:'',a:null}];
   const clean=Object.assign({},d);delete clean._new;
   const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=clean;else{db.docs.push(clean);log(docJob,`${KN(d)} ${d.number} created`)}
   d._new=false;return clean}
 function markSent(d){if(d.status==='accepted'||d.status==='paid')return;const r=docJob;
   if(isInv(d)){if(d.status!=='sent'){d.status='sent';d.sentAt=new Date().toISOString();log(r,`Invoice ${d.number} sent (${money(invDue(d))} due)`)}
+    const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d);return}
+  if(isChg(d)){if(d.status!=='sent'){d.status='sent';d.sentAt=new Date().toISOString();log(r,`Change order ${d.number} sent for approval (${money(d.total)})`)}
     const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d);return}
   if(isCon(d)){if(d.status!=='sent'){d.status='sent';d.sentAt=new Date().toISOString();log(r,`Contract ${d.number} sent for signature (${money(d.total)})`)}
     r.value=d.subtotal;r.hst=d.hst;r.ms.tax=Number(d.tax)||0;const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d);return}
@@ -3579,14 +3608,18 @@ function markSent(d){if(d.status==='accepted'||d.status==='paid')return;const r=
   if(!stepDone(r,'contacted'))r.ms.contacted={done:true,date:today()};
   if(!stepDone(r,'estimate'))setStep(r,'estimate',true);
   const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d)}
-$('docForm').onsubmit=async e=>{e.preventDefault();if(!docsReady){toast('Run the estimates setup step first');return}if(isCon(docEdit)&&!conReady){toast('Run the contracts setup step first');return}if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
+$('docForm').onsubmit=async e=>{e.preventDefault();if(!docsReady){toast('Run the estimates setup step first');return}if(isTwo(docEdit)&&!conReady){toast('Run the contracts setup step first');return}if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
   const d=storeDoc();if(d.status==='sent'&&!isInv(d)){docJob.value=d.subtotal;docJob.hst=d.hst}save();hideModal('docModal');render();if(selId)openDetail(selId);toast(`${KN(d)} saved`)};
 $('docCancel').onclick=()=>hideModal('docModal');
 $('docModal').onclick=e=>{if(e.target.id==='docModal')hideModal('docModal')};
 $('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const act=b.dataset.act;
   if(!docsReady){toast('Run the estimates setup step first');return}
   if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
-  if(isCon(docEdit)&&!conReady){toast('Run the contracts setup step first');return}
+  if(isTwo(docEdit)&&!conReady){toast('Run the contracts setup step first');return}
+  if(act==='approve'){const r=docJob;if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again: the customer said yes';return}
+    readDocForm();if(!calcDoc(docEdit).total){toast('Add the prices first');return}storeDoc();docEdit.status='accepted';const at=new Date().toISOString(),nm='Approved in person (recorded by NEVACO BUILD)';
+    const i=db.docs.findIndex(x=>x.id===docEdit.id);db.docs[i]=Object.assign({},docEdit,{acceptedAt:at,acceptedName:nm});log(r,`Change order ${docEdit.number} approved by the customer (${money(docEdit.total)})`);save();
+    if(await flush()){await sb.from('documents').update({accepted_at:at,accepted_name:nm}).eq('id',docEdit.id)}hideModal('docModal');render();if(selId)openDetail(selId);toast('Change order approved and added to the contract',true);return}
   if(act==='del'){if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again to delete';return}
     db.docs=db.docs.filter(x=>x.id!==docEdit.id);log(docJob,`${KN(docEdit)} ${docEdit.number} deleted`);save();hideModal('docModal');render();if(selId)openDetail(selId);toast(`${KN(docEdit)} deleted`);return}
   if(act==='paymode'){readDocForm();if(!invDue(docEdit)){toast('Nothing due on this invoice');return}payMode=true;paintDocActs();return}
@@ -3601,11 +3634,11 @@ $('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-
     save();payMode=false;render();if(selId)openDetail(selId);openDoc(db.docs[i],r);toast(act==='paid'?'Payment recorded':'Payment undone',true);return}
   const d=docEdit;
   if(d.status!=='accepted'&&d.status!=='paid'){const c=calcDoc(Object.assign({},d,{hst:$('d-hst').checked,lump:$('d-lump').value}));if(!c.total&&act!=='pdf'){toast('Add a price before sending');return}}
-  const con=isCon(d);let cEmail='';
+  const con=isTwo(d);let cEmail='';
   if(con&&d.status!=='accepted'&&act!=='pdf'){readDocForm();const x=d.extra||{};cEmail=(x.customer?.email||'').trim();
     if(!x.customer?.name){toast('Add the owner name first');$('k-name').focus();return}
     if(['send','mail'].includes(act)&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cEmail)){toast('Add the owner email first');$('k-email').focus();return}
-    const sum=(x.schedule||[]).reduce((a,r)=>a+(Number(r.pct)||0),0);if(Math.abs(sum-100)>.01){toast(`Payment schedule adds up to ${sum}%. Make it 100%.`);return}
+    if(isCon(d)){const sum=(x.schedule||[]).reduce((a,r)=>a+(Number(r.pct)||0),0);if(Math.abs(sum-100)>.01){toast(`Payment schedule adds up to ${sum}%. Make it 100%.`);return}}
     if(!conCfg.signature){toast('Sign as NEVACO BUILD first, then send');sigDrawing=true;paintOurSig();$('k-sigbox').scrollIntoView({block:'center',behavior:'smooth'});return}
     if(!d.ownerSig||d.status==='draft'){d.ownerSig=conCfg.signature;d.ownerName='';d.ownerSignedAt=new Date().toISOString()}}
   const sendVia=act==='send'?(con&&gmailSt.connected?'direct':(con?cEmail:docJob.email)?'mail':((docJob.phone||'').replace(/\D/g,'').length>=10?'wa':'share')):act;
@@ -3655,8 +3688,16 @@ Kevin
 NEVACO BUILD INC.
 437-432-2252 | nevacobuild@gmail.com | nevacobuild.ca`;
   const cx=docEdit.extra||{},cname=String(cx.customer?.name||nm).trim(),cw0=cname.split(/\s+/)[0]||'',chi=!cname||/^\d/.test(cname)?'there':(cw0.length>2&&!cw0.endsWith('.')?cw0:cname);
-  const conSubject=`Your ${proj?proj.toLowerCase()+' ':''}contract (${docEdit.number})`;
-  const conMsg=`Hi ${chi},
+  const chgD=isChg(docEdit),cproj=(docJob.type||conFor(docJob)?.title||'renovation').trim();
+  const conSubject=chgD?`Change order for your ${cproj.toLowerCase()} project (${docEdit.number})`:`Your ${proj?proj.toLowerCase()+' ':''}contract (${docEdit.number})`;
+  const conMsg=chgD?`Hi ${chi},
+
+Here is the change order for the extra work we talked about:
+${link}
+
+It lists each item and its price. Please have a look, and when you are happy with it you can approve it on that page. Once approved, we will add it to your contract.
+
+Thank you,`:`Hi ${chi},
 
 Here is the contract for your ${proj.toLowerCase()} project, as we discussed:
 ${link}
@@ -3669,14 +3710,14 @@ NEVACO BUILD INC.
 437-432-2252 | nevacobuild@gmail.com | nevacobuild.ca`:msg0;
   const waMsg=inv?`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. Your ${ikind} ${docEdit.number} is ready: ${money(due)} CAD, due on receipt. View it here: ${link} . You can pay by e-Transfer to nevacobuild@gmail.com. Thank you!`:`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. Your estimate ${docEdit.number} for ${proj.toLowerCase()} is ready (${money(docEdit.total)} CAD). You can review it, download the PDF and sign online here: ${link}`;
   const email=con?cEmail:(docJob.email||'');
-  const conSms=`Hi ${chi}, this is NEVACO BUILD. Your contract ${docEdit.number} for ${proj.toLowerCase()} is ready to sign${email?'. We emailed it to '+email:''}. You can also open and sign it here: ${link}`;
+  const conSms=isChg(docEdit)?`Hi ${chi}, this is NEVACO BUILD. The change order ${docEdit.number} for the extra work is ready${email?'. We emailed it to '+email:''}. You can see it and approve it here: ${link}`:`Hi ${chi}, this is NEVACO BUILD. Your contract ${docEdit.number} for ${proj.toLowerCase()} is ready to sign${email?'. We emailed it to '+email:''}. You can also open and sign it here: ${link}`;
   const smsMsg=inv?`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. We just emailed you ${ikind} ${docEdit.number} (${money(due)} CAD, due on receipt)${email?' to '+email:''}. Please check your inbox and spam folder. You can also view it here: ${link} . e-Transfer to nevacobuild@gmail.com. Thank you!`:`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. We just sent your estimate ${docEdit.number}${proj?' for your '+proj.toLowerCase()+' project':''}${email?' to your email ('+email+')':''}. Please check your inbox, and your spam folder just in case. You can also review and sign it here: ${link}`;
   const gmail=`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(con?conSubject:subject)}&body=${encodeURIComponent(msg)}`;
   const go=u=>{if(win)win.location=u;else location.href=u};
   if(sendVia==='pdf')go(link+'&me=1');
   else if(sendVia==='direct'){b.disabled=true;const old=b.innerHTML;b.textContent='Sending…';
     try{await gm('send',{job_id:docJob.id,to:cEmail,to_name:cname,subject:conSubject,body:conMsg,reply_latest:true,no_logo:true,signature:'NEVACO BUILD INC.\n437-432-2252 · nevacobuild.ca'});
-      log(docJob,`Contract ${docEdit.number} emailed to ${cEmail}`);save();toast(`Contract sent to ${cEmail}`,false,true);docEdit._emailed=true;emailedDoc=docEdit.id}
+      log(docJob,`${KN(docEdit)} ${docEdit.number} emailed to ${cEmail}`);save();toast(`${KN(docEdit)} sent to ${cEmail}`,false,true);docEdit._emailed=true;emailedDoc=docEdit.id}
     catch(err){b.disabled=false;b.innerHTML=old;toast(err.message+' Opening Gmail instead.',false,true);location.href=gmail;return}}
   else if(sendVia==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied')}catch(err){prompt('Copy this link',link)}}
   else if(sendVia==='mail'){go(gmail);docEdit._emailed=true;emailedDoc=docEdit.id;toast((docJob.phone?'Gmail opened. Now tap Send Text.':`Gmail opened with the ${KN(docEdit).toLowerCase()} email`))}
@@ -3687,7 +3728,7 @@ NEVACO BUILD INC.
     if(navigator.share){try{await navigator.share({title:subject,text:waMsg})}catch(err){}}
     else{try{await navigator.clipboard.writeText(waMsg);toast('Message with link copied')}catch(err){prompt('Copy this message',waMsg)}}}
   render();if(selId)openDetail(selId);docEdit=JSON.parse(JSON.stringify(db.docs.find(x=>x.id===docEdit.id)||docEdit));docEdit._emailed=emailedDoc===docEdit.id;
-  $('docBanner').innerHTML=isCon(docEdit)?conBanner(docEdit):docEdit.status==='sent'?(isInv(docEdit)?`<div class="banner warn">${ico('pay')} Sent · ${money(invDue(docEdit))} due</div>`:`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`):$('docBanner').innerHTML;paintDocActs();
+  $('docBanner').innerHTML=isTwo(docEdit)?conBanner(docEdit):docEdit.status==='sent'?(isInv(docEdit)?`<div class="banner warn">${ico('pay')} Sent · ${money(invDue(docEdit))} due</div>`:`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`):$('docBanner').innerHTML;paintDocActs();
 });
 
 /* ---------- event form ---------- */
