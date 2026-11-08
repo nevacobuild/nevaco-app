@@ -896,13 +896,18 @@ async function send(user: string, b: any) {
   if (!isEmail(to)) throw new HttpError(400, `Add a valid email for ${p.name || "this contact"} first.`);
   const body = String(b.body || "").trim();
   if (!body) throw new HttpError(400, "Write a message first.");
-  const subject = clean(b.subject) || "NEVACO BUILD";
+  let subject = clean(b.subject) || "NEVACO BUILD";
 
   // continue the conversation when the subject matches the last email
   let threadId: string | null = null, inReplyTo: string | null = null, references: string | null = null;
-  const { data: prev } = await db.from("partner_messages").select("thread_id,rfc_id,subject,at").eq(ownCol, p.id).neq("dir", "note")
+  const { data: prev } = await db.from("partner_messages").select("thread_id,rfc_id,subject,at,dir,from_email").eq(ownCol, p.id).neq("dir", "note")
     .not("thread_id", "is", null).neq("thread_id", "homestars").order("at", { ascending: false }).limit(40);
-  const same = (prev || []).find((m: any) => normSubj(m.subject) === normSubj(subject));
+  let same = (prev || []).find((m: any) => normSubj(m.subject) === normSubj(subject));
+  // reply inside the customer's own last email when there is one: mail that answers a person lands in their inbox, not spam
+  if (!same && b.reply_latest) {
+    const theirs = (prev || []).find((m: any) => m.dir === "in" && String(m.from_email || "").toLowerCase() === to && m.rfc_id);
+    if (theirs) { same = theirs; const sj = String(theirs.subject || "").trim(); subject = sj ? (/^re:/i.test(sj) ? sj : "Re: " + sj) : subject; }
+  }
   if (same) {
     threadId = same.thread_id;
     const chain = (prev || []).filter((m: any) => m.thread_id === threadId && m.rfc_id).reverse().map((m: any) => m.rfc_id);
@@ -991,7 +996,7 @@ async function docEvent(req: Request, b: any) {
   if (d && j && isEmail(to) && await account()) {
     const link = `${APP}/doc.html?t=${d.share_token}`, first = name.split(/\s+/)[0] || "there", kn = KINDN(d.kind).toLowerCase();
     const body = `Hi ${first},\n\nThank you for signing ${kn} ${d.number}${d.title ? " for your " + String(d.title).toLowerCase() + " project" : ""}. A copy is below for your records. You can open it and download the signed PDF at any time:\n${link}\n\nWe will be in touch shortly to confirm the next steps.`;
-    await send("customer", { job_id: j.id, to, to_name: name, subject: `Signed ${kn} ${d.number} – NEVACO BUILD`, body, cta: { label: `View signed ${kn}`, url: link } })
+    await send("customer", { job_id: j.id, to, to_name: name, subject: `Your signed ${kn} ${d.number} – NEVACO BUILD`, body, reply_latest: true })
       .catch((e) => console.warn("signed copy", (e as Error).message));
   }
   return { ok: true, number: data.number };
