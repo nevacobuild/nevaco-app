@@ -61,6 +61,8 @@ td.amt{white-space:nowrap;font-weight:600;width:120px}
 .stamp{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:700;font-size:12px;border:1.5px solid var(--green);border-radius:6px;padding:3px 8px;margin-top:8px}
 .paidstamp{display:inline-block;margin-top:18px;border:3px solid var(--green);color:var(--green);font-weight:800;letter-spacing:.12em;font-size:18px;padding:6px 14px;border-radius:8px;transform:rotate(-3deg)}
 .sched small{color:var(--ink3)}
+.ptab{width:100%;border-collapse:collapse;margin:4px 0 6px}.ptab th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);text-align:right;padding:2px 0 6px;font-weight:700}.ptab th:first-child,.ptab td:first-child{text-align:left}
+.ptab td{text-align:right;padding:4px 0;border-top:1px solid var(--line)}.ptab tfoot td{border-top:1.5px solid var(--ink);font-weight:700}
 .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:0 0 24px}
 .keys div{background:#fff;padding:10px 12px}.keys small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);font-weight:700}.keys b{font-size:13px}
 .clauses p{margin:0 0 9px;color:var(--ink2);white-space:pre-wrap}.clauses p b{color:var(--ink)}
@@ -133,6 +135,9 @@ const post=(b)=>fetch(FN,{method:'POST',headers:{'Content-Type':'application/jso
 const x=d.extra||{};
 const clauses=t=>String(t||'').split(/\n\s*\n/).map(p=>{const m=p.match(/^(\d+\.\s+[^.\n]{2,60}\.)([\s\S]*)$/);return `<p>${m?`<b>${esc(m[1])}</b>${esc(m[2])}`:esc(p)}</p>`}).join('');
 const sched=(x.schedule||[]).filter(r=>String(r.d||'').trim()&&Number(r.pct)>0);
+const perRow=con&&sched.some(r=>r.hst!==undefined),sub0=Number(d.subtotal)||0;
+const pBase=r=>Math.round(Number(r.pct)*sub0)/100,pHst=r=>r.hst?Math.round(pBase(r)*13)/100:0;
+const hstOn=sched.filter(r=>r.hst),hstLabel=perRow&&hstOn.length&&hstOn.length<sched.length?'HST (13%) on '+hstOn.map(r=>r.d.toLowerCase()).join(', '):'HST (13%)';
 const fdt=v=>new Date(v).toLocaleString('en-CA',{dateStyle:'long',timeStyle:'short',timeZone:'America/Toronto'})+' (Toronto time)';
 document.title=`${KIND} ${d.number} · NEVACO BUILD`;
 const credit=Number(d.credit)||0,due=Math.max(0,Math.round((Number(d.total)-credit)*100)/100),paidInv=inv&&d.status==='paid';
@@ -165,7 +170,7 @@ function render(){accepted=d.status==='accepted';
       <tbody>${items.map((i,k)=>`<tr><td class="n">${k+1}</td><td class="desc">${esc(i.d)}</td><td class="amt">${Number(i.a)>0?money(i.a):''}</td></tr>`).join('')}</tbody></table>
     <div class="totals">
       <div><span>${priced?'Subtotal':'Contract price'}</span><span>${money(d.subtotal)}</span></div>
-      ${d.hst?`<div><span>HST (13%)</span><span>${money(d.tax)}</span></div>`:''}
+      ${d.hst?`<div><span>${esc(hstLabel)}</span><span>${money(d.tax)}</span></div>`:''}
       <div class="${inv&&credit?'':'grand'}"><span>Total${d.hst||inv?'':' (HST not included)'}</span><span>${money(d.total)}${inv&&credit?'':' CAD'}</span></div>
       ${inv&&credit?`<div><span>Less payments received</span><span>−${money(credit)}</span></div><div class="grand"><span>Balance due</span><span>${money(due)} CAD</span></div>`:''}
     </div>
@@ -175,7 +180,9 @@ function render(){accepted=d.status==='accepted';
       <div class="row"><span><b>Cheque</b> payable to NEVACO BUILD INC.</span></div>
       <div class="row"><span><b>Cash</b> · a receipt will be provided</span></div></div>`:''}
     ${con&&sched.length?`<div class="sched"><div class="lbl">Payment schedule</div>
-      ${sched.map(r=>`<div class="row"><span>${esc(r.d)} (${Number(r.pct)}%)</span><b>${money(Math.round(Number(r.pct)*Number(d.total||0))/100)}</b></div>`).join('')}
+      ${perRow?`<table class="ptab"><thead><tr><th>Payment</th><th>Amount</th><th>HST</th><th>Total</th></tr></thead><tbody>${sched.map(r=>`<tr><td>${esc(r.d)} (${Number(r.pct)}%)</td><td>${money(pBase(r))}</td><td>${r.hst?money(pHst(r)):'—'}</td><td><b>${money(pBase(r)+pHst(r))}</b></td></tr>`).join('')}</tbody>
+        <tfoot><tr><td>Total</td><td>${money(sub0)}</td><td>${money(d.tax)}</td><td><b>${money(d.total)}</b></td></tr></tfoot></table>`
+      :sched.map(r=>`<div class="row"><span>${esc(r.d)} (${Number(r.pct)}%)</span><b>${money(Math.round(Number(r.pct)*Number(d.total||0))/100)}</b></div>`).join('')}
       <div class="row"><small>Payment by Interac e-Transfer to nevacobuild@gmail.com, cheque payable to NEVACO BUILD INC., or cash with a receipt.</small></div></div>`:''}
     ${!inv&&!con&&Number(d.deposit_pct)>0?`<div class="sched"><div class="lbl">Payment schedule</div>
       <div class="row"><span>Deposit at signing (${Number(d.deposit_pct)}%)</span><b>${money(dep)}</b></div>
