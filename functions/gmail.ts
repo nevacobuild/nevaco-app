@@ -921,7 +921,7 @@ async function send(user: string, b: any) {
     if (error || !f) throw new HttpError(400, "Could not open the partnership PDF. Upload it again in Partners settings.");
     attachments.push({ name: cfg.pdf_name || "NEVACO BUILD Partnership.pdf", mime: "application/pdf", bytes: new Uint8Array(await f.arrayBuffer()) });
   }
-  const signature = b.signature === false ? "" : String(cfg.signature || "");
+  const signature = b.signature === false ? "" : typeof b.signature === "string" ? b.signature.slice(0, 500) : String(cfg.signature || "");
   const cta = b.cta && typeof b.cta === "object" ? { label: String(b.cta.label || "Open").slice(0, 60), url: String(b.cta.url || "") } : null;
   const raw = buildMime({ fromName: cfg.from_name || "NEVACO BUILD", from: acc.email, toName: b.to_name || p.name, to, subject, body, signature, inReplyTo, references, attachments, cta });
 
@@ -968,6 +968,7 @@ async function preview(b: any) {
 }
 
 /* ---------- customer signing page events (public, secured by the secret link) ---------- */
+const CO_SIG = "NEVACO BUILD INC.\n437-432-2252 · nevacobuild.ca";
 const KINDN = (k: string) => k === "contract" ? "Contract" : k === "invoice" ? "Invoice" : "Estimate";
 async function docEvent(req: Request, b: any) {
   const token = String(b.token || "");
@@ -996,7 +997,7 @@ async function docEvent(req: Request, b: any) {
   if (d && j && isEmail(to) && await account()) {
     const link = `${APP}/doc.html?t=${d.share_token}`, first = name.split(/\s+/)[0] || "there", kn = KINDN(d.kind).toLowerCase();
     const body = `Hi ${first},\n\nThank you for signing ${kn} ${d.number}${d.title ? " for your " + String(d.title).toLowerCase() + " project" : ""}. A copy is below for your records. You can open it and download the signed PDF at any time:\n${link}\n\nWe will be in touch shortly to confirm the next steps.`;
-    await send("customer", { job_id: j.id, to, to_name: name, subject: `Your signed ${kn} ${d.number} – NEVACO BUILD`, body, reply_latest: true })
+    await send("customer", { job_id: j.id, to, to_name: name, subject: `Your signed ${kn} (${d.number})`, body, reply_latest: true, signature: CO_SIG })
       .catch((e) => console.warn("signed copy", (e as Error).message));
   }
   return { ok: true, number: data.number };

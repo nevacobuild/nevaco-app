@@ -187,7 +187,7 @@ function render(){accepted=d.status==='accepted';
       <div><div class="sigline">${accepted&&d.signature?`<img src="${esc(d.signature)}" alt="Customer signature">`:''}</div>
         <div class="sigcap">${con?'Owner':'Customer'} signature${accepted?` · ${esc(d.accepted_name)} · ${fdate(d.accepted_at)}`:''}</div>
         ${accepted?`<div class="stamp">✓ ${con?'Signed':'Accepted'} online ${new Date(d.accepted_at).toLocaleString('en-CA',{dateStyle:'medium',timeStyle:'short'})}</div>`:''}</div>
-      <div><div class="sigline">${d.owner_signature?`<img src="${esc(d.owner_signature)}" alt="NEVACO BUILD signature">`:''}</div><div class="sigcap">NEVACO BUILD INC.${d.owner_name?' · '+esc(d.owner_name):''}${d.owner_signed_at?' · '+fdate(d.owner_signed_at):''}</div></div>
+      <div><div class="sigline">${d.owner_signature?`<img src="${esc(d.owner_signature)}" alt="NEVACO BUILD signature">`:''}</div><div class="sigcap">NEVACO BUILD INC.${d.owner_signed_at?' · '+fdate(d.owner_signed_at):''}</div></div>
     </div>
     ${accepted&&con?`<div class="audit"><div class="lbl">Electronic signature record</div>
       <div><span>Signed by</span><b>${esc(d.accepted_name)}</b></div><div><span>Date and time</span>${fdt(d.accepted_at)}</div>
