@@ -86,17 +86,27 @@ export function signatureHtml(sig: string) {
 <tr><td style="padding-right:14px;border-right:2px solid #e8e8ed;vertical-align:middle"><img src="${LOGO}" width="104" height="45" alt="NEVACO BUILD" style="display:block;border:0"></td>
 <td style="padding-left:14px;vertical-align:middle">${txt}</td></tr></table>`;
 }
-export function bodyHtml(body: string, sig: string) {
-  const paras = escHtml(body).replace(/\r\n/g, "\n").split(/\n{2,}/).map((p) => `<p style="margin:0 0 12px">${p.replace(/\n/g, "<br>")}</p>`).join("");
-  return `<!doctype html><html><body style="margin:0"><div style="font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55;color:#1d1d1f">${paras}${signatureHtml(sig)}</div></body></html>`;
+export type Cta = { label: string; url: string };
+export function ctaHtml(c?: Cta | null) {
+  if (!c || !/^https:\/\//.test(c.url || "")) return "";
+  return `<table cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 18px"><tr><td style="border-radius:10px;background:#1d1d1f">
+<a href="${escHtml(c.url)}" style="display:inline-block;padding:13px 26px;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:10px">${escHtml(c.label || "Open")}</a></td></tr></table>`;
+}
+export function bodyHtml(body: string, sig: string, cta?: Cta | null) {
+  // when there is a button, the bare link line in the text is replaced by the button
+  let text = body;
+  if (cta && cta.url && text.includes(cta.url)) text = text.split("\n").filter((l) => l.trim() !== cta.url).join("\n").replace(/\n{3,}/g, "\n\n");
+  const ps = escHtml(text).replace(/\r\n/g, "\n").split(/\n{2,}/).map((p) => `<p style="margin:0 0 12px">${p.replace(/\n/g, "<br>")}</p>`);
+  if (cta) { const at = ps.findIndex((p) => /review|sign|view/i.test(p)); ps.splice(at >= 0 ? at + 1 : Math.min(1, ps.length), 0, ctaHtml(cta)); }
+  return `<!doctype html><html><body style="margin:0"><div style="font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55;color:#1d1d1f">${ps.join("")}${signatureHtml(sig)}</div></body></html>`;
 }
 
 export type Attach = { name: string; mime: string; bytes: Uint8Array };
 export function buildMime(o: { fromName: string; from: string; toName: string; to: string; subject: string; body: string; signature: string;
-  inReplyTo?: string | null; references?: string | null; attachments?: Attach[]; date?: Date; boundary?: string }) {
+  inReplyTo?: string | null; references?: string | null; attachments?: Attach[]; date?: Date; boundary?: string; cta?: Cta | null }) {
   const B = o.boundary || ("nb" + crypto.randomUUID().replace(/-/g, ""));
   const plain = o.body.replace(/\r?\n/g, "\r\n") + (o.signature ? "\r\n\r\n" + o.signature.replace(/\r?\n/g, "\r\n") : "");
-  const html = bodyHtml(o.body, o.signature);
+  const html = bodyHtml(o.body, o.signature, o.cta);
   const H: string[] = [
     `From: ${encName(o.fromName, o.from)}`,
     `To: ${encName(clean(o.toName), o.to)}`,
@@ -907,7 +917,8 @@ async function send(user: string, b: any) {
     attachments.push({ name: cfg.pdf_name || "NEVACO BUILD Partnership.pdf", mime: "application/pdf", bytes: new Uint8Array(await f.arrayBuffer()) });
   }
   const signature = b.signature === false ? "" : String(cfg.signature || "");
-  const raw = buildMime({ fromName: cfg.from_name || "NEVACO BUILD", from: acc.email, toName: p.name, to, subject, body, signature, inReplyTo, references, attachments });
+  const cta = b.cta && typeof b.cta === "object" ? { label: String(b.cta.label || "Open").slice(0, 60), url: String(b.cta.url || "") } : null;
+  const raw = buildMime({ fromName: cfg.from_name || "NEVACO BUILD", from: acc.email, toName: b.to_name || p.name, to, subject, body, signature, inReplyTo, references, attachments, cta });
 
   let sent: any;
   if (raw.length < 4_500_000) {
@@ -951,6 +962,41 @@ async function preview(b: any) {
   return { count: ids.length, threads: th.length, sample: sample.filter(Boolean) };
 }
 
+/* ---------- customer signing page events (public, secured by the secret link) ---------- */
+const KINDN = (k: string) => k === "contract" ? "Contract" : k === "invoice" ? "Invoice" : "Estimate";
+async function docEvent(req: Request, b: any) {
+  const token = String(b.token || "");
+  if (!/^[0-9a-f]{64}$/.test(token)) throw new HttpError(400, "This link is not valid");
+  if (b.action === "view") {
+    const { data, error } = await db.rpc("mark_doc_viewed", { p_token: token });
+    if (error) throw new HttpError(400, error.message);
+    if (data?.first) {
+      const { data: j } = await db.from("jobs").select("name").eq("id", data.job_id).maybeSingle();
+      await sendPush(`${KINDN(data.kind)} opened`, `${j?.name || "The customer"} just opened ${KINDN(data.kind).toLowerCase()} ${data.number}`, `/?lead=${encodeURIComponent(data.job_id)}`, "doc-" + data.number).catch(() => null);
+    }
+    return { ok: true };
+  }
+  if (b.action !== "sign") throw new HttpError(400, "Unknown action");
+  const { data, error } = await db.rpc("accept_shared_doc", { p_token: token, p_name: String(b.name || ""), p_signature: String(b.signature || "") });
+  if (error) throw new HttpError(400, error.message.replace(/^.*?ERROR:\s*/, ""));
+  const ip = (req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "").split(",")[0].trim();
+  const meta = { ip, device: String(req.headers.get("user-agent") || "").slice(0, 300), at: new Date().toISOString(), tz: String(b.tz || "").slice(0, 60) };
+  await db.from("documents").update({ sign_meta: meta }).eq("id", data.id);
+  const { data: d } = await db.from("documents").select("kind,number,title,total,extra,job_id,share_token").eq("id", data.id).maybeSingle();
+  const { data: j } = await db.from("jobs").select("id,name,email").eq("id", data.job_id).maybeSingle();
+  const name = String(b.name || "").trim();
+  await sendPush(`✍️ ${KINDN(data.kind)} signed`, `${name} signed ${KINDN(data.kind).toLowerCase()} ${data.number}${d?.total ? " · $" + Number(d.total).toLocaleString("en-CA") : ""}`, `/?lead=${encodeURIComponent(data.job_id)}`, "doc-" + data.number).catch(() => null);
+  // send the customer their signed copy from nevacobuild@gmail.com
+  const to = String(d?.extra?.customer?.email || j?.email || "").trim().toLowerCase();
+  if (d && j && isEmail(to) && await account()) {
+    const link = `${APP}/doc.html?t=${d.share_token}`, first = name.split(/\s+/)[0] || "there", kn = KINDN(d.kind).toLowerCase();
+    const body = `Hi ${first},\n\nThank you for signing ${kn} ${d.number}${d.title ? " for your " + String(d.title).toLowerCase() + " project" : ""}. A copy is below for your records. You can open it and download the signed PDF at any time:\n${link}\n\nWe will be in touch shortly to confirm the next steps.`;
+    await send("customer", { job_id: j.id, to, to_name: name, subject: `Signed ${kn} ${d.number} – NEVACO BUILD`, body, cta: { label: `View signed ${kn}`, url: link } })
+      .catch((e) => console.warn("signed copy", (e as Error).message));
+  }
+  return { ok: true, number: data.number };
+}
+
 async function checkCron(secret: string) {
   const { data } = await db.from("private_config").select("cron_secret").eq("id", 1).maybeSingle();
   if (!data?.cron_secret || data.cron_secret !== secret) throw new HttpError(401, "Bad cron secret");
@@ -967,6 +1013,7 @@ if (typeof Deno !== "undefined" && (Deno as any).serve && !(globalThis as any)._
       }
       return await metaWebhook(req, await req.text());
     }
+    if (req.method === "POST" && url.pathname.endsWith("/doc")) return json(await docEvent(req, await req.json().catch(() => ({}))));
     if (req.method === "GET" && url.pathname.endsWith("/meta_callback")) return await metaCallback(url);
     if (req.method === "GET" && url.pathname.endsWith("/callback")) return await callback(url);
     if (req.method === "GET") return json({ ok: true, service: "nevaco-gmail" });

@@ -703,6 +703,15 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .dtotals .g{font-weight:700;font-size:17px;border-top:.5px solid var(--sep);padding-top:8px;margin-top:4px}
 .dtotals span{color:var(--label2)}
 .docacts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#d-con,#d-conpay,#d-oursig{display:contents}
+.kpay{display:grid;grid-template-columns:1fr 64px 92px 28px;gap:8px;align-items:center;padding:6px 12px}.kpay+.kpay{border-top:.5px solid var(--sep)}
+.kpay input{width:100%;min-width:0;border:0;background:transparent;font-size:15px;padding:6px 0}.kpay input[data-f="pct"]{text-align:right}.kpay b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;font-size:14px}
+.kpay .rm{font-size:20px;color:var(--label3)}
+.oursig{padding:12px 14px}.oursig img{display:block;max-height:70px;max-width:260px;margin:2px 0 6px}.oursig .row2{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.oursig small{color:var(--label2)}.spad{position:relative;height:150px;border:1px dashed var(--label3);border-radius:10px;background:#fff;touch-action:none;margin:8px 0}
+.spad canvas{width:100%;height:100%;display:block;border-radius:10px}.spad span{position:absolute;left:12px;bottom:8px;font-size:12px;color:#999;pointer-events:none}
+.oursig input{width:100%;border:0;border-bottom:.5px solid var(--sep);background:transparent;font-size:15px;padding:8px 0;margin-bottom:6px}
+.ctrack{display:flex;flex-direction:column;gap:3px;font-size:13px}.ctrack span{display:flex;gap:6px;align-items:center}.ctrack i{width:7px;height:7px;border-radius:50%;background:var(--label3)}.ctrack i.on{background:var(--green)}
 .docacts button{height:46px;border-radius:12px;background:var(--card);font-weight:600;color:var(--blue);display:flex;align-items:center;justify-content:center;gap:8px}
 .docacts button.primary{background:var(--blue);color:#fff;grid-column:1/-1}
 .docacts button.wide{grid-column:1/-1}
@@ -715,7 +724,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .banner.info{background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--blue)}
 .banner.warn{background:color-mix(in srgb,var(--orange) 15%,transparent);color:var(--orange)}
 .docsheet[data-locked="1"] input,.docsheet[data-locked="1"] textarea,.docsheet[data-locked="1"] select{pointer-events:none;opacity:.7}
-.docsheet[data-locked="1"] .addline,.docsheet[data-locked="1"] .rm,.docsheet[data-locked="1"] #docSave{display:none}
+.docsheet[data-locked="1"] .addline,.docsheet[data-locked="1"] .rm,.docsheet[data-locked="1"] #docSave,.docsheet[data-locked="1"] #d-oursig{display:none}
 /* ===== detail drawer ===== */
 .detail{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;z-index:40;background:var(--bg);box-shadow:-12px 0 40px rgba(0,0,0,.18);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .45s var(--ease);padding-top:env(safe-area-inset-top);border-left:.5px solid var(--sep)}
 .detail.open{transform:none}
@@ -1005,7 +1014,25 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
       <div class="fg">
         <label><span>Project</span><input id="d-title" placeholder="e.g. Bathroom Renovation"></label>
         <label><span>Date</span><input id="d-date" type="date"></label>
-        <label><span>Valid for</span><select id="d-valid"><option value="15">15 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select></label>
+        <label id="d-validrow"><span>Valid for</span><select id="d-valid"><option value="15">15 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select></label>
+      </div>
+      <div id="d-con" hidden>
+        <div class="fghead">Owner (customer)</div>
+        <div class="fg">
+          <label><span>Name</span><input id="k-name" autocomplete="off" placeholder="Full name of the owner"></label>
+          <label><span>Address</span><input id="k-address" placeholder="Street address of the project"></label>
+          <label><span>City</span><input id="k-city" placeholder="Toronto"></label>
+          <label><span>Postal code</span><input id="k-postal" placeholder="M1M 1M1" autocapitalize="characters"></label>
+          <label><span>Phone</span><input id="k-phone" type="tel"></label>
+          <label><span>Email</span><input id="k-email" type="email" placeholder="Contract is sent here"></label>
+        </div>
+        <div class="fghead">Schedule</div>
+        <div class="fg">
+          <label><span>Start date</span><input id="k-start" type="date"></label>
+          <label><span>Completion</span><input id="k-end" type="date"></label>
+          <label><span>Warranty</span><select id="k-warranty"><option>1 year</option><option>2 years</option><option>3 years</option><option>6 months</option></select></label>
+          <label><span>Permits</span><select id="k-permits"><option>Not required</option><option>By NEVACO BUILD</option><option>By the Owner</option></select></label>
+        </div>
       </div>
       <div class="fghead" id="d-scopehead">Scope of work</div>
       <div class="fg items" id="d-items"></div>
@@ -1019,9 +1046,19 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
         <label><span>Deposit</span><select id="d-dep"><option value="0">No deposit</option><option value="10">10%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="40">40%</option><option value="50">50%</option></select></label>
       </div>
       <div class="dtotals" id="d-totals"></div>
-      <div class="fghead">Notes and terms</div>
-      <div class="fg"><label class="ta"><span>Notes</span><textarea id="d-notes" placeholder="e.g. Materials supplied by customer. Timeline 5–7 working days."></textarea></label></div>
+      <div id="d-conpay" hidden>
+        <div class="fghead">Payment schedule</div>
+        <div class="fg items" id="k-sched"></div>
+        <button type="button" class="addline" id="k-addpay">+ Add payment</button>
+        <p class="fnote" id="k-schednote"></p>
+      </div>
+      <div class="fghead" id="d-notehead">Notes and terms</div>
+      <div class="fg"><label class="ta"><span id="d-notelbl">Notes</span><textarea id="d-notes" placeholder="e.g. Materials supplied by customer. Timeline 5–7 working days."></textarea></label></div>
       <div class="fg" id="d-termsrow"><label class="ta"><span>Terms</span><textarea id="d-terms" rows="7"></textarea></label></div>
+      <div id="d-oursig" hidden>
+        <div class="fghead">NEVACO BUILD signature</div>
+        <div class="fg oursig" id="k-sigbox"></div>
+      </div>
       <div class="docacts" id="docActs"></div>
     </div>
   </form>
@@ -1288,7 +1325,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.34 (Nov 4) · Partner expense links';
+const APP_VERSION='1.35 (Nov 7) · Contracts';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1405,7 +1442,7 @@ const authStorage={
   removeItem:k=>{safe(()=>localStorage.removeItem(k));safe(()=>sessionStorage.removeItem(k))}
 };
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:authStorage,storageKey:'nevaco-auth'}});
-let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[],exps:[]};let expReady=false,expMeta=false,linksReady=false;let planReady=false,crewReady=false,fileSubReady=false;const filesReady0=fl=>!fl.error;let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
+let db={jobs:[],events:[],docs:[],files:[],partners:[],pmsgs:[],tasks:[],subs:[],exps:[]};let expReady=false,expMeta=false,linksReady=false;let planReady=false,crewReady=false,fileSubReady=false;const filesReady0=fl=>!fl.error;let conReady=false,conCfg={};let docsReady=false,invReady=false,filesReady=false,postalReady=false,partReady=false;
 let data=db.jobs;
 let me=null,team=[],loaded=false;
 let synced={jobs:new Map(),payments:new Map(),events:new Map(),documents:new Map(),partners:new Map(),contractors:new Map(),job_tasks:new Map()};
@@ -1419,7 +1456,8 @@ function evRow(e){if(!e.id)e.id=uid();return{id:e.id,job_id:nz(e.jobId),type:e.t
 function docRow(d){return{id:d.id,job_id:d.jobId,kind:d.kind||'estimate',number:d.number,status:d.status||'draft',date:d.date,valid_until:nz(d.validUntil),title:d.title||'',
   items:(d.items||[]).map(i=>({d:i.d||'',a:(i.a===''||i.a==null)?null:Number(i.a)})),lump:(d.lump===''||d.lump==null)?null:Number(d.lump),hst:!!d.hst,deposit_pct:Number(d.depositPct)||0,
   notes:d.notes||'',terms:d.terms||'',subtotal:Number(d.subtotal)||0,tax:Number(d.tax)||0,total:Number(d.total)||0,share_token:d.token,sent_at:nz(d.sentAt),
-  ...(invReady?{credit:Number(d.credit)||0,due_date:nz(d.dueDate),paid_at:nz(d.paidAt),paid_method:nz(d.paidMethod),ref:nz(d.ref)}:{})}}
+  ...(invReady?{credit:Number(d.credit)||0,due_date:nz(d.dueDate),paid_at:nz(d.paidAt),paid_method:nz(d.paidMethod),ref:nz(d.ref)}:{}),
+  ...(conReady?{extra:d.extra||{},owner_signature:nz(d.ownerSig),owner_name:nz(d.ownerName),owner_signed_at:nz(d.ownerSignedAt)}:{})}}
 function jtaskRow(t){return{id:t.id,job_id:t.jobId,title:t.title||'',start:nz(t.start),end:nz(t.end),contractor_id:nz(t.subId),cost:(t.cost==null||t.cost==='')?null:Number(t.cost),paid:!!t.paid,paid_at:nz(t.paidAt),done:!!t.done,notes:t.notes||'',sort:t.sort||0}}
 const SUBF=[['company','company'],['address','address'],['hst','hst'],['wsib','wsib'],['wsibExp','wsib_exp',1],['insCompany','ins_company'],['insPolicy','ins_policy'],['insAmount','ins_amount'],['insExp','ins_exp',1],['license','license'],['rate','rate'],['payMethod','pay_method']];
 function subRow(c){const o={id:c.id,name:c.name||'',trade:c.trade||'',phone:c.phone||'',email:c.email||'',notes:c.notes||''};if(crewReady)SUBF.forEach(([k,col,d])=>o[col]=d?nz(c[k]):(c[k]||''));return o}
@@ -1433,7 +1471,9 @@ async function fetchAll(){
   const[jt,ct,xp,el]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name'),sb.from('job_expenses').select('*').order('date'),sb.from('expense_links').select('*').order('created_at')]);expReady=!xp.error;linksReady=!el.error;expMeta=expReady&&(xp.data.length?('pay_method' in xp.data[0]):!(await sb.from('job_expenses').select('pay_method').limit(1)).error);planReady=!jt.error&&!ct.error;crewReady=planReady&&(ct.data.length?('ins_exp' in ct.data[0]):!(await sb.from('contractors').select('ins_exp').limit(1)).error);if(filesReady0(fl))fileSubReady=fl.data.length?('contractor_id' in fl.data[0]):!(await sb.from('files').select('contractor_id').limit(1)).error;
   partReady=!pt.error&&!pm.error;if(partReady){pset=(ps.data&&ps.data[0]&&ps.data[0].value)||{};await loadGmailStatus()}
   filesReady=!fl.error;
-  if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error}
+  if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error;
+    conReady=dc.data.length?('extra' in dc.data[0]):!(await sb.from('documents').select('extra').limit(1)).error;
+    if(conReady){const cs=await sb.from('app_settings').select('*').eq('key','contract');const row=(cs.data||[]).find(x=>x.key==='contract');conCfg=Object.assign({},row&&row.value||{});if(!String(conCfg.signature||'').startsWith('data:image/png'))delete conCfg.signature}}
   const err=j.error||p.error||e.error;if(err)throw err;
   postalReady=j.data.length?('postal' in j.data[0]):!(await sb.from('jobs').select('postal').limit(1)).error;
   const jobs=j.data.map(x=>({id:x.id,name:x.name||'',phone:x.phone||'',email:x.email||'',address:x.address||'',city:x.city||'',postal:x.postal||'',type:x.type||'',source:x.source||'',
@@ -1447,7 +1487,8 @@ async function fetchAll(){
   const docs=(dc.data||[]).map(x=>({id:x.id,jobId:x.job_id,kind:x.kind,number:x.number,status:x.status,date:x.date,validUntil:x.valid_until||'',title:x.title||'',items:Array.isArray(x.items)?x.items:[],
     lump:x.lump==null?null:Number(x.lump),hst:!!x.hst,depositPct:Number(x.deposit_pct)||0,notes:x.notes||'',terms:x.terms||'',subtotal:Number(x.subtotal)||0,tax:Number(x.tax)||0,total:Number(x.total)||0,
     token:x.share_token,sentAt:x.sent_at||'',acceptedAt:x.accepted_at||'',acceptedName:x.accepted_name||'',
-    credit:Number(x.credit)||0,dueDate:x.due_date||'',paidAt:x.paid_at||'',paidMethod:x.paid_method||'',ref:x.ref||''}));
+    credit:Number(x.credit)||0,dueDate:x.due_date||'',paidAt:x.paid_at||'',paidMethod:x.paid_method||'',ref:x.ref||'',
+    extra:x.extra||{},ownerSig:x.owner_signature||'',ownerName:x.owner_name||'',ownerSignedAt:x.owner_signed_at||'',viewedAt:x.viewed_at||'',signMeta:x.sign_meta||null}));
   const partners=partReady?pt.data.map(mapPartner):[],pmsgsL=partReady?pm.data.map(mapMsg):[];
   const tasks=planReady?jt.data.map(x=>({id:x.id,jobId:x.job_id,title:x.title||'',start:x.start||'',end:x.end||'',subId:x.contractor_id||'',cost:x.cost==null?null:Number(x.cost),paid:!!x.paid,paidAt:x.paid_at||'',done:!!x.done,notes:x.notes||'',sort:x.sort||0})):[];
   const subs=planReady?ct.data.map(subFrom):[];
@@ -1720,8 +1761,8 @@ function customers(){
 function custNeeds(c){
   const T=today(),n=[];
   for(const r of c.jobs){if(r.lost)continue;const tag=c.jobs.length>1?` · ${r.type||r.name}`:'';
-    for(const d of (db.docs||[]).filter(x=>x.jobId===r.id&&x.status==='sent')){const age=d.sentAt?dayDiff(T,ld(d.sentAt)):0;
-      n.push({k:'sign',p:age>=5?1:2,c:age>=5?'--p1':'--p2',ic:'sign',t:`Sign estimate ${d.number}`,s:`${money(d.total)} · sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}${tag}`,job:r.id,doc:d.id})}
+    for(const d of (db.docs||[]).filter(x=>x.jobId===r.id&&x.status==='sent'&&!isInv(x))){const age=d.sentAt?dayDiff(T,ld(d.sentAt)):0;
+      n.push({k:'sign',p:age>=5?1:2,c:age>=5?'--p1':'--p2',ic:'sign',t:`Sign ${KN(d).toLowerCase()} ${d.number}${d.viewedAt?' · opened':''}`,s:`${money(d.total)} · sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}${tag}`,job:r.id,doc:d.id})}
     const openInv=(db.docs||[]).filter(x=>isInv(x)&&x.jobId===r.id&&x.status==='sent');
     for(const d of openInv){const age=d.sentAt?dayDiff(T,ld(d.sentAt)):0;n.push({k:'pay',p:age>=7?1:2,c:age>=7?'--p1':'--p2',ic:'pay',t:`Pay invoice ${d.number} · ${money(invDue(d))}`,s:`Sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}${tag}`,job:r.id,doc:d.id})}
     if(openInv.length){}else if(stepDone(r,'complete')&&!stepDone(r,'final')&&total(r)>0){const age=ageOf(r.ms.complete?.date,T);
@@ -2845,7 +2886,7 @@ function openDetail(id,pan){
     ${planCard(r)}
     ${expBlock(r)}
     ${leadConvHtml(r)}
-    <div class="block"><div class="label">Estimates & Invoices <span><button id="newDoc">+ Estimate</button>&nbsp;&nbsp;<button id="newInv">+ Invoice</button></span></div>
+    <div class="block"><div class="label">Documents <span><button id="newDoc">+ Estimate</button>&nbsp;&nbsp;<button id="newCon">+ Contract</button>&nbsp;&nbsp;<button id="newInv">+ Invoice</button></span></div>
       <div class="group">${docsFor(r.id).length?docsFor(r.id).sort((a,b)=>(isInv(a)-isInv(b))||String(a.number).localeCompare(String(b.number))).map(docListRow).join(''):`<div class="empty" style="padding:16px"><b style="font-size:15px">No estimate yet</b>Create one and send it for online signature.</div>`}</div></div>
     ${filesBlock(filesFor(r.id),'attachJob')}
     <div class="block"><div class="label">Job Steps <span>${STEPS.filter(s=>stepDone(r,s.k)).length} of ${STEPS.length}</span></div>
@@ -2914,6 +2955,7 @@ function openDetail(id,pan){
   $('dLost').onclick=()=>{if(!r.lost&&isLead(r)){openCall(r,'notint');return}if(r.lost&&isLead(r)){reopenLead(r);return}snapshot();r.lost=!r.lost;log(r,r.lost?'Marked as lost':'Reopened');save();render();openDetail(r.id);toast(r.lost?'Marked as lost':'Reopened',true)};
   $('addPay').onclick=()=>openPay('extra');
   $('newDoc').onclick=()=>openDoc(null,r);
+  $('newCon').onclick=()=>{if(!conReady){toast('Run the contracts setup step first');return}openDoc(null,r,'contract')};
   if($('attachJob'))$('attachJob').onclick=()=>pickFiles(r.id);
   $('newInv').onclick=()=>{if(!invReady){toast('Run the invoices setup step first');return}openDoc(null,r,'invoice')};
   v.querySelectorAll('[data-doc]').forEach(b=>b.onclick=()=>openDoc((db.docs||[]).find(x=>x.id===b.dataset.doc),r));
@@ -3146,7 +3188,8 @@ $('vDetail').addEventListener('click',e=>{const o=e.target.closest('[data-file]'
 /* ---------- estimates ---------- */
 const DOC_ST={draft:{n:'Draft',c:'--p0'},sent:{n:'Sent · waiting for signature',c:'--s-sent'},accepted:{n:'Signed',c:'--green'},declined:{n:'Declined',c:'--red'},paid:{n:'Paid',c:'--green'}};
 const isInv=d=>d&&d.kind==='invoice';
-const KN=d=>isInv(d)?'Invoice':'Estimate';
+const isCon=d=>d&&d.kind==='contract';
+const KN=d=>isInv(d)?'Invoice':isCon(d)?'Contract':'Estimate';
 const invDue=d=>Math.max(0,Math.round(((Number(d.total)||0)-(Number(d.credit)||0))*100)/100);
 const DEFAULT_TERMS=`1. This estimate is valid until the date shown above.
 2. The work is limited to the scope listed. Any extra work or changes will be priced separately and approved in writing before the work is done.
@@ -3156,8 +3199,9 @@ const DEFAULT_TERMS=`1. This estimate is valid until the date shown above.
 const docsFor=id=>(db.docs||[]).filter(x=>x.jobId===id).sort((a,b)=>String(b.number).localeCompare(String(a.number)));
 function docListRow(d){const inv=isInv(d);let st=DOC_ST[d.status]||DOC_ST.draft;
   if(inv&&d.status==='sent'){const age=d.sentAt?dayDiff(today(),ld(d.sentAt)):0;st={n:`Sent · ${money(invDue(d))} due${age?' · '+age+' day'+(age>1?'s':'')+' ago':''}`,c:age>=7?'--p1':'--p2'}}
-  return `<button class="row" data-doc="${d.id}"><span class="gl" style="--c:var(${st.c})">${ico(inv?'pay':(d.status==='accepted'?'sign':'quote'))}</span><span class="rt"><b>${esc(d.number)} · ${esc(d.title||KN(d))}</b><span>${st.n}${d.status==='accepted'&&d.acceptedName?' by '+esc(d.acceptedName):''}${d.status==='paid'&&d.paidMethod?' · '+esc(d.paidMethod):''} · ${fmtDate(d.date)}</span></span><span class="rv"><em>${money(inv?(d.status==='paid'?d.total-d.credit:invDue(d)):d.total)||'$0'}</em>${ico('chev')}</span></button>`}
-function nextDocNumber(kind){const pre=kind==='invoice'?'INV-':'E-';const re=new RegExp('^'+pre+'(\\d{1,6})$');const n=(db.docs||[]).filter(x=>(x.kind||'estimate')===(kind||'estimate')).map(x=>{const m=String(x.number).match(re);return m?parseInt(m[1],10):NaN}).filter(Number.isFinite);return pre+(n.length?Math.max(...n)+1:1001)}
+  else if(d.status==='sent'&&d.viewedAt)st={n:'Opened · waiting for signature',c:'--s-sent'};
+  return `<button class="row" data-doc="${d.id}"><span class="gl" style="--c:var(${st.c})">${ico(inv?'pay':(d.status==='accepted'||isCon(d)?'sign':'quote'))}</span><span class="rt"><b>${esc(d.number)} · ${esc(d.title||KN(d))}</b><span>${st.n}${d.status==='accepted'&&d.acceptedName?' by '+esc(d.acceptedName):''}${d.status==='paid'&&d.paidMethod?' · '+esc(d.paidMethod):''} · ${fmtDate(d.date)}</span></span><span class="rv"><em>${money(inv?(d.status==='paid'?d.total-d.credit:invDue(d)):d.total)||'$0'}</em>${ico('chev')}</span></button>`}
+function nextDocNumber(kind){const pre=kind==='invoice'?'INV-':kind==='contract'?'C-':'E-';const re=new RegExp('^'+pre+'(\\d{1,6})$');const n=(db.docs||[]).filter(x=>(x.kind||'estimate')===(kind||'estimate')).map(x=>{const m=String(x.number).match(re);return m?parseInt(m[1],10):NaN}).filter(Number.isFinite);return pre+(n.length?Math.max(...n)+1:1001)}
 function buildInvoice(r){
   const ests=docsFor(r.id).filter(x=>!isInv(x)&&x.status!=='draft');const est=ests.find(x=>x.status==='accepted')||ests[0]||null;
   const title=(est?.title||r.type||'Renovation').trim();const sub=Number(r.value)||est?.subtotal||0;const hst=est?est.hst:r.hst!==false;
@@ -3175,25 +3219,94 @@ function itemRow(i,k){return `<div class="itm"><em>${k+1}</em><textarea data-k="
 function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=$('d-date').value||today();
   if(isInv(d)){d.validUntil='';d.dueDate=d.date;d.credit=Number($('d-credit').value.replace(/[^0-9.]/g,''))||0}else d.validUntil=addDays(d.date,Number($('d-valid').value)||30);
   d.lump=$('d-lump').value.replace(/[^0-9.]/g,'')||null;d.hst=$('d-hst').checked;d.depositPct=Number($('d-dep').value)||0;d.notes=$('d-notes').value.trim();d.terms=$('d-terms').value.trim();
-  const c=calcDoc(d);d.subtotal=c.sub;d.tax=c.tax;d.total=c.total;return c}
-function paintTotals(){const c=readDocForm(),d=docEdit;$('d-lumprow').hidden=c.priced;
+  const c=calcDoc(d);d.subtotal=c.sub;d.tax=c.tax;d.total=c.total;
+  if(isCon(d)){const x=d.extra=Object.assign({},d.extra||{});x.customer={};['name','address','city','postal','phone','email'].forEach(k=>x.customer[k]=$('k-'+k).value.trim());
+    x.start=$('k-start').value;x.end=$('k-end').value;x.warranty=$('k-warranty').value;x.permits=$('k-permits').value;x.schedule=conSchedEdit.map(r=>({d:String(r.d||'').trim(),pct:Number(r.pct)||0})).filter(r=>r.d||r.pct);d.depositPct=x.schedule[0]?.pct||0}
+  return c}
+function paintTotals(){const c=readDocForm(),d=docEdit;$('d-lumprow').hidden=c.priced;if(isCon(d)&&!$('d-conpay').hidden&&$('k-sched').childElementCount)$('k-sched').querySelectorAll('.kpay b').forEach((b,k)=>b.textContent=money(Math.round((Number(conSchedEdit[k]?.pct)||0)*d.total)/100)||'$0');
   const dep=Math.round(d.depositPct*d.total)/100;
-  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':'Contract price')}</span><b>${money(c.sub)||'$0'}</b></div>${d.hst?`<div><span>HST (13%)</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">Total</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`}
+  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':'Contract price')}</span><b>${money(c.sub)||'$0'}</b></div>${d.hst?`<div><span>HST (13%)</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">Total</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`}
 function paintItems(){$('d-items').innerHTML=docEdit.items.map(itemRow).join('');$('d-items').querySelectorAll('textarea').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})}
+const CONTRACT_TERMS=`1. Scope of work. The Contractor will supply the labour, and the materials listed in the scope, to complete the work described in this contract in a good and workmanlike manner and in line with the Ontario Building Code and good trade practice. Anything not listed in the scope is not included.
+
+2. Changes to the work. Any change, addition or removal of work must be agreed in writing (email or text message is acceptable) before it is done, with the price and any change to the schedule. Approved changes are added to the contract price and paid with the next scheduled payment.
+
+3. Hidden or unexpected conditions. If the Contractor finds conditions that could not reasonably be seen before the work started (for example rot, mould, asbestos, water damage, wiring or plumbing that is not up to code, or structural problems), the Contractor will stop that part of the work and tell the Owner. Any extra work needed will be priced and approved under section 2 before it continues.
+
+4. Payment. The Owner will pay the contract price according to the payment schedule above. Payments are due within 3 days of the stage being reached. If a payment is late, the Contractor may pause the work until it is paid, and the schedule will be extended by the same time. The Owner may hold back amounts as required by the Construction Act (Ontario).
+
+5. Schedule. The start and completion dates are estimates. They may change because of weather, material delivery, inspections, permit delays, changes asked for by the Owner, hidden conditions, or other causes outside the Contractor's control. The Contractor will keep the Owner informed of any change.
+
+6. Materials and selections. Materials and finishes chosen by the Owner must be confirmed in time so the work is not delayed. Materials supplied by the Owner are the Owner's responsibility for quality, quantity, warranty and on-time delivery. Leftover materials paid for by the Owner belong to the Owner.
+
+7. Permits and inspections. Permits are handled as shown above. The Owner will give access for any required inspections.
+
+8. Site access and safety. The Owner will give the Contractor reasonable access to the work area, electricity and water during working hours (Monday to Saturday, 8:00 AM to 6:00 PM, unless agreed otherwise). The Owner will remove valuables and fragile items from the work area. For safety, the Owner, children and pets should stay out of the work area while work is in progress.
+
+9. Clean up. The Contractor will keep the work area reasonably tidy, remove construction debris, and leave the area broom clean at completion.
+
+10. Insurance. The Contractor carries general liability insurance and will provide proof of insurance on request.
+
+11. Warranty. The Contractor warrants its workmanship for the period shown above from the completion date. Materials and products carry their manufacturers' warranties. The warranty does not cover normal wear and tear, misuse, lack of maintenance, settling or minor cracks from normal movement, or work done by others. Warranty requests must be made in writing.
+
+12. Completion. The work is complete when the scope is finished, except for minor items that do not stop the Owner from using the space. Any minor items will be listed together and completed within a reasonable time, and do not delay the completion payment beyond their reasonable value.
+
+13. Cancellation. If this contract was signed away from the Contractor's place of business, the Owner may cancel it within 10 days of receiving a copy, as allowed under the Consumer Protection Act, 2002 (Ontario), by giving notice in writing to NEVACO BUILD INC. at nevacobuild@gmail.com. After that, if the Owner cancels, the Owner will pay for work completed, materials ordered that cannot be returned, and any restocking fees.
+
+14. Disputes. Both parties will try in good faith to settle any disagreement by talking first. This contract is governed by the laws of the Province of Ontario.
+
+15. Entire agreement and electronic signature. This contract, including the scope, price, payment schedule and these terms, is the complete agreement between the Owner and the Contractor and replaces any earlier estimate or discussion. It can only be changed in writing. Both parties agree that it may be signed electronically, and that an electronic signature is as valid as a handwritten one.`;
+const conSched=p=>{p=Math.max(0,Math.min(100,Number(p)||30));const mid=Math.round((100-p)/2);return[{d:'Deposit on signing',pct:p},{d:'Progress payment at mid-project',pct:mid},{d:'Final payment on completion',pct:100-p-mid}].filter(x=>x.pct>0)};
+function buildContract(r){
+  const ests=docsFor(r.id).filter(x=>(x.kind||'estimate')==='estimate'&&x.status!=='draft');const est=ests.find(x=>x.status==='accepted')||ests[0]||docsFor(r.id).find(x=>(x.kind||'estimate')==='estimate')||null;
+  return{id:uid(),jobId:r.id,kind:'contract',number:nextDocNumber('contract'),status:'draft',date:today(),validUntil:'',title:(est?.title||r.type||'Renovation').trim(),
+    items:est?JSON.parse(JSON.stringify(est.items||[])):[{d:'',a:null},{d:'',a:null}],lump:est?est.lump:(r.value||null),hst:est?est.hst:r.hst!==false,depositPct:est?.depositPct||30,
+    notes:'',terms:CONTRACT_TERMS,token:newToken(),ref:est?.number||'',credit:0,_new:true,
+    extra:{customer:{name:r.name||'',address:r.address||'',city:r.city||'',postal:r.postal||'',phone:r.phone||'',email:r.email||''},start:jStart(r)||'',end:jEnd(r)||'',warranty:'1 year',permits:'Not required',schedule:conSched(est?.depositPct||30)}}}
+let conSchedEdit=[];
+function paintSched(){const d=docEdit,tot=Number(d.total)||0,sum=conSchedEdit.reduce((t,x)=>t+(Number(x.pct)||0),0);
+  $('k-sched').innerHTML=conSchedEdit.map((x,k)=>`<div class="kpay"><input data-k="${k}" data-f="d" value="${esc(x.d)}" placeholder="When it is paid"><input data-k="${k}" data-f="pct" inputmode="decimal" value="${x.pct??''}" placeholder="%"><b>${money(Math.round((Number(x.pct)||0)*tot)/100)||'$0'}</b><button type="button" class="rm" data-krm="${k}" aria-label="Remove payment">×</button></div>`).join('');
+  $('k-schednote').innerHTML=Math.abs(sum-100)<.01?'Payments add up to 100% of the total.':`<span style="color:var(--red)">Payments add up to ${sum}%. Make them 100%.</span>`}
+function paintOurSig(){const has=!!conCfg.signature,box=$('k-sigbox'),d=docEdit;
+  if(!sigDrawing){box.innerHTML=has?`<img src="${esc(conCfg.signature)}" alt="Your signature"><div class="row2"><small>${esc(conCfg.name||'Kevin')} · NEVACO BUILD INC. Added to the contract when you send it.</small><button type="button" class="lnkbtn" id="k-sigchg">Change</button></div>`
+      :`<div class="row2"><small>Sign once. Your signature is saved and added to every contract you send.</small><button type="button" class="lnkbtn" id="k-sigchg">Sign now</button></div>`;
+    $('k-sigchg').onclick=()=>{sigDrawing=true;paintOurSig()};return}
+  box.innerHTML=`<input id="k-signame" placeholder="Your name" value="${esc(conCfg.name||'Kevin')}"><div class="spad"><canvas id="k-pad"></canvas><span id="k-padhint">Sign here with your finger, pencil or mouse</span></div><div class="row2"><button type="button" class="lnkbtn" id="k-sigclr">Clear</button><span><button type="button" class="lnkbtn" id="k-sigx">Cancel</button>&nbsp;<button type="button" class="lnkbtn" id="k-sigok" style="font-weight:700">Save signature</button></span></div>`;
+  const cv=$('k-pad'),ctx=cv.getContext('2d');let dr=false,drawn=false,last=null;
+  const r0=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=r0.width*dpr;cv.height=r0.height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#111';
+  const pt=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+  cv.onpointerdown=e=>{dr=true;last=pt(e);cv.setPointerCapture(e.pointerId);$('k-padhint').hidden=true};
+  cv.onpointermove=e=>{if(!dr)return;const p=pt(e);ctx.beginPath();ctx.moveTo(last[0],last[1]);ctx.lineTo(p[0],p[1]);ctx.stroke();last=p;drawn=true};
+  cv.onpointerup=cv.onpointercancel=()=>{dr=false};
+  $('k-sigclr').onclick=()=>{ctx.clearRect(0,0,cv.width,cv.height);drawn=false;$('k-padhint').hidden=false};
+  $('k-sigx').onclick=()=>{sigDrawing=false;paintOurSig()};
+  $('k-sigok').onclick=async()=>{if(!drawn){toast('Sign in the box first');return}const nm=$('k-signame').value.trim()||'Kevin';
+    const nc=Object.assign({},conCfg,{signature:cv.toDataURL('image/png'),name:nm});
+    try{await must(sb.from('app_settings').upsert({key:'contract',value:nc}));conCfg=nc;sigDrawing=false;paintOurSig();toast('Signature saved')}catch(e){toast('Could not save the signature. Check your connection.')}}}
+let sigDrawing=false;
 function openDoc(d,r,kind){docJob=r;
   if(!d&&kind==='invoice')d=buildInvoice(r);
+  if(!d&&kind==='contract')d=buildContract(r);
   if(!d){d={id:uid(),jobId:r.id,kind:'estimate',number:nextDocNumber('estimate'),status:'draft',date:today(),validUntil:addDays(today(),30),title:r.type||'',items:[{d:'',a:null},{d:'',a:null}],lump:r.value||null,hst:r.hst!==false,depositPct:30,notes:'',terms:DEFAULT_TERMS,token:newToken(),_new:true}}
   docEdit=JSON.parse(JSON.stringify(d));if(!docEdit.items.length)docEdit.items=[{d:'',a:null}];
-  const inv=isInv(docEdit);$('docTitleH').textContent=`${KN(docEdit)} ${docEdit.number}`;
-  $('d-valid').closest('label').hidden=inv;$('d-dep').closest('label').hidden=inv;$('d-creditrow').hidden=!inv;$('d-credit').value=docEdit.credit||'';
-  $('d-scopehead').textContent=inv?'Description':'Scope of work';$('d-scopenote').hidden=inv;$('d-termsrow').hidden=inv&&!docEdit.terms;
+  const inv=isInv(docEdit),con=isCon(docEdit);$('docTitleH').textContent=`${KN(docEdit)} ${docEdit.number}`;
+  $('d-validrow').hidden=inv||con;$('d-dep').closest('label').hidden=inv||con;$('d-con').hidden=!con;$('d-conpay').hidden=!con;$('d-oursig').hidden=!con;
+  $('d-notelbl').textContent=con?'Special conditions':'Notes';$('d-notehead').textContent=con?'Special conditions and terms':'Notes and terms';$('d-terms').rows=con?14:7;
+  if(con){const x=docEdit.extra||(docEdit.extra={}),c=x.customer||{};['name','address','city','postal','phone','email'].forEach(k=>$('k-'+k).value=c[k]||'');
+    $('k-start').value=x.start||'';$('k-end').value=x.end||'';$('k-warranty').value=x.warranty||'1 year';$('k-permits').value=x.permits||'Not required';
+    conSchedEdit=JSON.parse(JSON.stringify(x.schedule&&x.schedule.length?x.schedule:conSched(docEdit.depositPct)));sigDrawing=false;paintOurSig()}$('d-creditrow').hidden=!inv;$('d-credit').value=docEdit.credit||'';
+  $('d-scopehead').textContent=inv?'Description':'Scope of work';$('d-scopenote').hidden=inv;$('d-notes').placeholder=con?'e.g. Owner supplies tiles and fixtures. Work hours 8 AM to 5 PM.':'e.g. Materials supplied by customer. Timeline 5–7 working days.';$('d-termsrow').hidden=inv&&!docEdit.terms;
   $('d-title').value=docEdit.title;$('d-date').value=docEdit.date;
   const vd=docEdit.validUntil?dayDiff(docEdit.validUntil,docEdit.date):30;$('d-valid').value=[15,30,60,90].includes(vd)?String(vd):'30';
   $('d-lump').value=docEdit.lump??'';$('d-hst').checked=!!docEdit.hst;$('d-dep').value=String(docEdit.depositPct||0);if(!$('d-dep').value)$('d-dep').value='30';
   $('d-notes').value=docEdit.notes;$('d-terms').value=docEdit.terms;
   const locked=docEdit.status==='accepted'||docEdit.status==='paid';$('docForm').dataset.locked=locked?'1':'0';payMode=false;
-  $('docBanner').innerHTML=inv?(docEdit.status==='paid'?`<div class="banner ok">${ico('check')} Paid ${money(docEdit.total-docEdit.credit)} on ${fmtDate(ld(docEdit.paidAt))}${docEdit.paidMethod?' by '+esc(docEdit.paidMethod):''}</div>`:docEdit.status==='sent'?`<div class="banner warn">${ico('pay')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · ${money(invDue(docEdit))} due</div>`:''):locked?`<div class="banner ok">${ico('check')} Signed by ${esc(docEdit.acceptedName||'customer')} on ${fmtDate(ld(docEdit.acceptedAt))}</div>`:docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · waiting for the customer to sign</div>`:'';
-  paintItems();paintTotals();paintDocActs();showModal('docModal')}
+  $('docBanner').innerHTML=con?conBanner(docEdit):inv?(docEdit.status==='paid'?`<div class="banner ok">${ico('check')} Paid ${money(docEdit.total-docEdit.credit)} on ${fmtDate(ld(docEdit.paidAt))}${docEdit.paidMethod?' by '+esc(docEdit.paidMethod):''}</div>`:docEdit.status==='sent'?`<div class="banner warn">${ico('pay')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · ${money(invDue(docEdit))} due</div>`:''):locked?`<div class="banner ok">${ico('check')} Signed by ${esc(docEdit.acceptedName||'customer')} on ${fmtDate(ld(docEdit.acceptedAt))}</div>`:docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · waiting for the customer to sign</div>`:'';
+  paintItems();paintTotals();if(con)paintSched();paintDocActs();showModal('docModal')}
+const dtm=v=>v?new Date(v).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+function conBanner(d){if(d.status==='draft')return '';
+  const step=(on,t)=>`<span><i class="${on?'on':''}"></i>${t}</span>`;
+  return `<div class="banner ${d.status==='accepted'?'ok':'info'}"><div class="ctrack">${step(!!d.sentAt,`Sent${d.sentAt?' '+dtm(d.sentAt):''}${d.extra?.sentTo?' to '+esc(d.extra.sentTo):''}`)}${step(!!d.viewedAt,d.viewedAt?`Opened by the customer ${dtm(d.viewedAt)}`:'Not opened yet')}${step(d.status==='accepted',d.status==='accepted'?`Signed by ${esc(d.acceptedName||'customer')} ${dtm(d.acceptedAt)}${d.signMeta?.ip?' · IP '+esc(d.signMeta.ip):''}`:'Waiting for signature')}</div></div>`}
 let payMode=false;
 function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,''),inv=isInv(d);
   if(inv&&d.status==='paid'){$('docActs').innerHTML=`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Paid Invoice (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button><button type="button" class="wide danger" data-act="unpay">Undo Payment</button>`;return}
@@ -3201,17 +3314,22 @@ function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').
     :`<button type="button" class="wide paidbtn" data-act="paymode">${ico('check')}Mark as Paid</button>`):'';
   if(inv&&payMode){$('docActs').innerHTML=payBlock;return}
   $('docActs').innerHTML=d.status==='accepted'
-    ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed Estimate (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>`
-    :`${d._emailed&&ph?`<div class="banner ok" style="grid-column:1/-1">${ico('check')} Email ready in Gmail. Now send the text message.</div><button type="button" class="primary textnow" data-act="sms">${ico('msg')}Send Text to ${esc(docJob.phone)}</button>`:''}
-      <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email?'mail':'sent')}${d.status==='sent'?'Send Again':'Send to Customer'}${docJob.email?' by Email':''}</button>
+    ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed ${KN(d)} (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>`
+    :`${d._emailed&&ph?`<div class="banner ok" style="grid-column:1/-1">${ico('check')} ${isCon(d)&&gmailSt.connected?'Contract emailed. Send a text too so they see it.':'Email ready in Gmail. Now send the text message.'}</div><button type="button" class="primary textnow" data-act="sms">${ico('msg')}Send Text to ${esc(docJob.phone)}</button>`:''}
+      <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email||isCon(d)?'mail':'sent')}${isCon(d)?(d.status==='sent'?'Send Again for Signature':'Send for Signature'):(d.status==='sent'?'Send Again':'Send to Customer')+(docJob.email?' by Email':'')}</button>
       <button type="button" data-act="pdf">${ico('quote')}Preview / PDF</button><button type="button" data-act="copy">Copy Link</button>
-      <button type="button" data-act="mail" ${docJob.email?'':'disabled style="opacity:.4" title="Add the customer email first"'}>${ico('mail')}Gmail</button><button type="button" data-act="sms" ${ph?'':'disabled style="opacity:.4" title="Add the customer phone first"'}>${ico('msg')}Text</button>
+      <button type="button" data-act="mail" ${docJob.email||isCon(d)?'':'disabled style="opacity:.4" title="Add the customer email first"'}>${ico('mail')}Gmail</button><button type="button" data-act="sms" ${ph?'':'disabled style="opacity:.4" title="Add the customer phone first"'}>${ico('msg')}Text</button>
       <button type="button" class="wide" data-act="wa" ${ph?'':'disabled style="opacity:.4"'}>${ico('msg')}WhatsApp</button>
       ${payBlock}
       ${d._new?'':`<button type="button" class="wide danger" data-act="del">Delete ${KN(d)}</button>`}`}
 $('d-items').addEventListener('input',e=>{const t=e.target,k=+t.dataset.k;if(!docEdit.items[k])return;docEdit.items[k][t.dataset.f]=t.dataset.f==='a'?(t.value.replace(/[^0-9.]/g,'')||null):t.value;
   if(t.tagName==='TEXTAREA'){t.style.height='auto';t.style.height=t.scrollHeight+'px'}paintTotals()});
 $('d-items').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;docEdit.items.splice(+b.dataset.rm,1);if(!docEdit.items.length)docEdit.items.push({d:'',a:null});paintItems();paintTotals()});
+$('k-sched').addEventListener('input',e=>{const t=e.target,k=+t.dataset.k;if(!conSchedEdit[k])return;conSchedEdit[k][t.dataset.f]=t.dataset.f==='pct'?(t.value.replace(/[^0-9.]/g,'')):t.value;
+  if(t.dataset.f==='pct'){paintTotals();const sum=conSchedEdit.reduce((a,x)=>a+(Number(x.pct)||0),0);$('k-schednote').innerHTML=Math.abs(sum-100)<.01?'Payments add up to 100% of the total.':`<span style="color:var(--red)">Payments add up to ${sum}%. Make them 100%.</span>`}});
+$('k-sched').addEventListener('click',e=>{const b=e.target.closest('[data-krm]');if(!b)return;conSchedEdit.splice(+b.dataset.krm,1);paintSched()});
+$('k-addpay').onclick=()=>{const sum=conSchedEdit.reduce((a,x)=>a+(Number(x.pct)||0),0);conSchedEdit.splice(Math.max(0,conSchedEdit.length-1),0,{d:'',pct:Math.max(0,100-sum)||''});paintSched();readDocForm()};
+['k-start','k-end'].forEach(id=>$(id).addEventListener('change',()=>{if($('k-start').value&&$('k-end').value&&$('k-end').value<$('k-start').value)$('k-end').value=$('k-start').value}));
 $('d-addline').onclick=()=>{docEdit.items.push({d:'',a:null});paintItems();const ts=$('d-items').querySelectorAll('textarea');ts[ts.length-1].focus()};
 ['d-lump','d-hst','d-dep','d-date','d-valid','d-credit'].forEach(id=>$(id).addEventListener('input',paintTotals));
 function storeDoc(){readDocForm();const d=docEdit;d.items=d.items.filter(i=>String(i.d||'').trim()||Number(i.a)>0);if(!d.items.length)d.items=[{d:'',a:null}];
@@ -3221,18 +3339,21 @@ function storeDoc(){readDocForm();const d=docEdit;d.items=d.items.filter(i=>Stri
 function markSent(d){if(d.status==='accepted'||d.status==='paid')return;const r=docJob;
   if(isInv(d)){if(d.status!=='sent'){d.status='sent';d.sentAt=new Date().toISOString();log(r,`Invoice ${d.number} sent (${money(invDue(d))} due)`)}
     const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d);return}
+  if(isCon(d)){if(d.status!=='sent'){d.status='sent';d.sentAt=new Date().toISOString();log(r,`Contract ${d.number} sent for signature (${money(d.total)})`)}
+    r.value=d.subtotal;r.hst=d.hst;const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d);return}
   if(d.status!=='sent'){d.status='sent';d.sentAt=new Date().toISOString();log(r,`Estimate ${d.number} sent (${money(d.total)})`)}
   r.value=d.subtotal;r.hst=d.hst;
   if(!stepDone(r,'contacted'))r.ms.contacted={done:true,date:today()};
   if(!stepDone(r,'estimate'))setStep(r,'estimate',true);
   const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d)}
-$('docForm').onsubmit=async e=>{e.preventDefault();if(!docsReady){toast('Run the estimates setup step first');return}if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
+$('docForm').onsubmit=async e=>{e.preventDefault();if(!docsReady){toast('Run the estimates setup step first');return}if(isCon(docEdit)&&!conReady){toast('Run the contracts setup step first');return}if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
   const d=storeDoc();if(d.status==='sent'&&!isInv(d)){docJob.value=d.subtotal;docJob.hst=d.hst}save();hideModal('docModal');render();if(selId)openDetail(selId);toast(`${KN(d)} saved`)};
 $('docCancel').onclick=()=>hideModal('docModal');
 $('docModal').onclick=e=>{if(e.target.id==='docModal')hideModal('docModal')};
 $('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const act=b.dataset.act;
   if(!docsReady){toast('Run the estimates setup step first');return}
   if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
+  if(isCon(docEdit)&&!conReady){toast('Run the contracts setup step first');return}
   if(act==='del'){if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again to delete';return}
     db.docs=db.docs.filter(x=>x.id!==docEdit.id);log(docJob,`${KN(docEdit)} ${docEdit.number} deleted`);save();hideModal('docModal');render();if(selId)openDetail(selId);toast(`${KN(docEdit)} deleted`);return}
   if(act==='paymode'){readDocForm();if(!invDue(docEdit)){toast('Nothing due on this invoice');return}payMode=true;paintDocActs();return}
@@ -3247,9 +3368,16 @@ $('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-
     save();payMode=false;render();if(selId)openDetail(selId);openDoc(db.docs[i],r);toast(act==='paid'?'Payment recorded':'Payment undone',true);return}
   const d=docEdit;
   if(d.status!=='accepted'&&d.status!=='paid'){const c=calcDoc(Object.assign({},d,{hst:$('d-hst').checked,lump:$('d-lump').value}));if(!c.total&&act!=='pdf'){toast('Add a price before sending');return}}
-  const sendVia=act==='send'?(docJob.email?'mail':((docJob.phone||'').replace(/\D/g,'').length>=10?'wa':'share')):act;
+  const con=isCon(d);let cEmail='';
+  if(con&&d.status!=='accepted'&&act!=='pdf'){readDocForm();const x=d.extra||{};cEmail=(x.customer?.email||'').trim();
+    if(!x.customer?.name){toast('Add the owner name first');$('k-name').focus();return}
+    if(['send','mail'].includes(act)&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cEmail)){toast('Add the owner email first');$('k-email').focus();return}
+    const sum=(x.schedule||[]).reduce((a,r)=>a+(Number(r.pct)||0),0);if(Math.abs(sum-100)>.01){toast(`Payment schedule adds up to ${sum}%. Make it 100%.`);return}
+    if(!conCfg.signature){toast('Sign as NEVACO BUILD first, then send');sigDrawing=true;paintOurSig();$('k-sigbox').scrollIntoView({block:'center',behavior:'smooth'});return}
+    if(!d.ownerSig||d.status==='draft'){d.ownerSig=conCfg.signature;d.ownerName=conCfg.name||'Kevin';d.ownerSignedAt=new Date().toISOString()}}
+  const sendVia=act==='send'?(con&&gmailSt.connected?'direct':(con?cEmail:docJob.email)?'mail':((docJob.phone||'').replace(/\D/g,'').length>=10?'wa':'share')):act;
   const win=['pdf','wa','mail'].includes(sendVia)?window.open('about:blank','_blank'):null;
-  if(d.status!=='accepted'&&d.status!=='paid'){storeDoc();if(['send','copy','mail','wa','sms'].includes(act))markSent(docEdit);save()}
+  if(d.status!=='accepted'&&d.status!=='paid'){storeDoc();if(['send','copy','mail','wa','sms'].includes(act)){if(con&&cEmail&&['send','mail'].includes(act))docEdit.extra=Object.assign({},docEdit.extra,{sentTo:cEmail});markSent(docEdit)}save()}
   const ok=await flush();
   if(!ok){if(win)win.close();toast('Not saved. Check your connection.');return}
   const link=docLink(docEdit),nm=String(docJob.name||'').trim(),w0=nm.split(/\s+/)[0]||'';
@@ -3293,23 +3421,47 @@ Best regards,
 Kevin
 NEVACO BUILD INC.
 437-432-2252 | nevacobuild@gmail.com | nevacobuild.ca`;
-  const msg=inv?invMsg:msg0;
+  const cx=docEdit.extra||{},cname=String(cx.customer?.name||nm).trim(),cw0=cname.split(/\s+/)[0]||'',chi=!cname||/^\d/.test(cname)?'there':(cw0.length>2&&!cw0.endsWith('.')?cw0:cname);
+  const conSubject=`Please sign: contract ${docEdit.number} from NEVACO BUILD${proj?' – '+proj:''}`;
+  const conMsg=`Hi ${chi},
+
+Thank you for choosing NEVACO BUILD for your ${proj.toLowerCase()} project. Your contract ${docEdit.number} is ready. Please review it and sign it online here:
+${link}
+
+Contract total: ${money(docEdit.total)} CAD${docEdit.hst?' (including HST)':' (plus HST)'}${cx.start?`
+Start date: ${new Date(cx.start+'T12:00').toLocaleDateString('en-CA',{month:'long',day:'numeric',year:'numeric'})}`:''}${(cx.schedule||[])[0]?.pct?`
+${cx.schedule[0].d}: ${money(Math.round(cx.schedule[0].pct*docEdit.total)/100)}`:''}
+
+It only takes a minute: open the link, read the contract, type your name and sign with your finger or mouse. You will get a signed copy by email right after.
+
+If you have any questions, just reply to this email or call or text us at 437-432-2252.`;
+  const msg=inv?invMsg:con?conMsg+`
+
+Best regards,
+Kevin
+NEVACO BUILD INC.
+437-432-2252 | nevacobuild@gmail.com | nevacobuild.ca`:msg0;
   const waMsg=inv?`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. Your ${ikind} ${docEdit.number} is ready: ${money(due)} CAD, due on receipt. View it here: ${link} . You can pay by e-Transfer to nevacobuild@gmail.com. Thank you!`:`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. Your estimate ${docEdit.number} for ${proj.toLowerCase()} is ready (${money(docEdit.total)} CAD). You can review it, download the PDF and sign online here: ${link}`;
-  const email=docJob.email||'';
+  const email=con?cEmail:(docJob.email||'');
+  const conSms=`Hi ${chi}, this is Kevin from NEVACO BUILD. Your contract ${docEdit.number} for ${proj.toLowerCase()} is ready to sign${email?'. We emailed it to '+email:''}. You can also open and sign it here: ${link}`;
   const smsMsg=inv?`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. We just emailed you ${ikind} ${docEdit.number} (${money(due)} CAD, due on receipt)${email?' to '+email:''}. Please check your inbox and spam folder. You can also view it here: ${link} . e-Transfer to nevacobuild@gmail.com. Thank you!`:`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. We just sent your estimate ${docEdit.number}${proj?' for your '+proj.toLowerCase()+' project':''}${email?' to your email ('+email+')':''}. Please check your inbox, and your spam folder just in case. You can also review and sign it here: ${link}`;
-  const gmail=`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(docJob.email||'')}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`;
+  const gmail=`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(con?conSubject:subject)}&body=${encodeURIComponent(msg)}`;
   const go=u=>{if(win)win.location=u;else location.href=u};
-  if(sendVia==='pdf')go(link);
+  if(sendVia==='pdf')go(link+'&me=1');
+  else if(sendVia==='direct'){b.disabled=true;const old=b.innerHTML;b.textContent='Sending…';
+    try{await gm('send',{job_id:docJob.id,to:cEmail,to_name:cname,subject:conSubject,body:conMsg,cta:{label:'Review & Sign Contract',url:link}});
+      log(docJob,`Contract ${docEdit.number} emailed to ${cEmail}`);save();toast(`Contract sent to ${cEmail}`,false,true);docEdit._emailed=true;emailedDoc=docEdit.id}
+    catch(err){b.disabled=false;b.innerHTML=old;toast(err.message+' Opening Gmail instead.',false,true);location.href=gmail;return}}
   else if(sendVia==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied')}catch(err){prompt('Copy this link',link)}}
   else if(sendVia==='mail'){go(gmail);docEdit._emailed=true;emailedDoc=docEdit.id;toast((docJob.phone?'Gmail opened. Now tap Send Text.':`Gmail opened with the ${KN(docEdit).toLowerCase()} email`))}
   else if(sendVia==='sms'){const raw=(docJob.phone||'').replace(/[^\d+]/g,'');const num=raw.startsWith('+')?raw:(raw.length===10?'+1'+raw:'+'+raw);
-    const apple=/iPhone|iPad|Macintosh/.test(navigator.userAgent);location.href=`sms:${num}${apple?'&':'?'}body=${encodeURIComponent(smsMsg)}`;emailedDoc=null;log(docJob,`Text sent about ${KN(docEdit).toLowerCase()} ${docEdit.number}`);save()}
+    const apple=/iPhone|iPad|Macintosh/.test(navigator.userAgent);location.href=`sms:${num}${apple?'&':'?'}body=${encodeURIComponent(con?conSms:smsMsg)}`;emailedDoc=null;log(docJob,`Text sent about ${KN(docEdit).toLowerCase()} ${docEdit.number}`);save()}
   else if(sendVia==='wa'){const ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');go(`https://wa.me/1${ph}?text=${encodeURIComponent(waMsg)}`)}
   else if(sendVia==='share'){
     if(navigator.share){try{await navigator.share({title:subject,text:waMsg})}catch(err){}}
     else{try{await navigator.clipboard.writeText(waMsg);toast('Message with link copied')}catch(err){prompt('Copy this message',waMsg)}}}
   render();if(selId)openDetail(selId);docEdit=JSON.parse(JSON.stringify(db.docs.find(x=>x.id===docEdit.id)||docEdit));docEdit._emailed=emailedDoc===docEdit.id;
-  $('docBanner').innerHTML=docEdit.status==='sent'?(isInv(docEdit)?`<div class="banner warn">${ico('pay')} Sent · ${money(invDue(docEdit))} due</div>`:`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`):$('docBanner').innerHTML;paintDocActs();
+  $('docBanner').innerHTML=isCon(docEdit)?conBanner(docEdit):docEdit.status==='sent'?(isInv(docEdit)?`<div class="banner warn">${ico('pay')} Sent · ${money(invDue(docEdit))} due</div>`:`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`):$('docBanner').innerHTML;paintDocActs();
 });
 
 /* ---------- event form ---------- */
@@ -3433,7 +3585,7 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')up()})}).catch(()=>{});
 }
 setInterval(()=>{if(!selId&&$('modal').hidden&&$('evModal').hidden)render()},60000);
-if(location.protocol==='file:')window.__nv={openPlan:(...a)=>openPlan(...a),openExp:(...a)=>openExp(...a),get db(){return db},get data(){return data},setGmail(v){gmailSt=v},renderPartners};
+if(location.protocol==='file:')window.__nv={openPlan:(...a)=>openPlan(...a),openDetail:(...a)=>openDetail(...a),openExp:(...a)=>openExp(...a),get db(){return db},get data(){return data},setGmail(v){gmailSt=v},renderPartners};
 })();
 </script>
 </body>
