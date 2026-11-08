@@ -78,10 +78,11 @@ export function companyFromEmail(e: string) {
 }
 
 // The signature: first line bold, logo on the left
-export function signatureHtml(sig: string) {
+export function signatureHtml(sig: string, logo = true) {
   const lines = String(sig || "").split("\n").map((l) => l.trim()).filter(Boolean);
   if (!lines.length) return "";
   const txt = lines.map((l, i) => i === 0 ? `<b style="font-size:14px;color:#1d1d1f">${escHtml(l)}</b>` : `<span style="color:#6e6e73">${escHtml(l)}</span>`).join("<br>");
+  if (!logo) return `<p style="margin:18px 0 0;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.45">${txt}</p>`;
   return `<table cellpadding="0" cellspacing="0" border="0" style="margin-top:18px;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.45">
 <tr><td style="padding-right:14px;border-right:2px solid #e8e8ed;vertical-align:middle"><img src="${LOGO}" width="104" height="45" alt="NEVACO BUILD" style="display:block;border:0"></td>
 <td style="padding-left:14px;vertical-align:middle">${txt}</td></tr></table>`;
@@ -92,21 +93,21 @@ export function ctaHtml(c?: Cta | null) {
   return `<table cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 18px"><tr><td style="border-radius:10px;background:#1d1d1f">
 <a href="${escHtml(c.url)}" style="display:inline-block;padding:13px 26px;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:10px">${escHtml(c.label || "Open")}</a></td></tr></table>`;
 }
-export function bodyHtml(body: string, sig: string, cta?: Cta | null) {
+export function bodyHtml(body: string, sig: string, cta?: Cta | null, logo = true) {
   // when there is a button, the bare link line in the text is replaced by the button
   let text = body;
   if (cta && cta.url && text.includes(cta.url)) text = text.split("\n").filter((l) => l.trim() !== cta.url).join("\n").replace(/\n{3,}/g, "\n\n");
   const ps = escHtml(text).replace(/\r\n/g, "\n").split(/\n{2,}/).map((p) => `<p style="margin:0 0 12px">${p.replace(/\n/g, "<br>")}</p>`);
   if (cta) { const at = ps.findIndex((p) => /review|sign|view/i.test(p)); ps.splice(at >= 0 ? at + 1 : Math.min(1, ps.length), 0, ctaHtml(cta)); }
-  return `<!doctype html><html><body style="margin:0"><div style="font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55;color:#1d1d1f">${ps.join("")}${signatureHtml(sig)}</div></body></html>`;
+  return `<!doctype html><html><body style="margin:0"><div style="font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55;color:#1d1d1f">${ps.join("")}${signatureHtml(sig, logo)}</div></body></html>`;
 }
 
 export type Attach = { name: string; mime: string; bytes: Uint8Array };
 export function buildMime(o: { fromName: string; from: string; toName: string; to: string; subject: string; body: string; signature: string;
-  inReplyTo?: string | null; references?: string | null; attachments?: Attach[]; date?: Date; boundary?: string; cta?: Cta | null }) {
+  inReplyTo?: string | null; references?: string | null; attachments?: Attach[]; date?: Date; boundary?: string; cta?: Cta | null; logo?: boolean }) {
   const B = o.boundary || ("nb" + crypto.randomUUID().replace(/-/g, ""));
   const plain = o.body.replace(/\r?\n/g, "\r\n") + (o.signature ? "\r\n\r\n" + o.signature.replace(/\r?\n/g, "\r\n") : "");
-  const html = bodyHtml(o.body, o.signature, o.cta);
+  const html = bodyHtml(o.body, o.signature, o.cta, o.logo !== false);
   const H: string[] = [
     `From: ${encName(o.fromName, o.from)}`,
     `To: ${encName(clean(o.toName), o.to)}`,
@@ -923,7 +924,7 @@ async function send(user: string, b: any) {
   }
   const signature = b.signature === false ? "" : typeof b.signature === "string" ? b.signature.slice(0, 500) : String(cfg.signature || "");
   const cta = b.cta && typeof b.cta === "object" ? { label: String(b.cta.label || "Open").slice(0, 60), url: String(b.cta.url || "") } : null;
-  const raw = buildMime({ fromName: cfg.from_name || "NEVACO BUILD", from: acc.email, toName: b.to_name || p.name, to, subject, body, signature, inReplyTo, references, attachments, cta });
+  const raw = buildMime({ fromName: cfg.from_name || "NEVACO BUILD", from: acc.email, toName: b.to_name || p.name, to, subject, body, signature, inReplyTo, references, attachments, cta, logo: b.no_logo ? false : true });
 
   let sent: any;
   if (raw.length < 4_500_000) {
@@ -997,7 +998,7 @@ async function docEvent(req: Request, b: any) {
   if (d && j && isEmail(to) && await account()) {
     const link = `${APP}/doc.html?t=${d.share_token}`, first = name.split(/\s+/)[0] || "there", kn = KINDN(d.kind).toLowerCase();
     const body = `Hi ${first},\n\nThank you for signing ${kn} ${d.number}${d.title ? " for your " + String(d.title).toLowerCase() + " project" : ""}. A copy is below for your records. You can open it and download the signed PDF at any time:\n${link}\n\nWe will be in touch shortly to confirm the next steps.`;
-    await send("customer", { job_id: j.id, to, to_name: name, subject: `Your signed ${kn} (${d.number})`, body, reply_latest: true, signature: CO_SIG })
+    await send("customer", { job_id: j.id, to, to_name: name, subject: `Your signed ${kn} (${d.number})`, body, reply_latest: true, signature: CO_SIG, no_logo: true })
       .catch((e) => console.warn("signed copy", (e as Error).message));
   }
   return { ok: true, number: data.number };

@@ -1325,7 +1325,7 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.37 (Nov 7) · Contract email';
+const APP_VERSION='1.38 (Nov 7) · Contract email';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -3425,19 +3425,13 @@ NEVACO BUILD INC.
   const conSubject=`Your ${proj?proj.toLowerCase()+' ':''}contract (${docEdit.number})`;
   const conMsg=`Hi ${chi},
 
-Thank you for choosing NEVACO BUILD for your ${proj.toLowerCase()} project. As discussed, we have prepared your contract ${docEdit.number}. You can read it and sign it online at this link:
+Here is the contract for your ${proj.toLowerCase()} project, as we discussed:
 ${link}
 
-Contract total: ${money(docEdit.total)} CAD${docEdit.hst?' (including HST)':' (plus HST)'}${cx.start?`
-Start date: ${new Date(cx.start+'T12:00').toLocaleDateString('en-CA',{month:'long',day:'numeric',year:'numeric'})}`:''}${(cx.schedule||[])[0]?.pct?`
-${cx.schedule[0].d}: ${money(Math.round(cx.schedule[0].pct*docEdit.total)/100)}`:''}
+Please have a look and let us know if you have any questions or would like anything changed. When you are happy with it, you can sign it right on that page.
 
-To sign, open the link, read the contract, type your name and sign with your finger or mouse. You will get a signed copy by email right after.
-
-If you have any questions, just reply to this email or call or text us at 437-432-2252.`;
+Thank you,`;
   const msg=inv?invMsg:con?conMsg+`
-
-Best regards,
 NEVACO BUILD INC.
 437-432-2252 | nevacobuild@gmail.com | nevacobuild.ca`:msg0;
   const waMsg=inv?`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. Your ${ikind} ${docEdit.number} is ready: ${money(due)} CAD, due on receipt. View it here: ${link} . You can pay by e-Transfer to nevacobuild@gmail.com. Thank you!`:`Hi ${hiName||'there'}, this is Kevin from NEVACO BUILD. Your estimate ${docEdit.number} for ${proj.toLowerCase()} is ready (${money(docEdit.total)} CAD). You can review it, download the PDF and sign online here: ${link}`;
@@ -3448,7 +3442,7 @@ NEVACO BUILD INC.
   const go=u=>{if(win)win.location=u;else location.href=u};
   if(sendVia==='pdf')go(link+'&me=1');
   else if(sendVia==='direct'){b.disabled=true;const old=b.innerHTML;b.textContent='Sending…';
-    try{await gm('send',{job_id:docJob.id,to:cEmail,to_name:cname,subject:conSubject,body:conMsg,reply_latest:true,signature:'NEVACO BUILD INC.\n437-432-2252 · nevacobuild.ca'});
+    try{await gm('send',{job_id:docJob.id,to:cEmail,to_name:cname,subject:conSubject,body:conMsg,reply_latest:true,no_logo:true,signature:'NEVACO BUILD INC.\n437-432-2252 · nevacobuild.ca'});
       log(docJob,`Contract ${docEdit.number} emailed to ${cEmail}`);save();toast(`Contract sent to ${cEmail}`,false,true);docEdit._emailed=true;emailedDoc=docEdit.id}
     catch(err){b.disabled=false;b.innerHTML=old;toast(err.message+' Opening Gmail instead.',false,true);location.href=gmail;return}}
   else if(sendVia==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied')}catch(err){prompt('Copy this link',link)}}
