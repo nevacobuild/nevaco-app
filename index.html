@@ -1415,7 +1415,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.45 (Nov 7) · Payment date and cash';
+const APP_VERSION='1.46 (Nov 9) · Safer saving';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1557,11 +1557,15 @@ function subRow(c){const o={id:c.id,name:c.name||'',trade:c.trade||'',phone:c.ph
 function subFrom(x){const o={id:x.id,name:x.name||'',trade:x.trade||'',phone:x.phone||'',email:x.email||'',notes:x.notes||''};SUBF.forEach(([k,col])=>o[k]=x[col]||'');return o}
 function setStatus(t,cls){const el=$('syncStatus');if(!el)return;el.textContent=t;el.className=cls||''}
 async function must(q){const{error}=await q;if(error)throw error}
+/* read every row of a table: the server returns at most 1000 rows per request, so keep asking until a short page comes back */
+async function allRows(build){const out=[],N=1000;
+  for(let from=0;;from+=N){const{data,error}=await build().range(from,from+N-1);if(error)return{data:null,error};out.push(...data);if(data.length<N)return{data:out,error:null}}}
+const tbl=(t,...by)=>allRows(()=>by.reduce((q,c)=>q.order(c),sb.from(t).select('*')));
 async function fetchAll(){
-  const[j,p,e,dc,fl]=await Promise.all([sb.from('jobs').select('*').order('created_at'),sb.from('payments').select('*').order('date'),sb.from('events').select('*'),
-    sb.from('documents').select('*').order('created_at'),sb.from('files').select('*').order('created_at')]);
-  const[pt,pm,ps,op]=await Promise.all([sb.from('partners').select('*').order('created_at'),sb.from('partner_messages').select('*').order('at'),sb.from('app_settings').select('*').eq('key','partners'),sb.from('opportunities').select('*').order('at',{ascending:false}).limit(300)]);
-  const[jt,ct,xp,el]=await Promise.all([sb.from('job_tasks').select('*').order('sort'),sb.from('contractors').select('*').order('name'),sb.from('job_expenses').select('*').order('date'),sb.from('expense_links').select('*').order('created_at')]);expReady=!xp.error;linksReady=!el.error;expMeta=expReady&&(xp.data.length?('pay_method' in xp.data[0]):!(await sb.from('job_expenses').select('pay_method').limit(1)).error);planReady=!jt.error&&!ct.error;crewReady=planReady&&(ct.data.length?('ins_exp' in ct.data[0]):!(await sb.from('contractors').select('ins_exp').limit(1)).error);if(filesReady0(fl))fileSubReady=fl.data.length?('contractor_id' in fl.data[0]):!(await sb.from('files').select('contractor_id').limit(1)).error;
+  const[j,p,e,dc,fl]=await Promise.all([tbl('jobs','created_at','id'),tbl('payments','date','id'),tbl('events','id'),
+    tbl('documents','created_at','id'),tbl('files','created_at','id')]);
+  const[pt,pm,ps,op]=await Promise.all([tbl('partners','created_at','id'),tbl('partner_messages','at','id'),sb.from('app_settings').select('*').eq('key','partners'),sb.from('opportunities').select('*').order('at',{ascending:false}).limit(300)]);
+  const[jt,ct,xp,el]=await Promise.all([tbl('job_tasks','sort','id'),tbl('contractors','name','id'),tbl('job_expenses','date','id'),tbl('expense_links','created_at','token')]);expReady=!xp.error;linksReady=!el.error;expMeta=expReady&&(xp.data.length?('pay_method' in xp.data[0]):!(await sb.from('job_expenses').select('pay_method').limit(1)).error);planReady=!jt.error&&!ct.error;crewReady=planReady&&(ct.data.length?('ins_exp' in ct.data[0]):!(await sb.from('contractors').select('ins_exp').limit(1)).error);if(filesReady0(fl))fileSubReady=fl.data.length?('contractor_id' in fl.data[0]):!(await sb.from('files').select('contractor_id').limit(1)).error;
   partReady=!pt.error&&!pm.error;if(partReady){pset=(ps.data&&ps.data[0]&&ps.data[0].value)||{};await loadGmailStatus()}
   filesReady=!fl.error;
   if(!dc.error){const pr=await sb.from('documents').select('credit').limit(1);invReady=!pr.error;
@@ -1586,6 +1590,7 @@ async function fetchAll(){
   const tasks=planReady?jt.data.map(x=>({id:x.id,jobId:x.job_id,title:x.title||'',start:x.start||'',end:x.end||'',subId:x.contractor_id||'',cost:x.cost==null?null:Number(x.cost),paid:!!x.paid,paidAt:x.paid_at||'',done:!!x.done,notes:x.notes||'',sort:x.sort||0})):[];
   const subs=planReady?ct.data.map(subFrom):[];
   const exps=expReady?xp.data.map(expFrom):[];
+  if(loaded&&(dirty||syncing))return false;   // something was edited while this was loading: keep the edit, load again later
   db={jobs,events,docs,files:fl.data||[],partners,pmsgs:pmsgsL,opps:(op&&!op.error&&op.data)||[],tasks,subs,exps,elinks:linksReady?el.data:[]};data=db.jobs;
   synced={jobs:new Map(jobs.map(r=>[r.id,JSON.stringify(jobRow(r))])),payments:new Map(payRows().map(x=>[x.id,JSON.stringify(x)])),events:new Map(events.map(x=>[x.id,JSON.stringify(evRow(x))])),documents:new Map(docs.map(x=>[x.id,JSON.stringify(docRow(x))])),partners:new Map(partners.map(x=>[x.id,JSON.stringify(partRow(x))]))};
   synced.job_tasks=new Map(tasks.map(x=>[x.id,JSON.stringify(jtaskRow(x))]));synced.contractors=new Map(subs.map(x=>[x.id,JSON.stringify(subRow(x))]));
@@ -1593,28 +1598,95 @@ async function fetchAll(){
 }
 let syncing=false,again=false,dirty=false,syncT=null;
 function save(){data.forEach(r=>r.stage=stageOf(r));dirty=true;clearTimeout(syncT);syncT=setTimeout(sync,250)}
+/* ---------- safe saving: merge with the server copy, and keep unsaved changes on this device ---------- */
+const SYNC_T=['partners','contractors','jobs','payments','events','documents','job_tasks'],OUTBOX='nevaco-outbox';
+const blank=v=>v==null||v==='';
+function same(a,b){
+  if(blank(a)&&blank(b))return true;
+  if(blank(a)||blank(b))return false;
+  if(typeof a!=='object'&&typeof b!=='object')return a===b||(typeof a!==typeof b&&!isNaN(a)&&!isNaN(b)&&Number(a)===Number(b));
+  if(typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b))return false;
+  if(Array.isArray(a))return a.length===b.length&&a.every((x,i)=>same(x,b[i]));
+  for(const k of new Set([...Object.keys(a),...Object.keys(b)]))if(!same(a[k],b[k]))return false;
+  return true;
+}
+const isObj=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
+/* one row, three copies: mine = this device, base = what this device last loaded, theirs = the server right now.
+   A field only the server changed keeps the server value; a field both changed keeps mine, except history (both kept) and ms/extra (merged key by key). */
+function mergeRow(mine,base,theirs){
+  const out=Object.assign({},mine);let remote=false;
+  for(const k of Object.keys(mine)){
+    if(!(k in theirs)||same(theirs[k],base[k]))continue;
+    remote=true;
+    if(same(mine[k],base[k])){out[k]=theirs[k];continue}
+    if(k==='history'&&Array.isArray(mine[k])&&Array.isArray(theirs[k])){
+      const seen=new Set((Array.isArray(base[k])?base[k]:[]).map(x=>JSON.stringify(x)));
+      out[k]=[...theirs[k],...mine[k].filter(x=>!seen.has(JSON.stringify(x)))];continue}
+    if(isObj(mine[k])&&isObj(theirs[k])){
+      const b=isObj(base[k])?base[k]:{},m=Object.assign({},mine[k]);
+      for(const s of new Set([...Object.keys(theirs[k]),...Object.keys(b)]))if(!same(theirs[k][s],b[s])&&same(mine[k][s],b[s])){if(s in theirs[k])m[s]=theirs[k][s];else delete m[s]}
+      out[k]=m}
+  }
+  return{row:out,remote};
+}
+function makePlan(){
+  const sets={jobs:db.jobs.map(jobRow),payments:payRows(),events:db.events.map(evRow),documents:docsReady?(db.docs||[]).map(docRow):[...synced.documents.keys()].map(id=>({id})),partners:partReady?(db.partners||[]).map(partRow):[],contractors:planReady?(db.subs||[]).map(subRow):[],job_tasks:planReady?(db.tasks||[]).filter(t=>job(t.jobId)).map(jtaskRow):[]},plan={};
+  for(const t of SYNC_T){
+    const cur=new Map(sets[t].map(x=>[x.id,x])),changed=[];
+    for(const[id,row]of cur){const js=JSON.stringify(row),base=synced[t].get(id);if(base!==js)changed.push({row,js,base:base||null})}
+    plan[t]={changed,removed:[...synced[t].keys()].filter(id=>!cur.has(id))};
+  }
+  return plan;
+}
+const planSize=p=>SYNC_T.reduce((n,t)=>n+(p[t]?p[t].changed.length+p[t].removed.length:0),0);
+/* unsaved changes are also written on this device, so closing the app while offline does not lose them */
+function keepOutbox(plan){safe(()=>{
+  if(!planSize(plan)){localStorage.removeItem(OUTBOX);return}
+  localStorage.setItem(OUTBOX,JSON.stringify({by:me.email,at:Date.now(),plan:Object.fromEntries(SYNC_T.map(t=>[t,{changed:plan[t].changed.map(c=>({row:c.row,base:c.base})),removed:plan[t].removed}]))}))})}
+async function pushPlan(plan,by){
+  let remote=false;const chunk=(a,n)=>{const o=[];for(let i=0;i<a.length;i+=n)o.push(a.slice(i,i+n));return o};
+  for(const t of SYNC_T){
+    const p=plan[t];if(!p||!p.changed.length||(t==='documents'&&!docsReady))continue;
+    const theirs=new Map(),cols=Object.keys(p.changed[0].row).join(',');
+    for(const ids of chunk(p.changed.filter(c=>c.base).map(c=>c.row.id),100)){const{data,error}=await sb.from(t).select(cols).in('id',ids);if(error)throw error;data.forEach(x=>theirs.set(x.id,x))}
+    const rows=[];
+    for(const c of p.changed){
+      if(!c.base){rows.push(c.row);continue}
+      const th=theirs.get(c.row.id);
+      if(!th){remote=true;continue}   // deleted by someone else meanwhile: do not bring it back
+      const m=mergeRow(c.row,JSON.parse(c.base),th);if(m.remote)remote=true;rows.push(m.row)}
+    const stamp=t==='jobs'||t==='partners';
+    for(const part of chunk(rows,200))await must(sb.from(t).upsert(stamp?part.map(r=>Object.assign({},r,{updated_by:by})):part));
+  }
+  for(const t of ['payments','events','documents','job_tasks','jobs','partners','contractors']){
+    const p=plan[t];if(!p||!p.removed.length||(t==='documents'&&!docsReady))continue;
+    for(const ids of chunk(p.removed,100))await must(sb.from(t).delete().in('id',ids))}
+  return remote;
+}
+/* changes left on this device from last time (closed while offline): save them now */
+async function replayOutbox(){
+  const raw=safe(()=>localStorage.getItem(OUTBOX));if(!raw)return;
+  let box=null;try{box=JSON.parse(raw)}catch(e){}
+  if(!box||!box.plan||!planSize(box.plan)){safe(()=>localStorage.removeItem(OUTBOX));return}
+  try{await pushPlan(box.plan,me.email);safe(()=>localStorage.removeItem(OUTBOX));await fetchAll();toast('Changes that were not saved last time are saved now.')}
+  catch(e){console.error(e);safe(()=>{localStorage.setItem(OUTBOX+'-failed',raw);localStorage.removeItem(OUTBOX)});toast('Some changes from last time could not be saved.')}
+}
 async function sync(){
   if(!me||!loaded)return;
   if(syncing){again=true;return}
-  syncing=true;syncT=null;setStatus('Saving…','busy');
+  syncing=true;syncT=null;setStatus('Saving…','busy');let ok=false;
   try{
-    const sets={jobs:db.jobs.map(jobRow),payments:payRows(),events:db.events.map(evRow),documents:docsReady?(db.docs||[]).map(docRow):[...synced.documents.keys()].map(id=>({id})),partners:partReady?(db.partners||[]).map(partRow):[],contractors:planReady?(db.subs||[]).map(subRow):[],job_tasks:planReady?(db.tasks||[]).filter(t=>job(t.jobId)).map(jtaskRow):[]},plan={};
-    for(const t of ['partners','contractors','jobs','payments','events','documents','job_tasks']){
-      const cur=new Map(sets[t].map(x=>[x.id,x])),changed=[];
-      for(const[id,row]of cur){const js=JSON.stringify(row);if(synced[t].get(id)!==js)changed.push([row,js])}
-      plan[t]={changed,removed:[...synced[t].keys()].filter(id=>!cur.has(id))};
-    }
-    if(plan.partners.changed.length)await must(sb.from('partners').upsert(plan.partners.changed.map(([r])=>Object.assign({},r,{updated_by:me.email}))));
-    if(plan.contractors.changed.length)await must(sb.from('contractors').upsert(plan.contractors.changed.map(([r])=>r)));
-    if(plan.jobs.changed.length)await must(sb.from('jobs').upsert(plan.jobs.changed.map(([r])=>Object.assign({},r,{updated_by:me.email}))));
-    for(const t of ['payments','events','documents','job_tasks'])if(plan[t].changed.length&&(t!=='documents'||docsReady))await must(sb.from(t).upsert(plan[t].changed.map(([r])=>r)));
-    for(const t of ['payments','events','documents','job_tasks','jobs','partners','contractors'])if(plan[t].removed.length&&(t!=='documents'||docsReady))await must(sb.from(t).delete().in('id',plan[t].removed));
-    for(const t of ['partners','contractors','jobs','payments','events','documents','job_tasks']){plan[t].changed.forEach(([r,js])=>synced[t].set(r.id,js));plan[t].removed.forEach(id=>synced[t].delete(id))}
-    setStatus('Synced');
-  }catch(err){console.error(err);setStatus('Not saved · retrying','err');toast('Not saved. Check your connection.');setTimeout(()=>{dirty=true;sync()},8000)}
+    const plan=makePlan();keepOutbox(plan);
+    const remote=await pushPlan(plan,me.email);
+    for(const t of SYNC_T){plan[t].changed.forEach(c=>synced[t].set(c.row.id,c.js));plan[t].removed.forEach(id=>synced[t].delete(id))}
+    if(!again&&syncT===null)safe(()=>localStorage.removeItem(OUTBOX));
+    ok=true;setStatus('Synced');if(remote)onRemote();
+  }catch(err){console.error(err);setStatus('Not saved · retrying','err');toast('Not saved. Check your connection.');setTimeout(sync,8000)}
   syncing=false;
-  if(again){again=false;sync()}else dirty=syncT!==null;
+  if(again){again=false;sync()}else dirty=!ok||syncT!==null;
 }
+const stashUnsaved=()=>{if(me&&loaded&&(dirty||syncT!==null))safe(()=>keepOutbox(makePlan()))};
+window.addEventListener('pagehide',stashUnsaved);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')stashUnsaved()});
 async function flush(){clearTimeout(syncT);syncT=null;while(syncing)await new Promise(r=>setTimeout(r,100));await sync();return !dirty}
 let remoteT=null;
 function onRemote(){clearTimeout(remoteT);remoteT=setTimeout(refreshFromServer,700)}
@@ -1624,7 +1696,7 @@ async function refreshFromServer(force){
   const inBefore=new Set((db.pmsgs||[]).filter(m=>m.dir==='in').map(m=>m.id)),hadMsgs=(db.pmsgs||[]).length>0;
   const expBefore=new Set((db.exps||[]).map(x=>x.id)),hadExp=(db.exps||[]).length>0||expReady;
   const before=new Set(data.map(r=>r.id)),signedBefore=new Set((db.docs||[]).filter(x=>x.status==='accepted').map(x=>x.id));
-  try{await fetchAll()}catch(e){console.error(e);return}
+  try{if(await fetchAll()===false){remoteT=setTimeout(refreshFromServer,1500);return}}catch(e){console.error(e);return}
   const linkNew=(db.exps||[]).filter(x=>x.via&&!expBefore.has(x.id));if(hadExp&&linkNew.length){const x=linkNew[0],r=job(x.jobId);toast(linkNew.length>1?`${linkNew.length} new expenses from links`:`New expense from ${x.by||'link'} · ${cents(x.amount)}${r?' · '+r.name:''}`)}
   const fresh=data.filter(r=>!before.has(r.id)&&['Website','HomeStars','Facebook','Instagram'].includes(r.history[0]?.by));
   if(fresh.length&&before.size)toast(fresh.length>1?`${fresh.length} new leads`:`New lead: ${fresh[0].name} · ${fresh[0].source}`);
@@ -3817,7 +3889,7 @@ async function start(session){
   const mine=team.find(x=>x.email.toLowerCase()===me.email.toLowerCase());
   if(!mine){await sb.auth.signOut();me=null;showAuth('signin','This account is not on the NEVACO team yet. Ask Kevin to add it.');return}
   me.name=mine.name||me.email.split('@')[0];
-  try{await fetchAll();setStatus('Synced')}catch(e){console.error(e);setStatus('Offline','err');toast('Could not load data. Check your connection.')}
+  try{await fetchAll();await replayOutbox();setStatus('Synced')}catch(e){console.error(e);setStatus('Offline','err');toast('Could not load data. Check your connection.')}
   if(!started){started=true;
     channel=sb.channel('nevaco-sync');
     ['jobs','payments','events','documents','files'].forEach(t=>channel.on('postgres_changes',{event:'*',schema:'public',table:t},onRemote));
