@@ -704,6 +704,24 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 .items input{flex:none;width:104px;border:0;background:var(--card2);border-radius:8px;padding:8px;text-align:right;color:var(--label);margin-top:2px}
 .items .rm{color:var(--label3);padding:9px 2px 0;font-size:18px;line-height:1}
 .addline{color:var(--blue);font-weight:600;font-size:15px;justify-self:start;padding:0 14px;margin-top:-12px}
+.ch{font-size:13px;color:var(--label2);text-transform:uppercase;letter-spacing:.04em;font-weight:500;margin:18px 14px 7px}
+.crow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 14px;border-top:.5px solid var(--sep)}
+.crow:first-child{border-top:0}
+button.crow:active{background:var(--card2)}
+.crow .ct{flex:1;min-width:0}
+.crow .ct>b,.crow .cn b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .ct>span,.crow .cn span{display:block;font-size:13px;color:var(--label2)}
+.crow .cn{text-align:right;font-variant-numeric:tabular-nums;flex:none}
+.crow .tag{flex:none;min-width:44px;text-align:center;font-size:13px;padding:3px 7px;margin:0;font-variant-numeric:tabular-nums}
+.cbar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:8px 0 5px;background:var(--card2)}
+.cbar i{display:block;height:100%}
+.cleg{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:12px;color:var(--label2)}
+.cleg span{display:inline-flex;align-items:center;gap:5px}
+.cleg i{width:8px;height:8px;border-radius:50%;flex:none}
+.cnote{font-size:13px;color:var(--label2);margin:12px 14px 0;line-height:1.4}
+.chint{background:var(--card);border-radius:12px;padding:12px 14px;margin-top:10px;font-size:14px;color:var(--label2);line-height:1.45}
+.chint>b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:3px}
+.chint strong{color:var(--label)}.chint strong.green{color:var(--green)}.chint strong.orange{color:var(--orange)}.chint strong.red{color:var(--red)}
 .dtotals{background:var(--card);border-radius:12px;padding:12px 14px;display:grid;gap:4px;font-variant-numeric:tabular-nums}
 .dtotals div{display:flex;justify-content:space-between}
 .dtotals .g{font-weight:700;font-size:17px;border-top:.5px solid var(--sep);padding-top:8px;margin-top:4px}
@@ -932,6 +950,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
   <button class="navbtn" data-tab="cust" aria-selected="false"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em id="custCount" hidden></em></button>
   <button class="navbtn" data-tab="part" aria-selected="false"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em id="partCount" hidden></em></button>
   <button class="navbtn" data-tab="crew" aria-selected="false"><span class="ni" style="--nc:#a2845e"><svg class="i" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M2.5 15h19v2.5h-19z"/><path d="M10 7.2V5h4v2.2"/></svg></span>Contractors<em class="scount" hidden></em></button>
+  <button class="navbtn" data-tab="cost" aria-selected="false"><span class="ni" style="--nc:#34c759"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Job Costing</button>
   <button class="navbtn" data-tab="lost" aria-selected="false"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg></span>Not Interested<em class="ncount" hidden></em></button>
   <button class="navbtn" data-tab="cal" aria-selected="false"><span class="ni" style="--nc:var(--orange)"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>Calendar</button>
   <button class="navbtn" data-tab="map" aria-selected="false"><span class="ni" style="--nc:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>Map</button>
@@ -981,6 +1000,10 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
     <header class="lt"><div><h1>Not Interested</h1><div class="sub" id="lostSub">Leads that said no · kept for later</div></div></header>
     <label class="searchbox"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lostq" type="search" placeholder="Search name, phone, city, reason" aria-label="Search not interested"></label>
     <div class="scroll"><div class="wrap" id="pLost"></div></div>
+  </section>
+  <section class="screen" id="sCost" hidden>
+    <header class="lt"><div><h1>Job Costing</h1><div class="sub" id="costSub">What your jobs really cost, compared with their price</div></div></header>
+    <div class="scroll"><div class="wrap" id="pCost"></div></div>
   </section>
   <section class="screen" id="sCal" hidden>
     <header class="lt"><div><h1 id="calTitle">Calendar</h1></div>
@@ -1107,6 +1130,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
         <label><span>Deposit</span><select id="d-dep"><option value="0">No deposit</option><option value="10">10%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="40">40%</option><option value="50">50%</option></select></label>
       </div>
       <div class="dtotals" id="d-totals"></div>
+      <div id="d-hint"></div>
       <div id="d-chg" hidden>
         <div class="fghead">Payment</div>
         <div class="fg"><label><span>Paid</span><select id="k-paywhen"><option>Added to the final payment</option><option>Paid with the next payment</option><option>Paid before this work starts</option><option>Paid when this work is done</option></select></label></div>
@@ -1252,6 +1276,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
       <button class="row" data-more="cust"><span class="ni" style="--nc:#af52de"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-3.5-5.8"/></svg></span>Customers<em class="ccount" hidden></em></button>
       <button class="row" data-more="part"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em class="pcount" hidden></em></button>
       <button class="row" data-more="crew"><span class="ni" style="--nc:#a2845e"><svg class="i" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M2.5 15h19v2.5h-19z"/><path d="M10 7.2V5h4v2.2"/></svg></span>Contractors<em class="scount" hidden></em></button>
+      <button class="row" data-more="cost"><span class="ni" style="--nc:#34c759"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Job Costing</button>
       <button class="row" data-more="lost"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg></span>Not Interested<em class="ncount" hidden></em></button>
     </div><div class="group"><button class="row" data-more="acct"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>Account & notifications</button></div></div>
   </div>
@@ -1415,7 +1440,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.46 (Nov 9) · Safer saving';
+const APP_VERSION='1.47 (Nov 9) · Job costing';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -3152,11 +3177,52 @@ function openContractor(id){const c=sub(id);if(!c)return;subSel=id;selId=null;cu
 }
 const subFiles=id=>(db.files||[]).filter(f=>f.contractor_id===id).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
 
+/* ---------- job costing: what jobs really cost, compared with their price ---------- */
+/* price = contract + approved extras, without HST · cost = expenses − returns + contractor work in the job plan (paid and unpaid) */
+const CCOL={'Materials':'#0a84ff','Labour':'#ff9f0a','Equipment / Tools':'#bf5af2','Permits / Fees':'#5ac8fa','Other':'#8e8e93'};
+const pct=v=>v==null?'—':Math.round(v*100)+'%';
+const mcls=m=>m==null?'':m>=.25?'green':m>=.1?'orange':'red';
+const smoney=v=>(v<0?'−':'')+kmoney(Math.abs(v));
+function costOf(r){const f=fin(r),rev=r2(f.tcv-f.hstAll),cost=r2(f.net+f.owed),cats=Object.assign({},f.cats);cats.Labour=(cats.Labour||0)+f.owed;
+  return{r,rev,cost,profit:r2(rev-cost),margin:rev>0?(rev-cost)/rev:null,done:stageOf(r)==='done',cats}}
+function costJobs(){return data.filter(r=>isJob(r)&&!r.sample).map(costOf).filter(c=>c.rev>0)}
+function costAgg(cs){const rev=r2(cs.reduce((t,c)=>t+c.rev,0)),cost=r2(cs.reduce((t,c)=>t+c.cost,0)),cats=Object.fromEntries(FCATS.map(([n])=>[n,0]));
+  cs.forEach(c=>FCATS.forEach(([n])=>cats[n]+=c.cats[n]||0));
+  return{n:cs.length,rev,cost,profit:r2(rev-cost),margin:rev>0?(rev-cost)/rev:null,ratio:rev>0?cost/rev:null,cats}}
+function costBar(a){const vs=FCATS.map(([n])=>[n,Math.max(0,a.cats[n]||0)]),tot=vs.reduce((t,x)=>t+x[1],0);if(!tot)return '';
+  return `<div class="cbar">${vs.map(([n,v])=>v?`<i style="width:${v/tot*100}%;background:${CCOL[n]}"></i>`:'').join('')}</div><div class="cleg">${vs.map(([n,v])=>v?`<span><i style="background:${CCOL[n]}"></i>${n} ${Math.round(v/tot*100)}%</span>`:'').join('')}</div>`}
+function renderCost(){
+  const all=costJobs(),closed=all.filter(c=>c.done&&c.cost>0),open=all.filter(c=>!c.done&&c.cost>0),bare=all.filter(c=>c.cost<=0),A=costAgg(closed);
+  const plural=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
+  $('costSub').textContent=closed.length?`${plural(closed.length,'finished job')} with costs`:'What your jobs really cost, compared with their price';
+  if(!closed.length&&!open.length){$('pCost').innerHTML=`<div class="empty"><b>No job costs yet</b>Add expenses and contractor work to a job. Its real cost and margin will show up here.</div>`;return}
+  const tile=(v,l,c)=>`<div class="tile" style="--c:${c}"><div class="top"><b>${v}</b></div><span>${l}</span></div>`;
+  const types=[...new Set(closed.map(c=>c.r.type||'Other'))].map(t=>[t,costAgg(closed.filter(c=>(c.r.type||'Other')===t))]).sort((a,b)=>b[1].rev-a[1].rev);
+  const jrow=c=>`<button class="crow" data-id="${esc(c.r.id)}"><div class="ct"><b>${esc(c.r.name)}</b><span>${esc(c.r.type||'Other')}${c.r.city?' · '+esc(c.r.city):''}</span></div><div class="cn"><b>${money(c.rev)}</b><span>cost ${money(c.cost)}</span></div><span class="tag ${mcls(c.margin)}">${pct(c.margin)}</span></button>`;
+  const byM=(a,b)=>(a.margin??0)-(b.margin??0);
+  $('pCost').innerHTML=
+    (closed.length?`<div class="sum">${tile(pct(A.margin),'Margin · finished jobs','var(--green)')}${tile(smoney(A.profit),'Profit · finished jobs','var(--s-pay)')}${tile(pct(A.ratio),'Costs as % of price','var(--orange)')}</div>`
+      :`<div class="banner info" style="margin-bottom:16px">No finished job has costs yet. The jobs below are still in progress, so their costs are not complete.</div>`)
+    +(types.length?`<h3 class="ch">By project type</h3><div class="group">${types.map(([t,a])=>`<div class="crow static"><div class="ct"><b>${esc(t)}</b><span>${plural(a.n,'job')} · average price ${money(a.rev/a.n)} · average cost ${money(a.cost/a.n)}</span>${costBar(a)}</div><span class="tag ${mcls(a.margin)}">${pct(a.margin)}</span></div>`).join('')}</div>`:'')
+    +(closed.length?`<h3 class="ch">Finished jobs · lowest margin first</h3><div class="group">${closed.slice().sort(byM).map(jrow).join('')}</div>`:'')
+    +(open.length?`<h3 class="ch">In progress · costs so far</h3><div class="group">${open.slice().sort(byM).map(jrow).join('')}</div>`:'')
+    +(bare.length?`<p class="cnote">${plural(bare.length,'job')} with a price but no costs recorded: ${bare.map(c=>esc(c.r.name)).join(', ')}. Add their expenses to include them.</p>`:'')
+    +`<p class="cnote">Price is the contract plus approved extras, without HST. Cost is expenses minus returns, plus contractor work in the job plan, paid or not. Tap a job to open its financial report.</p>`;
+}
+/* shown under the totals while writing an estimate or contract: what similar finished jobs cost */
+function costHint(r,sub){
+  if(!r||!(sub>0))return '';
+  const closed=costJobs().filter(c=>c.done&&c.cost>0&&c.r.id!==r.id);if(!closed.length)return '';
+  const ty=r.type||'Other',same=closed.filter(c=>(c.r.type||'Other')===ty),use=same.length?same:closed,a=costAgg(use);if(a.ratio==null)return '';
+  const est=r2(sub*a.ratio),left=r2(sub-est),n=use.length,jobs=`${n} finished ${same.length?esc(ty.toLowerCase())+' ':''}job${n===1?'':'s'}`;
+  return `<div class="chint"><b>From your past jobs</b>${same.length?'':`No finished ${esc(ty.toLowerCase())} jobs yet. `}On your ${jobs}, costs were ${pct(a.ratio)} of the price. At that rate this price leaves about <strong class="${mcls(a.margin)}">${left<0?'−':''}${money(Math.abs(left))}</strong> after about ${money(est)} of costs.${n<3?' This is based on few jobs, so treat it as a rough guide.':''}</div>`}
+$('pCost').onclick=e=>{const b=e.target.closest('button.crow');if(!b)return;const r=job(b.dataset.id);if(r)openReport(r)};
+
 /* ---------- tabs ---------- */
 function setTab(t){tab=t;
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('moreBtn').setAttribute('aria-selected',['cust','part','crew','lost'].includes(t));
-  ['today','leads','jobs','cust','part','crew','lost','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',crew:'sCrew',lost:'sLost',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
+  $('moreBtn').setAttribute('aria-selected',['cust','part','crew','lost','cost'].includes(t));
+  ['today','leads','jobs','cust','part','crew','lost','cost','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',crew:'sCrew',lost:'sLost',cost:'sCost',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
   if(t!=='map'&&isPhone()&&selId&&false)closeDetail();
   render();
   if(t==='part'&&gmailSt.connected&&Date.now()-lastCheck>60000)checkMail(false);
@@ -3557,7 +3623,7 @@ function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=
 function paintTotals(){const c=readDocForm(),d=docEdit;$('d-lumprow').hidden=c.priced;if(isCon(d)&&!$('d-conpay').hidden&&$('k-sched').childElementCount){$('k-sched').querySelectorAll('.kpay:not(.kph) b').forEach((b,k)=>{const x=conSchedEdit[k];if(x)b.innerHTML=(money(payBase(x,c.sub)+payHst(x,c.sub))||'$0')+(x.hst?'<small>incl. HST</small>':'')});schedNote()}
   const hstLbl=isCon(d)&&c.tax?(()=>{const on=conSchedEdit.filter(x=>x.hst&&Number(x.pct)>0);return on.length===conSchedEdit.filter(x=>Number(x.pct)>0).length?'HST (13%)':`HST (13%) on ${on.map(x=>x.d.toLowerCase()||'payment').join(', ')}`})():'HST (13%)';
   const dep=Math.round(d.depositPct*d.total)/100;
-  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':isChg(d)?'Change order price':'Contract price')}</span><b>${money(c.sub)||'$0'}</b></div>${d.hst?`<div><span>${esc(hstLbl)}</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">${isCon(d)?'Final total':isChg(d)?'Change order total':'Total'}</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`}
+  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':isChg(d)?'Change order price':'Contract price')}</span><b>${money(c.sub)||'$0'}</b></div>${d.hst?`<div><span>${esc(hstLbl)}</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">${isCon(d)?'Final total':isChg(d)?'Change order total':'Total'}</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`;$('d-hint').innerHTML=(d.kind==='estimate'||isCon(d))&&$('docForm').dataset.locked!=='1'?costHint(docJob,c.sub):''}
 function paintItems(){$('d-items').innerHTML=docEdit.items.map(itemRow).join('');$('d-items').querySelectorAll('textarea').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})}
 const CONTRACT_TERMS=`1. Scope of work. The Contractor will supply the labour, and the materials listed in the scope, to complete the work described in this contract in a good and workmanlike manner and in line with the Ontario Building Code and good trade practice. Anything not listed in the scope is not included.
 
@@ -3852,7 +3918,7 @@ $('evForm').onsubmit=e=>{e.preventDefault();
 let tt;function toast(m,canUndo,long){const t=$('toast');t.querySelector('span').textContent=m;$('undo').hidden=!(canUndo&&undoSnap);t.classList.toggle('long',!!long||m.length>60);t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('show');undoSnap=null},canUndo?5000:long?6500:2600)}
 $('undo').onclick=()=>{if(!undoSnap)return;db=JSON.parse(undoSnap);db.docs=db.docs||[];db.files=db.files||[];data=db.jobs;undoSnap=null;save();render();if(selId&&job(selId))openDetail(selId);else if(selId)closeDetail();$('toast').classList.remove('show')};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('repView').hidden&&$('coModal').hidden)closeReport();else if(!$('coModal').hidden)hideModal('coModal');else if(!$('phView').hidden)$('phView').hidden=true;else if(!$('elinkModal').hidden)hideModal('elinkModal');else if(!$('callModal').hidden)$('callCancel').click();else if(!$('expModal').hidden)$('expCancel').click();else if(!$('moreModal').hidden)hideModal('moreModal');else if(!$('subModal').hidden)hideModal('subModal');else if(!$('schedModal').hidden)hideModal('schedModal');else if(!$('planModal').hidden)$('planClose').click();else if(!$('partModal').hidden)hideModal('partModal');else if(!$('meetModal').hidden)hideModal('meetModal');else if(!$('feeModal').hidden)hideModal('feeModal');else if(!$('psetModal').hidden)hideModal('psetModal');else if(!$('custModal').hidden)hideModal('custModal');else if(!$('docModal').hidden)hideModal('docModal');else if(!$('acctModal').hidden)hideModal('acctModal');else if(!$('evModal').hidden)hideModal('evModal');else if(!$('modal').hidden)hideModal('modal');else if(placingId)stopPlacing();else if(selId||partSel||custSel||subSel)closeDetail()}});
-function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();renderCrewCount();if(tab==='crew')renderCrew();renderLostCount();if(tab==='lost')renderLost();renderMoreCount();if(tab==='cal')renderCal();if(repJob&&!$('repView').hidden)paintReport();drawPins();renderCards();
+function render(){data.forEach(r=>r.stage=stageOf(r));if(loaded)computePriorities();renderToday();$('jobsCount').textContent=data.filter(r=>stageOf(r)==='won').length||'';if(tab==='jobs'){renderSum();renderList()}renderCustCount();if(tab==='cust')renderCust();if(tab==='cost')renderCost();renderPartCount();if(tab==='part')renderPartners();renderLeadCount();if(tab==='leads')renderLeads();renderCrewCount();if(tab==='crew')renderCrew();renderLostCount();if(tab==='lost')renderLost();renderMoreCount();if(tab==='cal')renderCal();if(repJob&&!$('repView').hidden)paintReport();drawPins();renderCards();
   if('setAppBadge' in navigator&&loaded){const n=data.filter(leadNeeds).length+(db.partners||[]).filter(pUnread).length;(n?navigator.setAppBadge(n):navigator.clearAppBadge()).catch(()=>{})}}
 let locating=false;
 async function locateMissing(){if(locating)return;locating=true;try{await locateMissingRun()}finally{locating=false}}
