@@ -511,6 +511,10 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 .pipe>.on{color:var(--label)}
 .pipe>.on i{background:var(--c)}
 .thread{display:flex;flex-direction:column;gap:10px;padding:4px 0 8px}
+/* on a job or lead page the emails stay in a box that scrolls, so the page does not run on to the bottom */
+#jThread{max-height:min(52vh,460px);overflow-y:auto;overscroll-behavior:contain;border:.5px solid var(--sep);border-radius:14px;padding:10px}
+#jThread>*{flex:none}
+#jThread:has(>.pnone:only-child){border:0;padding:4px 0 8px}
 .tday{align-self:center;font-size:11.5px;color:var(--label2);font-weight:600;margin:6px 0 0}
 .bub{max-width:86%;border-radius:18px;padding:10px 13px;font-size:14px;line-height:1.42;white-space:pre-wrap;word-wrap:break-word;position:relative}
 .bub.out{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:6px}
@@ -1493,7 +1497,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.51 (Nov 11) · Search and tidier menu';
+const APP_VERSION='1.52 (Nov 11) · Email box on the job page';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -2523,7 +2527,7 @@ function leadConvHtml(r){
   </div>`;
 }
 function bindLeadConv(r){
-  const el=$('jConv');if(!el)return;bindThread(el);
+  const el=$('jConv');if(!el)return;bindThread(el);threadEnd();
   el.querySelectorAll('[data-qa]').forEach(b=>b.onclick=()=>b.dataset.qa==='phone'?openCall(r):leadQuick(r,b.dataset.qa));
   const body=$('jBody');if(!body)return;
   const keep=()=>{drafts['j:'+r.id]={s:$('jSubj').value,t:$('jBody').value}};
@@ -2555,7 +2559,9 @@ async function sendLead(r){
   }catch(e){toast(e.message,false,true);if(btn.isConnected){btn.disabled=false;btn.innerHTML=ico('sent')+'Send'}}
 }
 const leadComposing=()=>{const a=document.activeElement;return !!(a&&a.closest&&a.closest('#jComp'))||!!($('jBody')&&$('jBody').value.trim())};
-function refreshLeadThread(r){const t=$('jThread');if(!t)return;t.innerHTML=threadHtml(jmsgs(r),r.email);bindThread(t)}
+function refreshLeadThread(r){const t=$('jThread');if(!t)return;t.innerHTML=threadHtml(jmsgs(r),r.email);bindThread(t);threadEnd()}
+/* the conversation sits in a box of its own that scrolls; show the newest message */
+function threadEnd(){const t=$('jThread');if(t)t.scrollTop=t.scrollHeight}
 
 /* ---------- push notifications ---------- */
 const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -3425,8 +3431,8 @@ function openDetail(id,pan){
   </div>`;
   bindLeadConv(r);markLeadRead(r);
   if($('planOpen'))$('planOpen').onclick=()=>openPlan(r);if($('planSched'))$('planSched').onclick=()=>openSched(r,false);
-  bindExp(r,v);bindFu(r,v);bindFin(r);applyFull();if($('dFull'))$('dFull').onclick=()=>{jobFull=!jobFull;try{localStorage.setItem('nv-jobfull',jobFull?'1':'0')}catch(e){}openDetail(r.id)};
-  $('dTabs').onclick=e=>{const b=e.target.closest('[data-dv]');if(!b)return;dView=b.dataset.dv;const sc=v.querySelector('.scroll');sc.dataset.dv=dView;$('dTabs').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(sc.scrollTop>$('dTabs').offsetTop)sc.scrollTop=$('dTabs').offsetTop};
+  bindExp(r,v);bindFu(r,v);bindFin(r);applyFull();threadEnd();if($('dFull'))$('dFull').onclick=()=>{jobFull=!jobFull;try{localStorage.setItem('nv-jobfull',jobFull?'1':'0')}catch(e){}openDetail(r.id)};
+  $('dTabs').onclick=e=>{const b=e.target.closest('[data-dv]');if(!b)return;dView=b.dataset.dv;const sc=v.querySelector('.scroll');sc.dataset.dv=dView;$('dTabs').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(dView==='messages')threadEnd();if(sc.scrollTop>$('dTabs').offsetTop)sc.scrollTop=$('dTabs').offsetTop};
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
   if($('dNotesEdit'))$('dNotesEdit').onclick=()=>{openForm(r);setTimeout(()=>$('f-notes').focus(),300)};
