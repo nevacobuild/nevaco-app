@@ -207,6 +207,27 @@ svg.i{width:1em;height:1em;flex:none;stroke:currentColor;fill:none;stroke-width:
 .label{font-size:13px;color:var(--label2);text-transform:uppercase;letter-spacing:.04em;margin:0 4px 7px;font-weight:500;display:flex;justify-content:space-between}
 .label button{color:var(--blue);text-transform:none;letter-spacing:0;font-size:13px;font-weight:500}
 .block{margin-bottom:20px}
+/* today: sections that fold */
+details.fold>summary{list-style:none;cursor:pointer;align-items:center}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold .fchev{color:var(--label3);display:flex;transition:transform .2s}
+details.fold[open] .fchev{transform:rotate(90deg)}
+details.fold:not([open]){margin-bottom:10px}
+details.fold:not([open])>summary{background:var(--card);border-radius:14px;padding:12px 14px;margin:0}
+details.fold:not([open])>summary h3{font-size:17px}
+/* only Today's badge is red; the other counts are quiet */
+.navbtn em.hot:not(.tcount){background:var(--card2);color:var(--label2)}
+/* job page: one part at a time (side panel and phone); full screen still shows everything */
+.dtabs{display:flex;gap:6px;position:sticky;top:0;z-index:3;background:var(--bg);padding:6px 0 10px;margin:0 0 6px;overflow-x:auto;scrollbar-width:none}
+.dtabs::-webkit-scrollbar{display:none}
+.dtabs button{flex:1;white-space:nowrap;height:36px;padding:0 12px;border-radius:18px;background:var(--card2);font-weight:600;font-size:14px;color:var(--label2)}
+.dtabs button[aria-pressed="true"]{background:var(--label);color:var(--bg)}
+.detail.full .dtabs{display:none}
+.detail [data-g]:empty{display:none}
+.detail:not(.full) .scroll[data-dv="overview"] [data-g]:not([data-g="overview"]),
+.detail:not(.full) .scroll[data-dv="money"] [data-g]:not([data-g="money"]),
+.detail:not(.full) .scroll[data-dv="messages"] [data-g]:not([data-g="messages"]),
+.detail:not(.full) .scroll[data-dv="more"] [data-g]:not([data-g="more"]){display:none}
 .nextcard{background:var(--card);border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin-bottom:20px}
 .nextcard .gl{width:38px;height:38px}
 .nextcard b{display:block;font-size:12px;color:var(--label2);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
@@ -841,6 +862,7 @@ button.crow:active{background:var(--card2)}
   .tabbar button[aria-selected="true"] svg{stroke-width:2.3}
   .tabbar em{position:absolute;top:-3px;left:calc(50% + 5px);font-style:normal;background:var(--p1);color:#fff;font-size:11px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px}
   .tabbar em.calm{background:var(--p2)}
+  .tabbar em:not(.tcount){background:var(--label3)}
   .lt{padding:calc(14px + env(safe-area-inset-top)) 16px 10px}
   .lt h1{font-size:31px}
   .lt .sub{font-size:14px}
@@ -1440,7 +1462,7 @@ button.crow:active{background:var(--card2)}
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.48 (Nov 11) · Job costing fix';
+const APP_VERSION='1.49 (Nov 11) · Simpler Today and job page';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1526,7 +1548,9 @@ function stageOf(r){
   if(r.ms.visit?.date)return 'visit';
   return 'lead';
 }
-function nextStep(r){if(r.lost)return null;return STEPS.find(s=>!stepDone(r,s.k))||null}
+/* the first step not done yet. A step is skipped once a later work step is done (a finished job no longer asks for a job plan); money steps are never skipped */
+function nextStep(r){if(r.lost)return null;const done=STEPS.map(s=>stepDone(r,s.k));let last=-1;STEPS.forEach((s,i)=>{if(done[i]&&!s.pay)last=i});
+  return STEPS.find((s,i)=>!done[i]&&(s.pay||i>last))||null}
 function payStatus(r){
   const t=total(r),p=paid(r);
   if(!t)return stepDone(r,'final')?{t:'Paid',cls:'green'}:null;
@@ -1770,7 +1794,7 @@ function todoItems(){
       items.push({key:r.id+k,job:r,date:m.date,time:m.time,ic:SK[k].ic,c:SK[k].c,title:k==='visit'?`Site visit · ${r.name}`:k==='start'?`Start work · ${r.name}`:`Finish work · ${r.name}`,sub:`${r.address}, ${r.city}`,act:()=>{setStep(r,k,true)}});}
     if(r.follow&&r.follow<=T)items.push({key:r.id+'f',job:r,date:r.follow,ic:'follow',c:'--s-follow',title:`Follow up · ${r.name}`,sub:st==='sent'?`Estimate ${money(total(r))||''} sent ${fmtDate(r.ms.estimate?.date)}`:SK[nextStep(r)?.k||'review'].n,act:()=>{log(r,'Followed up');r.follow=st==='sent'?addDays(T,4):''}});
     else if(st==='sent'&&!r.follow&&r.ms.estimate?.date&&dayDiff(T,r.ms.estimate.date)>=4)items.push({key:r.id+'fa',job:r,date:addDays(r.ms.estimate.date,4),ic:'follow',c:'--s-follow',title:`Follow up on estimate · ${r.name}`,sub:`${money(total(r))} sent ${fmtDate(r.ms.estimate.date)}`,act:()=>{log(r,'Followed up on estimate');r.follow=addDays(T,4)}});
-    if(!stepDone(r,'contacted'))items.push({key:r.id+'c',job:r,ic:'follow',c:'--s-lead',title:`Call new lead · ${r.name}`,sub:`${r.type} · ${r.city}`,pri:ageOf(r.history?.[0]?.d||r.date,T)>=1?1:2,act:()=>setStep(r,'contacted',true)});
+    if(!stepDone(r,'contacted'))items.push({key:r.id+'c',job:r,ic:'follow',c:'--s-lead',title:`${leadState(r)==='reply'?'Reply to new lead':'Call new lead'} · ${r.name}`,sub:`${r.type} · ${r.city}`,pri:ageOf(r.history?.[0]?.d||r.date,T)>=1?1:2,act:()=>setStep(r,'contacted',true)});
     else if(!stepDone(r,'visit')&&!r.ms.visit?.date)items.push({key:r.id+'bv',job:r,ic:'visit',c:'--s-visit',title:`Book site visit · ${r.name}`,sub:`${r.type} · ${r.city}`,pri:3,open:true});
     if(stepDone(r,'visit')&&!stepDone(r,'estimate'))items.push({key:r.id+'e',job:r,ic:'quote',c:'--s-quote',title:`Send estimate · ${r.name}`,sub:`${r.type} · visited ${fmtDate(r.ms.visit.date)}`,pri:ageOf(r.ms.visit?.date,T)>3?2:3,act:()=>setStep(r,'estimate',true)});
     if(stepDone(r,'contract')&&!stepDone(r,'deposit'))items.push({key:r.id+'d',job:r,ic:'pay',c:'--s-pay',title:`Collect deposit · ${r.name}`,pri:2,sub:total(r)?`Suggested ${money(Math.round(total(r)*.3))}`:'Contract signed',open:'deposit'});
@@ -1797,17 +1821,21 @@ function renderToday(){
   const n=items.length,hot=g[1].length+g[2].length;
   document.querySelectorAll('.tcount').forEach(e=>{e.textContent=hot;e.hidden=!hot;e.classList.toggle('hot',g[1].length>0);e.classList.toggle('calm',!g[1].length)});
   $('todaySub').innerHTML=esc(d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'}))+(g[1].length?` · <b>${g[1].length} urgent</b>`:'');
-  const chip=(p,label,v)=>`<span class="pchip" style="--c:var(${PC[p]})"><i></i><b>${v}</b><span>${label}</span></span>`;
-  const sect=(p,title,list)=>list.length?`<div class="sect"><div class="secthead"><h3 style="--c:var(${PC[p]})"><i></i>${title}<em>${list.length}</em></h3></div><div class="group">${list.map(taskRow).join('')}</div></div>`:'';
-  $('pToday').innerHTML=`<div class="prow">${chip(1,'Urgent',g[1].length)}${chip(2,'Today',g[2].length)}${chip(3,'Soon',g[3].length)}${chip(4,'Upcoming',up.length)}</div>
-    <div class="money"><div class="mt"><b>${kmoney(out)}</b><span>Quotes out</span></div><div class="mt"><b>${kmoney(owed)}</b><span>To collect</span></div><div class="mt"><b>${active}</b><span>Active jobs</span></div></div>
-    ${sect(1,'Urgent',g[1])}${sect(2,'Today',g[2])}${sect(3,'Soon',g[3])}
+  /* "Do first": at most three things, one per customer: money first, then today's appointments, then new leads */
+  const wt=i=>i.ic==='pay'?0:(i.date===T&&i.time)?1:/^(Call|Reply to) new lead/.test(i.title)?2:3;
+  const seenJ=new Set(),first=[...g[1],...g[2]].sort((a,b)=>wt(a)-wt(b)).filter(i=>{const k=i.job?i.job.id:i.key;if(seenJ.has(k))return false;seenJ.add(k);return true}).slice(0,3);
+  const fk=new Set(first.map(i=>i.key)),rest=l=>l.filter(i=>!fk.has(i.key));
+  const openS=safe(()=>JSON.parse(localStorage.getItem('nv-today-open')||'null'))||{2:true};
+  const fold=(p,title,list)=>list.length?`<details class="sect fold" data-fold="${p}"${openS[p]?' open':''}><summary class="secthead"><h3 style="--c:var(${PC[p]})"><i></i>${title}<em>${list.length}</em></h3><span class="fchev">${ico('chev')}</span></summary><div class="group">${list.map(taskRow).join('')}</div></details>`:'';
+  const sect=(p,title,list)=>list.length?`<div class="sect"><div class="secthead"><h3 style="--c:var(${PC[p]})"><i></i>${title}</h3></div><div class="group">${list.map(taskRow).join('')}</div></div>`:'';
+  $('pToday').innerHTML=`<div class="money"><div class="mt"><b>${kmoney(out)}</b><span>Quotes out</span></div><div class="mt"><b>${kmoney(owed)}</b><span>To collect</span></div><div class="mt"><b>${active}</b><span>Active jobs</span></div></div>
+    ${sect(1,'Do first',first)}${fold(1,'More urgent',rest(g[1]))}${fold(2,'Today',rest(g[2]))}${fold(3,'Soon',g[3])}
     ${(()=>{const ps=pushState();const off=ps==='off'||ps==='install';if(!off||safe(()=>localStorage.getItem('nv-push-hide'))==='1')return '';
       return `<div class="pushcard">${ico('msg')}<div><b>Get notified about new leads</b><span>${ps==='install'?'On iPhone/iPad: Share › Add to Home Screen, then open the app from there.':'New leads, replies and reminders on this '+deviceName()+'.'}</span></div>${ps==='off'?'<button class="btn" data-pushon>Turn on</button>':''}<button class="px" data-pushhide aria-label="Hide">${ico('x')}</button></div>`})()}
     ${(()=>{const T2=today(),on=(db.tasks||[]).filter(t=>!t.done&&t.start&&t.start<=T2&&(t.end||t.start)>=T2&&job(t.jobId)&&!job(t.jobId).lost);if(!on.length)return '';
       return `<div class="sect"><div class="secthead"><h3 style="--c:var(--s-won)"><i></i>On site today<em>${on.length}</em></h3><button data-go="cal">Calendar</button></div><div class="group">${on.map(t=>{const r=job(t.jobId),c=sub(t.subId),ph=digits(c?.phone),st=taskState(t);
         return `<div class="task onsite" style="--c:var(--s-won)"><span class="gl" style="--c:var(--s-won);width:28px;height:28px">${ico('won')}</span><button class="tt" data-goplan="${t.id}"><b>${esc(t.title)} · ${esc(r.name)}</b><span><u>${c?esc(c.name):'Our team'}${t.end&&t.end!==T2?' · until '+fmtDate(t.end):' · finishes today'}${st==='late'?' · late':''}</u></span></button>${ph?`<a class="iconbtn" href="tel:+1${ph}" aria-label="Call">${ico('call')}</a>`:''}</div>`}).join('')}</div></div>`})()}
-    ${(()=>{const ln=data.filter(r=>isLead(r)&&leadState(r)==='reply');return ln.length?`<div class="sect"><div class="secthead"><h3 style="--c:#5856d6"><i></i>Leads waiting for a reply<em>${ln.length}</em></h3><button data-go="leads">Leads</button></div><div class="group">${ln.map(r=>{const lm=jmails(r).at(-1),sk=srcKey(r);
+    ${(()=>{const ln=data.filter(r=>isLead(r)&&leadState(r)==='reply'&&!items.some(i=>i.job===r));return ln.length?`<div class="sect"><div class="secthead"><h3 style="--c:#5856d6"><i></i>Leads waiting for a reply<em>${ln.length}</em></h3><button data-go="leads">Leads</button></div><div class="group">${ln.map(r=>{const lm=jmails(r).at(-1),sk=srcKey(r);
       return `<button class="task" data-golead="${r.id}" style="--c:${SRC[sk].c}"><span class="gl" style="--c:${SRC[sk].c};width:28px;height:28px">${ico('msg')}</span><span class="tt"><b>Reply to ${esc(r.name)}</b><span><u>${SRC[sk].n} · ${esc(String(lm?.body||'').replace(/\s+/g,' ').slice(0,70))}</u></span></span><span class="when">${whenShort(lm?.at)}</span></button>`}).join('')}</div></div>`:''})()}
     ${(()=>{const pn=(db.partners||[]).filter(pNeeds).sort((a,b)=>(pUnread(b)?1:0)-(pUnread(a)?1:0));return pn.length?`<div class="sect"><div class="secthead"><h3 style="--c:var(--blue)"><i></i>Partners<em>${pn.length}</em></h3><button data-go="part">Partners</button></div><div class="group">${pn.map(p=>{const a=pAction(p),un=pUnread(p),c=un||a?.k==='reply'?'--blue':a?.k==='meet'?'--orange':'--p1';
       const t=un||a?.k==='reply'?'Reply to':a?.k==='meet'?a.n+' ·':'Follow up with';const lm=lastMail(p);
@@ -1816,6 +1844,7 @@ function renderToday(){
     ${up.length?`<div class="sect"><div class="secthead"><h3 style="--c:var(--p4)"><i></i>Upcoming<em>${up.length}</em></h3><button data-go="cal">Calendar</button></div><div class="group">${up.slice(0,10).map(calRow).join('')}</div></div>`:''}`;
   window._todo=Object.fromEntries(items.map(i=>[i.key,i]));
 }
+$('pToday').addEventListener('toggle',e=>{const d=e.target;if(!d.dataset||!d.dataset.fold)return;const o=safe(()=>JSON.parse(localStorage.getItem('nv-today-open')||'null'))||{2:true};o[d.dataset.fold]=d.open;safe(()=>localStorage.setItem('nv-today-open',JSON.stringify(o)))},true);
 function taskRow(i){
   const late=i.date&&i.date<today();
   return `<div class="task" data-k="${i.key}" style="--c:var(${PC[i.p]||'--p3'})"><button class="chk" aria-label="Mark done" data-act="done">${ico('check')}</button>
@@ -2731,8 +2760,8 @@ function finBlock(r){if(!showExp(r))return '';const f=fin(r),cs=changes(r);
     <div class="group"><div class="fink">
       <div><span>Contract value</span><b>${money(f.tcv)||'$0'}</b>${f.co?`<small>incl. ${money(f.co)} extras</small>`:''}</div>
       <div><span>Received</span><b style="color:var(--green)">${money(f.rec)||'$0'}</b><small>${f.hstIn?'incl. '+cents(f.hstIn)+' HST to keep for CRA · ':''}${f.recv>0.5?money(f.recv)+' to collect':'All collected'}</small></div>
-      <div><span>Expenses</span><b style="color:var(--red)">${cents(f.net)}</b>${f.owed?`<small>+ ${money(f.owed)} labour to pay</small>`:''}</div>
-      <div><span>Profit so far</span><b style="color:${f.profit<0?'var(--red)':'var(--purple,#af52de)'}">${f.profit<0?'−':''}${cents(Math.abs(f.profit))}</b><small>${f.hstIn?'After HST · ':''}expected ${f.expected<0?'−':''}${money(Math.abs(f.expected))}</small></div>
+      <div><span>Expenses</span><b style="color:var(--red)">${cents(f.net)}</b>${f.owed?`<small>+ ${money(f.owed)} labour to pay</small>`:f.spent?'':'<small>None recorded yet</small>'}</div>
+      ${!f.spent&&!f.owed?`<div><span>Profit so far</span><b style="color:var(--label3)">—</b><small>Add this job's expenses to see the profit</small></div>`:`<div><span>Profit so far</span><b style="color:${f.profit<0?'var(--red)':'var(--purple,#af52de)'}">${f.profit<0?'−':''}${cents(Math.abs(f.profit))}</b><small>${f.hstIn?'After HST · ':''}expected ${f.expected<0?'−':''}${money(Math.abs(f.expected))}</small></div>`}
     </div>
     ${chgDocs(r).map(d=>`<button class="row corow" data-doc="${d.id}"><span class="rt"><b>${esc(d.number)} · ${esc((d.items||[]).filter(i=>String(i.d||'').trim()).map(i=>i.d).join(', ')||d.title||'Change order')}</b><span>${d.status==='accepted'?'Approved'+(d.acceptedName&&!/^Approved in person/.test(d.acceptedName)?' online by '+esc(d.acceptedName):''):d.status==='sent'?(d.viewedAt?'Opened · waiting for approval':'Sent · waiting for approval'):'Draft · not sent'} · ${fmtDate(d.date)}</span></span><span class="rv"><em style="${d.status==='accepted'?'':'color:var(--label3)'}">${money(d.total)||'$0'}</em>${ico('chev')}</span></button>`).join('')}
     ${cs.length?cs.map((c,i)=>`<button class="row corow" data-co="${i}"><span class="rt"><b>${esc(c.title||'Extra job')}</b><span>${[fmtDate(c.date),c.by,CO_ST[c.status]||''].filter(Boolean).map(esc).join(' · ')}</span></span><span class="rv"><em style="${coCounts(c)?'':'color:var(--label3);text-decoration:line-through'}">${money(c.amount)||'$0'}</em>${ico('chev')}</span></button>`).join(''):''}
@@ -2824,7 +2853,7 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
 let jobFull=false;
 try{jobFull=localStorage.getItem('nv-jobfull')==='1'}catch(e){}
 function masonry(){const v=$('vDetail'),sc=v.querySelector('.scroll');if(!sc||!v.classList.contains('full')||sc.querySelector('.mcols'))return;
-  const kids=[...sc.children].filter(k=>!k.matches('.dtitle,.acts,.nextcard,#dConfirm'));if(!kids.length)return;
+  const kids=[...sc.children].filter(k=>!k.matches('.dtitle,.acts,.nextcard,.dtabs,#dConfirm'));if(!kids.length)return;
   const n=Math.max(1,Math.min(4,Math.floor((sc.clientWidth-52+22)/(360+22))));const wrap=document.createElement('div');wrap.className='mcols';
   const cols=Array.from({length:n},()=>{const c=document.createElement('div');c.className='mcol';wrap.appendChild(c);return c});
   kids[0].before(wrap);kids.forEach(k=>{const c=cols.reduce((a,b)=>b.offsetHeight<a.offsetHeight?b:a);c.appendChild(k)})}
@@ -3246,6 +3275,7 @@ function setStep(r,k,on,date){
   if(k==='contract'&&on)r.follow='';
 }
 function openPay(k){inlinePay=k;if(selId)openDetail(selId);setTimeout(()=>{const i=$('payAmt');if(i){i.focus();i.select()}},60)}
+let dView='overview',dViewFor=null;
 function openDetail(id,pan){
   const r=job(id);if(!r){closeDetail();return}
   if(selId!==id)inlinePay=null;selId=id;mapSel=id;if(pan&&tab==='map'&&r.lat!=null)flyTo(r.lat,r.lng);
@@ -3255,10 +3285,12 @@ function openDetail(id,pan){
   const nextText=!nx?'All steps complete':nx.k==='visit'&&r.ms.visit?.date?`Site visit ${fmtDate(r.ms.visit.date)}${r.ms.visit.time?' at '+fmtTime(r.ms.visit.time):''}`:nx.k==='start'&&r.ms.start?.date?`Work starts ${fmtDate(r.ms.start.date)}`:nx.k==='final'&&T?`Collect ${money(B)}`:nx.k==='deposit'&&T?`Collect deposit (${money(Math.round(T*.3))} suggested)`:({contacted:'Call the customer',visit:'Book the site visit',estimate:'Send the estimate',contract:'Get the contract signed',plan:'Set the job dates and job plan',deposit:'Collect the deposit',start:'Set a start date',complete:'Finish the work',final:'Collect final payment',review:'Ask for a review'})[nx.k];
   const evs=db.events.filter(e=>e.jobId===r.id).sort((a,b)=>a.date.localeCompare(b.date));
   const curI=nx?nx.i:-1;
+  if(dViewFor!==id){dViewFor=id;dView=isLead(r)&&leadState(r)==='reply'?'messages':'overview'}
+  if(inlinePay)dView=inlinePay==='extra'?'money':'overview';
   const v=$('vDetail');
   keepTop(v,'j:'+id);
   v.innerHTML=`<div class="navbar"><button id="dBack">${ico('back')}${isPhone()?'Back':'Close'}</button><span class="nvr">${isPhone()?'':`<button id="dFull"></button>`}<button id="dEdit">Edit</button></span></div>
-  <div class="scroll">
+  <div class="scroll" data-dv="${dView}">
     <div class="dtitle" style="--c:var(${st.c})"><div class="st"><i></i>${st.n}${ps?`<span class="tag ${ps.cls}">${ps.t}</span>`:''}${r.sample?'<span class="tag">Example</span>':''}</div>
       <h2>${esc(r.name)}</h2><p>${esc([r.address,[r.city,r.postal].filter(Boolean).join(' ')].filter(Boolean).join(', '))}${r.type?' · '+esc(r.type):''}${r.approx?' · <span style="color:var(--orange)">approximate pin</span>':''}</p></div>
     <div class="acts">
@@ -3267,16 +3299,17 @@ function openDetail(id,pan){
       <a class="act" target="_blank" rel="noopener" href="${wa?'https://wa.me/1'+wa:'#'}" aria-disabled="${!wa}">${ico('msg')}WhatsApp</a>
       <button class="act" id="dCal">${ico('calp')}Schedule</button>
     </div>
-    ${fuCard(r)}
+    <div data-g="overview">${fuCard(r)}</div>
     ${nx&&!r.lost?`<div class="nextcard"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
-    ${finBlock(r)}
-    ${planCard(r)}
-    ${expBlock(r)}
-    ${leadConvHtml(r)}
-    <div class="block"><div class="label">Documents <span><button id="newDoc">+ Estimate</button>&nbsp;&nbsp;<button id="newCon">+ Contract</button>&nbsp;&nbsp;<button id="newInv">+ Invoice</button></span></div>
+    <div class="dtabs" id="dTabs">${[['overview','Overview'],['money','Money'],['messages','Messages'],['more','Files & more']].map(([k,n])=>`<button data-dv="${k}" aria-pressed="${dView===k}">${n}</button>`).join('')}</div>
+    <div data-g="money">${finBlock(r)}</div>
+    <div data-g="overview">${planCard(r)}</div>
+    <div data-g="money">${expBlock(r)}</div>
+    <div data-g="messages">${leadConvHtml(r)}</div>
+    <div class="block" data-g="money"><div class="label">Documents <span><button id="newDoc">+ Estimate</button>&nbsp;&nbsp;<button id="newCon">+ Contract</button>&nbsp;&nbsp;<button id="newInv">+ Invoice</button></span></div>
       <div class="group">${docsFor(r.id).length?docsFor(r.id).sort((a,b)=>(isInv(a)-isInv(b))||String(a.number).localeCompare(String(b.number))).map(docListRow).join(''):`<div class="empty" style="padding:16px"><b style="font-size:15px">No estimate yet</b>Create one and send it for online signature.</div>`}</div></div>
-    ${filesBlock(filesFor(r.id),'attachJob')}
-    <div class="block"><div class="label">Job Steps <span>${STEPS.filter(s=>stepDone(r,s.k)).length} of ${STEPS.length}</span></div>
+    <div data-g="more">${filesBlock(filesFor(r.id),'attachJob')}</div>
+    <div class="block" data-g="overview"><div class="label">Job Steps <span>${STEPS.filter(s=>stepDone(r,s.k)).length} of ${STEPS.length}</span></div>
       <div class="group journey" id="journey">${STEPS.map(s=>{const on=stepDone(r,s.k),m=r.ms[s.k]||{};
         let sub=on?(m.date?fmtDate(m.date):'Done'):'';
         if(s.k==='deposit'&&r.payments.length)sub=`${money(r.payments[0].amount)} · ${fmtDate(r.payments[0].date)}`;
@@ -3287,15 +3320,15 @@ function openDetail(id,pan){
           <span class="sx"><b>${s.n}</b>${sub?`<span>${sub}</span>`:''}</span>${dt}</div>
           ${inlinePay===s.k?`<div class="inline"><input id="payAmt" inputmode="decimal" value="${s.k==='deposit'?(T?Math.round(T*.3):''):(B||'')}" placeholder="Amount"><input id="payDate" type="date" value="${today()}" max="${today()}" aria-label="Date received"><select id="payHow" aria-label="How they paid"><option>e-Transfer</option><option>Cheque</option><option>Cash</option><option>Other</option></select><select id="payWho" aria-label="Who took the cash" hidden><option value="">Who took the cash?</option>${PARTNERS.map(n=>`<option>${n}</option>`).join('')}</select><button class="btn" id="payOk">Record</button><button class="btn gray" id="payNo">Cancel</button></div>`:''}`}).join('')}
       </div></div>
-    <div class="block"><div class="label">Payments <button id="addPay">Record Payment</button></div>
+    <div class="block" data-g="money"><div class="label">Payments <button id="addPay">Record Payment</button></div>
       <div class="group">
         <div class="paysum"><div class="nums"><div><span>Contract${r.hst?' + HST':''}${coTotal(r)?' + extras':''}</span><b>${T?money(T+coTotal(r)):'—'}</b></div><div><span>Paid</span><b>${money(P)||'$0'}</b></div><div><span>Balance</span><b style="color:${B>0.5?'var(--s-pay)':'var(--green)'}">${T?money(B):'—'}</b></div></div>
           <div class="bar"><i style="width:${T?Math.min(100,P/(T+coTotal(r))*100):0}%"></i></div></div>
         ${r.payments.map((p,i)=>{const m=pmOf(p),rest=payNoteRest(p),cb=cashBy(p);return `<div class="pay"><span class="payl"><input type="date" class="payd" data-payd="${i}" value="${esc(p.date)}" aria-label="Date received">${rest?'<em>'+esc(rest)+'</em>':''}<select class="paym" data-paym="${i}" aria-label="How they paid">${['','e-Transfer','Cheque','Cash','Other'].map(o=>`<option value="${o}"${o===m?' selected':''}>${o||'How paid?'}</option>`).join('')}</select>${m==='Cash'?`<select class="paym${cb?'':' need'}" data-payw="${i}" aria-label="Who took the cash"><option value="">Who took it?</option>${PARTNERS.map(n=>`<option${n===cb?' selected':''}>${n}</option>`).join('')}</select>`:''}</span><span><b>${money(p.amount)}</b><button data-delpay="${i}" aria-label="Remove payment">${ico('x')}</button></span></div>`}).join('')}
         ${inlinePay==='extra'?`<div class="inline" style="padding-left:14px"><input id="payAmt" inputmode="decimal" placeholder="Amount" value="${B||''}"><input id="payDate" type="date" value="${today()}" max="${today()}" aria-label="Date received"><select id="payHow" aria-label="How they paid"><option>e-Transfer</option><option>Cheque</option><option>Cash</option><option>Other</option></select><select id="payWho" aria-label="Who took the cash" hidden><option value="">Who took the cash?</option>${PARTNERS.map(n=>`<option>${n}</option>`).join('')}</select><button class="btn" id="payOk">Record</button><button class="btn gray" id="payNo">Cancel</button></div>`:''}
       </div></div>
-    ${evs.length?`<div class="block"><div class="label">Scheduled</div><div class="group">${evs.map(e=>calRow({key:'e:'+e.id,type:e.type,title:e.title,time:e.time,date:e.date,done:e.done,job:null})).join('')}</div></div>`:''}
-    <div class="block"><div class="label">Details</div>
+    ${evs.length?`<div class="block" data-g="overview"><div class="label">Scheduled</div><div class="group">${evs.map(e=>calRow({key:'e:'+e.id,type:e.type,title:e.title,time:e.time,date:e.date,done:e.done,job:null})).join('')}</div></div>`:''}
+    <div class="block" data-g="overview"><div class="label">Details</div>
       <div class="group info">
         <div class="r"><span>Source</span><b>${esc(r.source)||'—'}</b></div>
         ${r.partnerId&&part(r.partnerId)?`<div class="r"><span>Referred by</span><b><button class="dlink" data-openpartner="${r.partnerId}">${esc(part(r.partnerId).name)}</button></b></div><div class="r"><span>Commission</span><b><button class="dlink" data-feejob="${r.id}">${r.refFee?money(r.refFee)+(r.refPaid?' · paid':' · to pay'):'Set amount'}</button></b></div>`:''}
@@ -3303,10 +3336,10 @@ function openDetail(id,pan){
         <div class="r"><span>Email</span><b>${esc(r.email)||'—'}</b></div>
         <div class="r"><span>Follow-up</span><b>${r.follow?fmtDate(r.follow):'—'}</b></div>
       </div></div>
-    ${r.notes?`<div class="block"><div class="label">Notes <button id="dNotesEdit">Edit</button></div>${renderNotes(r.notes)}</div>`:''}
-    <div class="block"><div class="label">Activity</div>
+    ${r.notes?`<div class="block" data-g="overview"><div class="label">Notes <button id="dNotesEdit">Edit</button></div>${renderNotes(r.notes)}</div>`:''}
+    <div class="block" data-g="more"><div class="label">Activity</div>
       <div class="hist">${[...r.history].reverse().slice(0,12).map(h=>`<div><i></i><span>${esc(h.t)}<small>${fmtDate(h.d)}${h.by?' · '+esc(h.by):''}</small></span></div>`).join('')}</div></div>
-    <div class="block group linkbtns">
+    <div class="block group linkbtns" data-g="more">
       <button class="row" id="dShowMap">Show on Map</button>
       <a class="row" target="_blank" rel="noopener" href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${r.lat},${r.lng}">Open Street View</a>
       <button class="row" id="dGpin">Set Pin from Google Maps</button>
@@ -3324,6 +3357,7 @@ function openDetail(id,pan){
   bindLeadConv(r);markLeadRead(r);
   if($('planOpen'))$('planOpen').onclick=()=>openPlan(r);if($('planSched'))$('planSched').onclick=()=>openSched(r,false);
   bindExp(r,v);bindFu(r,v);bindFin(r);applyFull();if($('dFull'))$('dFull').onclick=()=>{jobFull=!jobFull;try{localStorage.setItem('nv-jobfull',jobFull?'1':'0')}catch(e){}openDetail(r.id)};
+  $('dTabs').onclick=e=>{const b=e.target.closest('[data-dv]');if(!b)return;dView=b.dataset.dv;const sc=v.querySelector('.scroll');sc.dataset.dv=dView;$('dTabs').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(sc.scrollTop>$('dTabs').offsetTop)sc.scrollTop=$('dTabs').offsetTop};
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
   if($('dNotesEdit'))$('dNotesEdit').onclick=()=>{openForm(r);setTimeout(()=>$('f-notes').focus(),300)};
