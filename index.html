@@ -1440,7 +1440,7 @@ button.crow:active{background:var(--card2)}
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.47 (Nov 9) · Job costing';
+const APP_VERSION='1.48 (Nov 11) · Job costing fix';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -3180,7 +3180,7 @@ const subFiles=id=>(db.files||[]).filter(f=>f.contractor_id===id).sort((a,b)=>St
 /* ---------- job costing: what jobs really cost, compared with their price ---------- */
 /* price = contract + approved extras, without HST · cost = expenses − returns + contractor work in the job plan (paid and unpaid) */
 const CCOL={'Materials':'#0a84ff','Labour':'#ff9f0a','Equipment / Tools':'#bf5af2','Permits / Fees':'#5ac8fa','Other':'#8e8e93'};
-const pct=v=>v==null?'—':Math.round(v*100)+'%';
+const pct=v=>{if(v==null)return '—';const n=Math.round(v*100);return (n<0?'−':'')+Math.abs(n)+'%'};
 const mcls=m=>m==null?'':m>=.25?'green':m>=.1?'orange':'red';
 const smoney=v=>(v<0?'−':'')+kmoney(Math.abs(v));
 function costOf(r){const f=fin(r),rev=r2(f.tcv-f.hstAll),cost=r2(f.net+f.owed),cats=Object.assign({},f.cats);cats.Labour=(cats.Labour||0)+f.owed;
