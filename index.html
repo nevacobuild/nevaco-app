@@ -663,6 +663,22 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 .task.onsite{display:flex;align-items:center;gap:10px}.task.onsite .tt{flex:1;text-align:left}
 /* ===== customers ===== */
 #sCust .searchbox{margin:0 32px 12px;max-width:820px}
+.lbar{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.lbar .cfil{flex:1;min-width:0}
+.lmore{flex:none;padding:7px 12px;border-radius:999px;background:var(--card);font-weight:600;font-size:13.5px;color:var(--label2);display:flex;align-items:center;gap:6px}
+.lmore[aria-expanded="true"]{color:var(--label)}
+.lmore i{width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.lpanel{background:var(--card2);border-radius:14px;padding:12px 12px 2px;margin:0 0 14px}
+.lpanel .srctabs,.lpanel .cfil{margin-bottom:10px}
+.lpl{font-size:12px;color:var(--label2);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin:0 2px 6px}
+.lpf{display:flex;gap:16px;flex-wrap:wrap;margin:0 2px 10px}
+.lpf button{color:var(--blue);font-size:14px;font-weight:600}
+.metacard{position:relative}
+.gx{position:absolute;top:8px;right:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--label3)}
+.gx svg{width:16px;height:16px}
+.backlink{display:block;color:var(--blue);font-size:15px;font-weight:600;margin:0 0 2px;padding:4px 8px 4px 0}
+.pay button{min-width:30px;min-height:30px;margin-left:12px;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+.pay button.sure{color:var(--red);font-weight:600;font-size:13px;padding:0 8px}
 .cfil{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
 .cfil button{padding:7px 12px;border-radius:999px;background:var(--card);font-weight:600;font-size:13.5px;display:flex;gap:6px;align-items:center}
 .cfil button em{font-style:normal;color:var(--label2);font-variant-numeric:tabular-nums}
@@ -973,7 +989,7 @@ button.crow:active{background:var(--card2)}
   <button class="navbtn" data-tab="part" aria-selected="false"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em id="partCount" hidden></em></button>
   <button class="navbtn" data-tab="crew" aria-selected="false"><span class="ni" style="--nc:#a2845e"><svg class="i" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M2.5 15h19v2.5h-19z"/><path d="M10 7.2V5h4v2.2"/></svg></span>Contractors<em class="scount" hidden></em></button>
   <button class="navbtn" data-tab="cost" aria-selected="false"><span class="ni" style="--nc:#34c759"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Job Costing</button>
-  <button class="navbtn" data-tab="lost" aria-selected="false"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg></span>Not Interested<em class="ncount" hidden></em></button>
+  
   <button class="navbtn" data-tab="cal" aria-selected="false"><span class="ni" style="--nc:var(--orange)"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></span>Calendar</button>
   <button class="navbtn" data-tab="map" aria-selected="false"><span class="ni" style="--nc:var(--green)"><svg class="i" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span>Map</button>
   <button class="newbtn" id="addBtn"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New Customer</button>
@@ -986,7 +1002,7 @@ button.crow:active{background:var(--card2)}
   </section>
   <section class="screen" id="sLeads" hidden>
     <header class="lt"><div><h1>Leads</h1><div class="sub" id="leadsSub">New customers</div></div>
-      <div class="tools"><button class="iconbtn dark" id="leadAdd" aria-label="Add lead"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
+      <div class="tools"><button class="pill" id="oppBtn" hidden></button><button class="iconbtn dark" id="leadAdd" aria-label="Add lead"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
     <label class="searchbox" id="leadSearchWrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lq" type="search" placeholder="Search name, phone, email, city" aria-label="Search leads"></label>
     <div class="scroll"><div class="wrap" id="pLeads"></div></div>
   </section>
@@ -1019,7 +1035,7 @@ button.crow:active{background:var(--card2)}
     <div class="scroll"><div class="wrap" id="pCrew"></div></div>
   </section>
   <section class="screen" id="sLost" hidden>
-    <header class="lt"><div><h1>Not Interested</h1><div class="sub" id="lostSub">Leads that said no · kept for later</div></div></header>
+    <header class="lt"><div><button class="backlink" id="lostBack">‹ Leads</button><h1>Not Interested</h1><div class="sub" id="lostSub">Leads that said no · kept for later</div></div></header>
     <label class="searchbox"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lostq" type="search" placeholder="Search name, phone, city, reason" aria-label="Search not interested"></label>
     <div class="scroll"><div class="wrap" id="pLost"></div></div>
   </section>
@@ -1299,7 +1315,7 @@ button.crow:active{background:var(--card2)}
       <button class="row" data-more="part"><span class="ni" style="--nc:#ff2d55"><svg class="i" viewBox="0 0 24 24"><path d="m11 17 2 2a1.4 1.4 0 0 0 2-2"/><path d="m14 14 2.5 2.5a1.4 1.4 0 0 0 2-2l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1.4 1.4 0 0 1-2-2L11.4 7a3 3 0 0 1 3.6-.5l.6.3a3 3 0 0 0 2.3.2L21 6M3 6l3.1 1a3 3 0 0 0 2.3-.2M21 13l-2 2M3 13l7.3 7.3a1.4 1.4 0 0 0 2-2"/></svg></span>Partners<em class="pcount" hidden></em></button>
       <button class="row" data-more="crew"><span class="ni" style="--nc:#a2845e"><svg class="i" viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0"/><path d="M2.5 15h19v2.5h-19z"/><path d="M10 7.2V5h4v2.2"/></svg></span>Contractors<em class="scount" hidden></em></button>
       <button class="row" data-more="cost"><span class="ni" style="--nc:#34c759"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Job Costing</button>
-      <button class="row" data-more="lost"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"/></svg></span>Not Interested<em class="ncount" hidden></em></button>
+      
     </div><div class="group"><button class="row" data-more="acct"><span class="ni" style="--nc:#8e8e93"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>Account & notifications</button></div></div>
   </div>
 </div>
@@ -1462,7 +1478,7 @@ button.crow:active{background:var(--card2)}
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.49 (Nov 11) · Simpler Today and job page';
+const APP_VERSION='1.50 (Nov 11) · Simpler Leads';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -2395,13 +2411,13 @@ function leadState(r){if(r.lost)return 'lost';const lm=jmails(r).at(-1);
 const fuDue=r=>!r.lost&&!!r.follow&&r.follow<=today();
 const leadNeeds=r=>isLead(r)&&!r.lost&&(['reply','new'].includes(leadState(r))||fuDue(r));
 const LST={new:{n:'New · not contacted',c:'--p1'},reply:{n:'Needs reply',c:'--blue'},replied:{n:'Replied',c:'--green'},lost:{n:'Lost',c:'--p0'}};
-let leadSrc='all',leadFilter='all',leadQuery='',leadView='list';
+let leadSrc='all',leadFilter=null,leadQuery='',leadView='list',leadMore=false;   // leadFilter null = automatic: 'Needs you' when someone is waiting, else all
 let metaSt=null,metaLoading=false;
 async function loadMeta(){if(metaLoading||!gmailSt.connected&&!partReady)return;metaLoading=true;try{metaSt=await gm('meta_status')}catch(e){metaSt={error:e.message,pages:[]}}metaLoading=false;if(tab==='leads')renderLeads()}
 function metaBar(){
   if(!metaSt){loadMeta();return ''}
   const pages=metaSt.pages||[];
-  if(!pages.length)return `<div class="gcard metacard"><span class="gico fb">${ico('lead')}</span><div><b>Connect Facebook &amp; Instagram lead forms</b><p>Leads from your ads come in here the moment someone submits the form, with their answers.</p>${metaSt.configured?'<button class="btn" id="metaConn">Connect Facebook</button>':'<p class="gerr">One-time setup needed on Facebook (Meta app).</p>'}</div></div>`;
+  if(!pages.length)return safe(()=>localStorage.getItem('nv-meta-hide'))==='1'?'':`<div class="gcard metacard"><button class="gx" data-metahide aria-label="Hide">${ico('x')}</button><span class="gico fb">${ico('lead')}</span><div><b>Connect Facebook &amp; Instagram lead forms</b><p>Leads from your ads come in here the moment someone submits the form, with their answers.</p>${metaSt.configured?'<button class="btn" id="metaConn">Connect Facebook</button>':'<p class="gerr">One-time setup needed on Facebook (Meta app).</p>'}</div></div>`;
   if(!['facebook','instagram'].includes(leadSrc))return '';
   const err=pages.find(p=>p.last_error);
   return `<div class="gbar${err?' warn':''}"><span class="gdot"></span><span class="gt">${err?esc(err.last_error):`<b>Facebook &amp; Instagram connected</b> · ${esc(pages.map(p=>p.name).join(', '))}${pages.some(p=>p.last_lead_at)?' · last lead '+ago(pages.map(p=>p.last_lead_at).filter(Boolean).sort().at(-1)):''}`}</span><button id="metaSync">Check now</button></div>`;
@@ -2416,19 +2432,23 @@ function renderLeads(){
   const inSrc=r=>leadSrc==='all'||srcKey(r)===leadSrc;
   const F=[{k:'all',n:'Open',f:r=>!r.lost},{k:'needs',n:'Needs you',f:leadNeeds},{k:'new',n:'New',f:r=>leadState(r)==='new'},{k:'reply',n:'Needs reply',f:r=>leadState(r)==='reply'},{k:'replied',n:'Replied',f:r=>!r.lost&&leadState(r)==='replied'&&stageOf(r)==='lead'},
     {k:'visit',n:'Site visit',f:r=>!r.lost&&['visit','quote'].includes(stageOf(r))},{k:'estimate',n:'Estimate sent',f:r=>!r.lost&&stageOf(r)==='sent'},{k:'follow',n:'Follow-up due',f:fuDue},{k:'nofu',n:'No follow-up set',f:r=>!r.lost&&!r.follow&&stepDone(r,'contacted')&&['lead','sent'].includes(stageOf(r))}];
-  const fl=F.find(x=>x.k===leadFilter)||F[0];
+  const want=leadFilter||(L.some(leadNeeds)?'needs':'all'),fl=F.find(x=>x.k===want)||F[0];
   const base=L.filter(inSrc);
   const list=base.filter(r=>fl.f(r)&&(!q||[r.name,r.email,r.phone,r.city,r.address,r.type,r.notes].join(' ').toLowerCase().includes(q)))
-    .sort((a,b)=>((leadNeeds(b)?2:0)+(jUnread(b)?1:0))-((leadNeeds(a)?2:0)+(jUnread(a)?1:0))||String(leadAt(b)).localeCompare(String(leadAt(a))));
-  const wk=addDays(today(),-7);
-  $('leadsSub').textContent=`${L.filter(r=>!r.lost).length} open · ${L.filter(leadNeeds).length} need you`;
-  const tabs=`<div class="srctabs">${S.map(s=>{const n=s.k==='all'?L.filter(r=>!r.lost).length:L.filter(r=>!r.lost&&srcKey(r)===s.k).length;return `<button data-src="${s.k}" aria-pressed="${leadView==='list'&&leadSrc===s.k}" style="--c:${s.k==='all'?'var(--label)':SRC[s.k].c}">${s.k!=='all'?'<i></i>':''}${s.n}${n?`<em>${n}</em>`:''}</button>`}).join('')}<button data-src="opps" aria-pressed="${leadView==='opps'}" style="--c:#f26722">${ico('star')}Opportunities${opps.length?`<em>${opps.length}</em>`:''}</button></div>`;
-  if(leadView==='opps'){$('pLeads').innerHTML=tabs+oppsHtml(opps);return}
-  const mb=metaBar();
-  const est=base.filter(r=>!r.lost&&stageOf(r)==='sent');
-  $('pLeads').innerHTML=mb+tabs+`<div class="pstats"><div class="mt"><b>${base.filter(leadNeeds).length}</b><span>Need you</span></div><div class="mt"><b>${base.filter(r=>(r.date||'')>=wk||String(r.history?.[0]?.d||'')>=wk).length}</b><span>New this week</span></div><div class="mt"><b>${base.filter(r=>!r.lost&&['visit','quote'].includes(stageOf(r))).length}</b><span>Site visits</span></div><div class="mt"><b>${est.length}</b><span>Estimates${est.length?' · '+kmoney(est.reduce((t,r)=>t+total(r),0)):''}</span></div></div>
-    <div class="cfil">${F.filter(f=>['all','needs'].includes(f.k)||base.some(f.f)).map(f=>`<button data-lf="${f.k}" aria-pressed="${f.k===fl.k}">${f.n}<em>${base.filter(f.f).length}</em></button>`).join('')}</div>
-    ${list.length?`<div class="group">${list.map(leadRow).join('')}</div>`:`<div class="pempty">${ico('lead','i big')}<b>${leadFilter==='needs'?'All caught up':'No leads here'}</b><p>${leadFilter==='needs'?'Every lead has an answer from you.':'New leads from your website, HomeStars and ads show up here automatically.'}</p></div>`}`;
+    .sort(fl.k==='needs'?(a,b)=>String(leadAt(a)).localeCompare(String(leadAt(b)))   // waiting longest first
+      :(a,b)=>((leadNeeds(b)?2:0)+(jUnread(b)?1:0))-((leadNeeds(a)?2:0)+(jUnread(a)?1:0))||String(leadAt(b)).localeCompare(String(leadAt(a))));
+  const wk=addDays(today(),-7),open=L.filter(r=>!r.lost),est=open.filter(r=>stageOf(r)==='sent'),lostN=lostList().length;
+  const nNew=open.filter(r=>(r.date||'')>=wk||String(r.history?.[0]?.d||'')>=wk).length,nVis=open.filter(r=>['visit','quote'].includes(stageOf(r))).length;
+  $('leadsSub').textContent=[`${open.length} open`,nNew?`${nNew} new this week`:'',nVis?`${nVis} site visit${nVis===1?'':'s'}`:'',est.length?`${est.length} estimate${est.length===1?'':'s'} out · ${kmoney(est.reduce((t,r)=>t+total(r),0))}`:''].filter(Boolean).join(' · ');
+  const ob=$('oppBtn');ob.hidden=!opps.length&&leadView!=='opps';ob.textContent=leadView==='opps'?'Back to leads':`Opportunities ${opps.length}`;
+  const extra=F.filter(f=>!['all','needs'].includes(f.k)&&base.some(f.f)),act=leadSrc!=='all'||!['all','needs'].includes(fl.k),panel=leadMore||act;
+  const chipF=f=>`<button data-lf="${f.k}" aria-pressed="${leadView==='list'&&f.k===fl.k}">${f.n==='Open'?'All':f.n}<em>${base.filter(f.f).length}</em></button>`;
+  const bar=`<div class="lbar"><div class="cfil">${chipF(F[1])}${chipF(F[0])}${lostN?`<button data-golost aria-pressed="false">Not interested<em>${lostN}</em></button>`:''}</div><button class="lmore${act?' on':''}" data-lmore aria-expanded="${panel}">Filter${act?'<i></i>':''}</button></div>`;
+  if(leadView==='opps'){$('pLeads').innerHTML=bar+oppsHtml(opps);return}
+  const srcs=`<div class="srctabs">${S.map(s=>{const n=s.k==='all'?open.length:open.filter(r=>srcKey(r)===s.k).length;return `<button data-src="${s.k}" aria-pressed="${leadSrc===s.k}" style="--c:${s.k==='all'?'var(--label)':SRC[s.k].c}">${s.k!=='all'?'<i></i>':''}${s.n}${n?`<em>${n}</em>`:''}</button>`}).join('')}</div>`;
+  const metaOff=metaSt&&!(metaSt.pages||[]).length&&safe(()=>localStorage.getItem('nv-meta-hide'))==='1';
+  $('pLeads').innerHTML=metaBar()+bar+(panel?`<div class="lpanel"><div class="lpl">Source</div>${srcs}${extra.length?`<div class="lpl">Status</div><div class="cfil">${extra.map(chipF).join('')}</div>`:''}<div class="lpf">${act?'<button data-lclear>Clear filters</button>':''}${metaOff?'<button data-metashow>Connect Facebook &amp; Instagram</button>':''}</div></div>`:'')
+    +(list.length?`<div class="group">${list.map(leadRow).join('')}</div>`:`<div class="pempty">${ico('lead','i big')}<b>${fl.k==='needs'?'All caught up':'No leads here'}</b><p>${fl.k==='needs'?'Every lead has an answer from you.':'New leads from your website, HomeStars and ads show up here automatically.'}</p></div>`);
 }
 const leadAt=r=>{const lm=jmails(r).at(-1);return lm?lm.at:(r.history?.[0]?.d||r.date||'')};
 function leadRow(r){const sk=srcKey(r),st=leadState(r),lm=jmails(r).at(-1),un=jUnread(r),stg=stageOf(r);
@@ -2450,11 +2470,17 @@ function oppsHtml(opps){
   return `${inv.length?`<div class="label">Invites</div><div class="opps">${inv.map(card).join('')}</div>`:''}
     <div class="label">HomeStars leads in your area · last 14 days</div><div class="opps">${area.map(card).join('')}</div>`;
 }
+$('oppBtn').onclick=()=>{leadView=leadView==='opps'?'list':'opps';renderLeads()};
 $('pLeads').addEventListener('click',async e=>{
   if(e.target.id==='metaConn'){metaConnect(e.target);return}
   if(e.target.id==='metaSync'){metaSync(e.target,7);return}
-  const s=e.target.closest('[data-src]');if(s){if(s.dataset.src==='opps'){leadView='opps'}else{leadView='list';leadSrc=s.dataset.src}renderLeads();return}
-  const f=e.target.closest('[data-lf]');if(f){leadFilter=f.dataset.lf;renderLeads();return}
+  if(e.target.closest('[data-metahide]')){safe(()=>localStorage.setItem('nv-meta-hide','1'));renderLeads();return}
+  if(e.target.closest('[data-metashow]')){safe(()=>localStorage.removeItem('nv-meta-hide'));renderLeads();return}
+  if(e.target.closest('[data-lmore]')){leadMore=!leadMore;renderLeads();return}
+  if(e.target.closest('[data-lclear]')){leadSrc='all';leadFilter=null;leadMore=false;renderLeads();return}
+  if(e.target.closest('[data-golost]')){setTab('lost');return}
+  const s=e.target.closest('[data-src]');if(s){leadView='list';leadSrc=s.dataset.src;renderLeads();return}
+  const f=e.target.closest('[data-lf]');if(f){leadView='list';leadFilter=f.dataset.lf;renderLeads();return}
   const x=e.target.closest('[data-oppx]');if(x){const o=(db.opps||[]).find(y=>y.id===x.dataset.oppx);if(o){o.status='dismissed';renderLeads();renderLeadCount();sb.from('opportunities').update({status:'dismissed'}).eq('id',o.id).then(()=>{},()=>{})}return}
   const r=e.target.closest('[data-lead]');if(r)openDetail(r.dataset.lead,true)});
 $('lq').oninput=e=>{leadQuery=e.target.value.trim();renderLeads()};
@@ -2685,6 +2711,7 @@ $('callForm').onsubmit=async e=>{e.preventDefault();const r=callFor;if(!r)return
 let lostWhyF='all',lostQ='';
 const lostList=()=>data.filter(r=>r.lost&&isLead(r));
 function renderLostCount(){const n=lostList().length;document.querySelectorAll('.ncount').forEach(x=>{x.textContent=n;x.hidden=!n})}
+$('lostBack').onclick=()=>setTab('leads');
 function renderLost(){
   const L=lostList(),q=lostQ.toLowerCase(),wf=r=>r.ms.lostWhy||'No reason saved';
   const whys=[...new Set(L.map(wf))].sort((a,b)=>L.filter(r=>wf(r)===b).length-L.filter(r=>wf(r)===a).length);
@@ -3249,8 +3276,8 @@ $('pCost').onclick=e=>{const b=e.target.closest('button.crow');if(!b)return;cons
 
 /* ---------- tabs ---------- */
 function setTab(t){tab=t;
-  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
-  $('moreBtn').setAttribute('aria-selected',['cust','part','crew','lost','cost'].includes(t));
+  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t||(t==='lost'&&b.dataset.tab==='leads')));
+  $('moreBtn').setAttribute('aria-selected',['cust','part','crew','cost'].includes(t));
   ['today','leads','jobs','cust','part','crew','lost','cost','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',crew:'sCrew',lost:'sLost',cost:'sCost',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
   if(t!=='map'&&isPhone()&&selId&&false)closeDetail();
   render();
@@ -3400,7 +3427,7 @@ function openDetail(id,pan){
   v.querySelectorAll('[data-payd]').forEach(inp=>inp.onchange=()=>{const p=r.payments[+inp.dataset.payd];if(!p||!inp.value)return;p.date=inp.value;log(r,`Payment of ${money(p.amount)} dated ${fmtDate(inp.value)}`);save();render();openDetail(r.id)});
   v.querySelectorAll('[data-payw]').forEach(sl=>sl.onchange=()=>{const p=r.payments[+sl.dataset.payw];if(!p)return;setPayNote(p,'Cash',sl.value);log(r,`Cash ${money(p.amount)} taken by ${sl.value||'—'}`);save();render();openDetail(r.id)});
   v.querySelectorAll('[data-paym]').forEach(sl=>sl.onchange=()=>{const p=r.payments[+sl.dataset.paym];if(!p)return;setPayNote(p,sl.value,cashBy(p));log(r,`Payment of ${money(p.amount)} marked as ${sl.value||'not set'}`);save();render();openDetail(r.id)});
-  v.querySelectorAll('[data-delpay]').forEach(b=>b.onclick=()=>{snapshot();const p=r.payments.splice(+b.dataset.delpay,1)[0];log(r,`Payment removed ${money(p.amount)}`);save();render();openDetail(r.id);toast('Payment removed',true)});
+  v.querySelectorAll('[data-delpay]').forEach(b=>b.onclick=()=>{if(!b.classList.contains('sure')){const h=b.innerHTML;b.classList.add('sure');b.textContent='Delete?';setTimeout(()=>{if(b.isConnected){b.classList.remove('sure');b.innerHTML=h}},3500);return}snapshot();const p=r.payments.splice(+b.dataset.delpay,1)[0];log(r,`Payment removed ${money(p.amount)}`);save();render();openDetail(r.id);toast('Payment removed',true)});
   v.querySelectorAll('[data-cal]').forEach(b=>b.onclick=()=>{const e=db.events.find(x=>'e:'+x.id===b.dataset.cal);if(e)openEvent(e)});
   $('dDel').onclick=()=>{$('dConfirm').innerHTML=`<div class="group linkbtns"><div style="padding:14px;text-align:center;color:var(--label2);font-size:13px">Delete ${esc(r.name)}? This can’t be undone.</div><button class="row danger" id="dYes" style="font-weight:600">Delete</button><button class="row" id="dNo">Cancel</button></div>`;
     $('dYes').onclick=()=>{snapshot();db.jobs=data=data.filter(x=>x.id!==r.id);db.events=db.events.filter(x=>x.jobId!==r.id);db.docs=(db.docs||[]).filter(x=>x.jobId!==r.id);db.files=(db.files||[]).filter(x=>x.job_id!==r.id);save();closeDetail();render();toast('Customer deleted',true)};$('dNo').onclick=()=>$('dConfirm').innerHTML='';$('dConfirm').scrollIntoView({behavior:'smooth',block:'nearest'})};
