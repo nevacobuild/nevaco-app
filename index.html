@@ -228,6 +228,13 @@ details.fold:not([open])>summary h3{font-size:17px}
 .detail:not(.full) .scroll[data-dv="money"] [data-g]:not([data-g="money"]),
 .detail:not(.full) .scroll[data-dv="messages"] [data-g]:not([data-g="messages"]),
 .detail:not(.full) .scroll[data-dv="more"] [data-g]:not([data-g="more"]){display:none}
+#remModal .fg label{display:block}
+#remModal .fg label>span{display:block;width:auto;margin-bottom:6px;color:var(--label2);font-size:13px}
+#remModal .fg input,#remModal .fg textarea{width:100%;text-align:left;padding-left:14px;padding-right:14px;box-sizing:border-box}
+#remModal .fg textarea{min-height:230px;line-height:1.4}
+.nextcard .rbtn{margin-left:auto;flex:none;height:36px;padding:0 14px;border-radius:18px;background:var(--blue);color:#fff;font-weight:600;font-size:14px}
+.nextcard .remnote{display:block;margin-top:2px;font-size:12.5px;color:var(--label2)}
+.nextcard>div{min-width:0}
 .nextcard{background:var(--card);border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin-bottom:20px}
 .nextcard .gl{width:38px;height:38px}
 .nextcard b{display:block;font-size:12px;color:var(--label2);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
@@ -1468,6 +1475,20 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
   </form>
 </div>
 
+<div class="scrim" id="remModal" hidden>
+  <form class="sheet" id="remForm" novalidate>
+    <header><button type="button" id="remCancel">Cancel</button><h3>Payment reminder</h3><button type="submit" class="save" id="remSend">Send</button></header>
+    <div class="body">
+      <div class="fghead" id="remWho"></div>
+      <div class="cfil" id="remCh"></div>
+      <div class="fg">
+        <label id="remSubjRow"><span>Subject</span><input id="rem-subj"></label>
+        <label><span>Message</span><textarea id="rem-body" rows="11"></textarea></label>
+      </div>
+      <p class="fnote" id="remNote"></p>
+    </div>
+  </form>
+</div>
 <div class="scrim" id="feeModal" hidden>
   <form class="sheet" id="feeForm" novalidate>
     <header><button type="button" id="feeCancel">Cancel</button><h3>Referral Commission</h3><button type="submit" class="save">Save</button></header>
@@ -1544,7 +1565,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.55 (Nov 14) · Tidy-ups';
+const APP_VERSION='1.56 (Nov 14) · Payment reminders';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1889,6 +1910,9 @@ function todoItems(){
     items.push({key:'inv'+d.id,job:r,ic:'pay',c:'--s-pay',title:`Payment due · ${r.name}`,sub:`${d.number} · ${money(invDue(d))} · sent ${age?age+' day'+(age>1?'s':'')+' ago':'today'}`,pri:age>=7?1:2,doc:d.id})}
   for(const e of db.events){if(e.done||e.date>T)continue;const r=e.jobId&&job(e.jobId);const t=EVTYPES[e.type]||EVTYPES.other;
     items.push({key:e.id,job:r||null,date:e.date,time:e.time,ic:t.ic,c:t.c,title:e.title+(r?` · ${r.name}`:''),sub:t.n+(e.notes?' · '+e.notes:''),act:()=>{e.done=true;if(r)log(r,'Done: '+e.title)}});}
+  /* after a payment reminder the task rests for 5 days, then comes back saying how long ago it was sent */
+  for(const i of items){if(!i.job||!i.job.ms.remind?.at)continue;const k=String(i.key);if(!(k===i.job.id+'p'||k===i.job.id+'d'||k.startsWith('inv')))continue;
+    const n=dayDiff(T,i.job.ms.remind.at);if(n<0)continue;i.sub=(n<5?`Reminder sent ${n?fmtDate(i.job.ms.remind.at):'today'}`:`Reminded ${n} days ago`)+' · '+(i.sub||'');if(n<5)i.pri=3}
   return items;
 }
 function renderToday(){
@@ -3377,6 +3401,56 @@ $('findClose').onclick=()=>hideModal('findModal');$('findModal').onclick=e=>{if(
 document.querySelectorAll('.js-find').forEach(b=>b.onclick=openFind);
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openFind()}else if(e.key==='Escape'&&!$('findModal').hidden)hideModal('findModal')});
 
+/* ---------- payment reminder: a ready message by email, WhatsApp or text; the task rests for 5 days after ---------- */
+const MAILRE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const canRemind=r=>!r.lost&&total(r)>0&&balance(r)>0.5&&(stepDone(r,'contract')||stepDone(r,'complete')||stepDone(r,'deposit'));
+const remIsDeposit=r=>stepDone(r,'contract')&&!stepDone(r,'deposit')&&!stepDone(r,'complete')&&!(r.payments||[]).length;
+const remDue=r=>remIsDeposit(r)?Math.min(balance(r),Math.round(total(r)*.3)):balance(r);
+const REMCH={email:'Email',wa:'WhatsApp',sms:'Text'};
+let remJob=null,remCh='email';
+function remChannels(r){const c=[];if(MAILRE.test((r.email||'').trim()))c.push('email');if(digits(r.phone).length===10){c.push('wa');if(isPhone())c.push('sms')}return c}
+function remText(r,ch){
+  const nm=looksLikeAddress(r.name)?'there':firstName(r),amt=money(remDue(r)),what=r.address?`the work at ${r.address}`:`your ${String(r.type||'renovation').toLowerCase()} project`;
+  const inv=(db.docs||[]).filter(d=>d.jobId===r.id&&isInv(d)&&d.status==='sent').sort((a,b)=>String(a.number).localeCompare(String(b.number))).at(-1);
+  const again=(r.ms.remind?.n||0)>0,dep=remIsDeposit(r);
+  const lead=again?`Just following up on my earlier message. The ${dep?'deposit':stepDone(r,'complete')?'final payment':'payment'} for ${what} is still open.`
+    :dep?`This is a friendly reminder that the deposit for ${what} is still open.`
+    :stepDone(r,'complete')?`Thank you again for choosing NEVACO BUILD. This is a friendly reminder that the final payment for ${what} is still open.`
+    :`This is a friendly reminder that a payment for ${what} is still open.`;
+  const t=[`Hi ${nm},`,'',lead,'',`Amount due: ${amt}`,...(inv?[`Invoice: ${docLink(inv)}`]:[]),'',`You can pay by e-Transfer. If you would like to pay another way, or if anything looks different on your side, just reply to this message.`,'',ch==='email'?'Thank you,':`Thank you,\n${me_name()} · NEVACO BUILD`];
+  return t.join('\n')}
+function remPaint(){const r=remJob,chs=remChannels(r);
+  if(chs.length&&!chs.includes(remCh))remCh=chs[0];
+  $('remCh').innerHTML=chs.map(c=>`<button type="button" data-rc="${c}" aria-pressed="${c===remCh}">${REMCH[c]}</button>`).join('');
+  $('remCh').hidden=chs.length<2;
+  $('remSubjRow').hidden=remCh!=='email';
+  $('remSend').disabled=!chs.length;
+  $('remSend').textContent=remCh==='wa'?'Open WhatsApp':remCh==='sms'?'Open Messages':gmailSt.connected?'Send':'Open Gmail';
+  $('remWho').textContent=`${r.name} · ${money(remDue(r))} due`;
+  $('remNote').innerHTML=!chs.length?`There is no email or mobile number for ${esc(r.name)} yet. <button type="button" class="dlink" id="remEdit">Add contact details</button>`
+    :remCh==='email'?(gmailSt.connected?'Sends from nevacobuild@gmail.com with your signature.':'Gmail is not connected, so this opens Gmail with the message ready.')
+    :'Your messaging app opens with the message ready. Press send there.'}
+function openReminder(r){
+  remJob=r;remCh=remChannels(r)[0]||'email';
+  $('rem-subj').value=`Payment reminder${r.address?' · '+r.address:''}`;
+  $('rem-body').value=remText(r,remCh);remPaint();showModal('remModal');
+}
+$('remCh').onclick=e=>{const b=e.target.closest('[data-rc]');if(!b)return;const was=remText(remJob,remCh)===$('rem-body').value;remCh=b.dataset.rc;if(was)$('rem-body').value=remText(remJob,remCh);remPaint()};
+$('remNote').onclick=e=>{if(e.target.id==='remEdit'){const r=remJob;hideModal('remModal');setTimeout(()=>openForm(r),200)}};
+$('remCancel').onclick=()=>hideModal('remModal');$('remModal').onclick=e=>{if(e.target.id==='remModal')hideModal('remModal')};
+$('remForm').onsubmit=async e=>{e.preventDefault();const r=remJob;if(!r)return;
+  const body=$('rem-body').value.trim(),subject=$('rem-subj').value.trim()||'Payment reminder',amt=money(remDue(r)),ph=digits(r.phone),ch=remCh;
+  if(!body){toast('Write a message first');return}
+  if(ch==='wa')window.open(`https://wa.me/1${ph}?text=${encodeURIComponent(body)}`,'_blank','noopener');
+  else if(ch==='sms')location.href=`sms:+1${ph}?&body=${encodeURIComponent(body)}`;
+  else if(!gmailSt.connected)window.open(`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}&view=cm&fs=1&tf=1&to=${encodeURIComponent(r.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,'_blank','noopener');
+  else{const btn=$('remSend');btn.disabled=true;btn.textContent='Sending…';
+    try{if(!(await flush()))throw new Error('Still saving. Try again in a moment.');const res=await gm('send',{job_id:r.id,subject,body,reply_latest:true});if(res&&res.message)addMsg(res.message)}
+    catch(err){toast(err.message,false,true);remPaint();return}}
+  r.ms.remind={at:today(),n:(r.ms.remind?.n||0)+1,via:ch};
+  log(r,`Payment reminder ${ch==='email'&&gmailSt.connected?'sent':'opened'} by ${REMCH[ch].toLowerCase()} · ${amt}`);save();hideModal('remModal');render();if(selId===r.id)openDetail(r.id);
+  toast(ch==='email'&&gmailSt.connected?`Reminder sent to ${firstName(r)}`:'Reminder ready to send')};
+
 /* ---------- tabs ---------- */
 function setTab(t){const was=tab;tab=t;syncDock();
   /* docked panel: moving to another list starts with nothing selected, so the panel never shows someone from a different list */
@@ -3432,7 +3506,7 @@ function openDetail(id,pan){
       <button class="act" id="dCal">${ico('calp')}Schedule</button>
     </div>
     <div data-g="overview">${fuCard(r)}</div>
-    ${nx&&!r.lost?`<div class="nextcard" data-g="overview"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
+    ${nx&&!r.lost?`<div class="nextcard" data-g="overview"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p>${r.ms.remind?.at?`<small class="remnote">Reminder sent ${fmtDate(r.ms.remind.at)}${r.ms.remind.n>1?' · '+r.ms.remind.n+' so far':''}</small>`:''}</div>${canRemind(r)&&nx.pay?'<button class="rbtn" id="remNext">Remind</button>':''}</div>`:''}
     <div class="dtabs" id="dTabs">${[['overview','Overview'],['money','Money'],['messages','Messages'],['more','More']].map(([k,n])=>`<button data-dv="${k}" aria-pressed="${dView===k}">${n}</button>`).join('')}</div>
     <div data-g="money">${finBlock(r)}</div>
     <div data-g="overview">${planCard(r)}</div>
@@ -3452,7 +3526,7 @@ function openDetail(id,pan){
           <span class="sx"><b>${s.n}</b>${sub?`<span>${sub}</span>`:''}</span>${dt}</div>
           ${inlinePay===s.k?`<div class="inline"><input id="payAmt" inputmode="decimal" value="${s.k==='deposit'?(T?Math.round(T*.3):''):(B||'')}" placeholder="Amount"><input id="payDate" type="date" value="${today()}" max="${today()}" aria-label="Date received"><select id="payHow" aria-label="How they paid"><option>e-Transfer</option><option>Cheque</option><option>Cash</option><option>Other</option></select><select id="payWho" aria-label="Who took the cash" hidden><option value="">Who took the cash?</option>${PARTNERS.map(n=>`<option>${n}</option>`).join('')}</select><button class="btn" id="payOk">Record</button><button class="btn gray" id="payNo">Cancel</button></div>`:''}`}).join('')}
       </div></div>
-    <div class="block" data-g="money"><div class="label">Payments <button id="addPay">Record Payment</button></div>
+    <div class="block" data-g="money"><div class="label">Payments <span>${canRemind(r)?'<button id="remindBtn">Send reminder</button>&nbsp;&nbsp;':''}<button id="addPay">Record Payment</button></span></div>
       <div class="group">
         <div class="paysum"><div class="nums"><div><span>Contract${r.hst?' + HST':''}${coTotal(r)?' + extras':''}</span><b>${T?money(T+coTotal(r)):'—'}</b></div><div><span>Paid</span><b>${money(P)||'$0'}</b></div><div><span>Balance</span><b style="color:${B>0.5?'var(--s-pay)':'var(--green)'}">${T?money(B):'—'}</b></div></div>
           <div class="bar"><i style="width:${T?Math.min(100,P/(T+coTotal(r))*100):0}%"></i></div></div>
@@ -3507,6 +3581,7 @@ function openDetail(id,pan){
   $('dShowMap').onclick=()=>{if(isPhone())closeDetail();setTab('map');mapSel=r.id;drawPins();renderCards();setTimeout(()=>{if(r.lat!=null)flyTo(r.lat,r.lng,15);scrollCard(r.id)},80)};
   $('dLost').onclick=()=>{if(!r.lost&&isLead(r)){openCall(r,'notint');return}if(r.lost&&isLead(r)){reopenLead(r);return}snapshot();r.lost=!r.lost;log(r,r.lost?'Marked as lost':'Reopened');save();render();openDetail(r.id);toast(r.lost?'Marked as lost':'Reopened',true)};
   $('addPay').onclick=()=>openPay('extra');
+  if($('remindBtn'))$('remindBtn').onclick=()=>openReminder(r);if($('remNext'))$('remNext').onclick=()=>openReminder(r);
   $('newDoc').onclick=()=>openDoc(null,r);
   $('newCon').onclick=()=>{if(!conReady){toast('Run the contracts setup step first');return}openDoc(null,r,'contract')};
   if($('attachJob'))$('attachJob').onclick=()=>pickFiles(r.id);
