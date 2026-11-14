@@ -807,6 +807,19 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 /* ===== detail drawer ===== */
 .detail{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;z-index:40;background:var(--bg);box-shadow:-12px 0 40px rgba(0,0,0,.18);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .45s var(--ease);padding-top:env(safe-area-inset-top);border-left:.5px solid var(--sep)}
 .detail.open{transform:none}
+/* wide screens: the list sits on the left and the selected person stays open on the right (map and calendar keep the sliding panel) */
+:root{--dw:clamp(440px,30vw,560px)}
+@media (min-width:1280px){
+  body.dock .shell{right:var(--dw)}
+  body.dock .detail{width:var(--dw);transform:none;transition:none;box-shadow:none;border-left:.5px solid var(--sep)}
+  body.dock .detail.full{width:auto;border-left:0}
+  body.dock .screen>.scroll{padding-left:28px;padding-right:28px}
+}
+.dempty{margin:auto;max-width:300px;text-align:center;padding:40px 24px;color:var(--label2)}
+.dempty svg{width:40px;height:40px;color:var(--label3);margin-bottom:10px}
+.dempty b{display:block;color:var(--label);font-size:17px;margin-bottom:6px}
+.dempty p{margin:0 0 4px;font-size:14px;line-height:1.45}
+.dempty kbd{font:inherit;font-size:12px;background:var(--card2);border-radius:5px;padding:1px 6px}
 .detail .scroll{padding:0 18px calc(30px + env(safe-area-inset-bottom))}
 
 .detail .navbar .nvr{display:flex;gap:14px;align-items:center}
@@ -1531,7 +1544,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.53 (Nov 14) · Phone polish';
+const APP_VERSION='1.54 (Nov 14) · Wide screen layout';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -2933,7 +2946,7 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
     <footer class="rp-foot"><span>NEVACO BUILD INC. · nevacobuild.ca</span><span>Updated ${new Date().toLocaleString('en-CA',{dateStyle:'medium',timeStyle:'short'})}</span></footer>`}
 /* full screen job: every part of the job side by side */
 let jobFull=false;
-try{jobFull=localStorage.getItem('nv-jobfull')==='1'}catch(e){}
+try{jobFull=localStorage.getItem('nv-jobfull2')==='1'}catch(e){}
 function masonry(){const v=$('vDetail'),sc=v.querySelector('.scroll');if(!sc||!v.classList.contains('full')||sc.querySelector('.mcols'))return;
   const kids=[...sc.children].filter(k=>!k.matches('.dtitle,.acts,.nextcard,.dtabs,#dConfirm'));if(!kids.length)return;
   const n=Math.max(1,Math.min(4,Math.floor((sc.clientWidth-52+22)/(360+22))));const wrap=document.createElement('div');wrap.className='mcols';
@@ -3357,7 +3370,9 @@ document.querySelectorAll('.js-find').forEach(b=>b.onclick=openFind);
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openFind()}else if(e.key==='Escape'&&!$('findModal').hidden)hideModal('findModal')});
 
 /* ---------- tabs ---------- */
-function setTab(t){tab=t;
+function setTab(t){const was=tab;tab=t;syncDock();
+  /* docked panel: moving to another list starts with nothing selected, so the panel never shows someone from a different list */
+  if(document.body.classList.contains('dock')&&was!==t&&detailOpen()){selId=null;custSel=null;partSel=null;subSel=null;inlinePay=null;$('vDetail').classList.remove('open','full');detailEmpty()}
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t||(t==='lost'&&b.dataset.tab==='leads')));
   $('moreBtn').setAttribute('aria-selected',['cust','part','crew','cost'].includes(t));
   ['today','leads','jobs','cust','part','crew','lost','cost','cal','map'].forEach(k=>{const el=$({today:'sToday',leads:'sLeads',jobs:'sJobs',cust:'sCust',part:'sPart',crew:'sCrew',lost:'sLost',cost:'sCost',cal:'sCal',map:'sMap'}[k]);el.hidden=k!==t;if(k===t){const sc=el.querySelector('.scroll');if(sc)sc.scrollTop=0}});
@@ -3465,7 +3480,7 @@ function openDetail(id,pan){
   </div>`;
   bindLeadConv(r);markLeadRead(r);
   if($('planOpen'))$('planOpen').onclick=()=>openPlan(r);if($('planSched'))$('planSched').onclick=()=>openSched(r,false);
-  bindExp(r,v);bindFu(r,v);bindFin(r);applyFull();threadEnd();if($('dFull'))$('dFull').onclick=()=>{jobFull=!jobFull;try{localStorage.setItem('nv-jobfull',jobFull?'1':'0')}catch(e){}openDetail(r.id)};
+  bindExp(r,v);bindFu(r,v);bindFin(r);applyFull();threadEnd();if($('dFull'))$('dFull').onclick=()=>{jobFull=!jobFull;try{localStorage.setItem('nv-jobfull2',jobFull?'1':'0')}catch(e){}openDetail(r.id)};
   $('dTabs').onclick=e=>{const b=e.target.closest('[data-dv]');if(!b)return;dView=b.dataset.dv;const sc=v.querySelector('.scroll');sc.dataset.dv=dView;$('dTabs').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(dView==='messages')threadEnd();if(isPhone()||sc.scrollTop>$('dTabs').offsetTop)sc.scrollTop=$('dTabs').offsetTop};
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
@@ -3516,7 +3531,14 @@ function openDetail(id,pan){
   v.classList.add('open');
   renderList();drawPins();renderCards();
 }
-function closeDetail(){selId=null;custSel=null;partSel=null;subSel=null;inlinePay=null;$('vDetail').classList.remove('open','full');render()}
+function closeDetail(){selId=null;custSel=null;partSel=null;subSel=null;inlinePay=null;$('vDetail').classList.remove('open','full');render();detailEmpty()}
+/* wide screens: keep the right panel docked, and say what it is for while nothing is selected */
+const DOCKQ=matchMedia('(min-width:1280px)');
+function syncDock(){document.body.classList.toggle('dock',DOCKQ.matches&&!['map','cal'].includes(tab));detailEmpty()}
+const EMPTYT={today:['Open a task','Tap a task to see the customer, the money and the messages.'],leads:['Pick a lead','Read the conversation and reply from here.'],jobs:['Pick a job','See the money, payments, files and job steps.'],cust:['Pick a customer','Everything about the customer opens here.'],part:['Pick a partner','The conversation and referrals open here.'],crew:['Pick a contractor','Insurance, WSIB, pay and files open here.'],lost:['Pick a lead','See why they said no, and call them again later.'],cost:['Tap a job','Its financial report opens here.']};
+function detailEmpty(){const v=$('vDetail');if(!v||!document.body.classList.contains('dock')||v.classList.contains('open'))return;
+  const t=EMPTYT[tab]||EMPTYT.today;v.innerHTML=`<div class="dempty">${ico('lead')}<b>${t[0]}</b><p>${t[1]}</p><p>Search anyone with <kbd>⌘K</kbd></p></div>`}
+DOCKQ.addEventListener('change',syncDock);
 
 /* ---------- map ---------- */
 let map=null;const markers={},seen=new Set();
