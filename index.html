@@ -425,10 +425,15 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 .card.p3 small{color:var(--p3text)}
 .card em{display:block;font-style:normal;font-size:12px;color:var(--blue);margin-top:4px;font-weight:600}
 .pin .ring{position:absolute;left:-7px;top:-7px;width:48px;height:48px;border-radius:50%;border:3px solid var(--c);opacity:0;pointer-events:none}
-.pin.p1 .ring{animation:pulse 1.1s ease-out infinite}
-.pin.p2 .ring{animation:pulse 1.8s ease-out infinite}
-.pin.p3 .ring{animation:pulse 2.8s ease-out infinite}
-.pin.p1 .b{animation:blink 1.1s ease-in-out infinite}
+.pin.top.p1 .ring{animation:pulse 1.6s ease-out infinite}
+.pin.top.p2 .ring{animation:pulse 2.4s ease-out infinite}
+.pin.top.p3 .ring{animation:pulse 3.2s ease-out infinite}
+.pin.p1:not(.top) .b{border-color:#ffd9d6}
+/* a group is a dark bubble with a coloured ring, so it is never mistaken for the numbered Do-first badges */
+.cl{width:44px;height:44px;border-radius:50%;background:rgba(28,28,30,.94);border:3px solid var(--c);box-shadow:0 3px 12px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-variant-numeric:tabular-nums;transition:transform .2s var(--ease)}
+.cl b{font-weight:800}
+.cl:hover{transform:scale(1.1)}
+@media (prefers-reduced-motion:reduce){.pin .ring{animation:none!important}}
 @keyframes pulse{0%{transform:scale(.7);opacity:.95}70%{opacity:.12}100%{transform:scale(1.7);opacity:0}}
 @keyframes blink{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.0),0 3px 10px rgba(0,0,0,.28)}50%{box-shadow:0 0 0 7px rgba(255,59,48,.35),0 3px 10px rgba(0,0,0,.28)}}
 .pin .rank{position:absolute;right:-8px;top:-8px;min-width:20px;height:20px;border-radius:10px;background:#fff;color:#1d1d1f;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 1px 5px rgba(0,0,0,.35);border:2px solid var(--c)}
@@ -1565,7 +1570,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.56 (Nov 14) · Payment reminders';
+const APP_VERSION='1.57 (Nov 14) · Clearer map';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -3624,7 +3629,7 @@ function detailEmpty(){const v=$('vDetail');if(!v||!document.body.classList.cont
 DOCKQ.addEventListener('change',syncDock);
 
 /* ---------- map ---------- */
-let map=null;const markers={},seen=new Set();
+let map=null;const seen=new Set();
 let mapSel=null;
 const detailOpen=()=>$('vDetail').classList.contains('open');
 function padding(){if(isPhone())return{paddingTopLeft:[40,90],paddingBottomRight:[40,200]};return{paddingTopLeft:[60,80],paddingBottomRight:[detailOpen()?500:80,170]}}
@@ -3632,18 +3637,38 @@ function fit(list){if(!map||tab!=='map')return;const pts=(list||data.filter(r=>!
   if(pts.length===1){flyTo(pts[0][0],pts[0][1],15);return}map.flyToBounds(pts,Object.assign({maxZoom:15,duration:.8},padding()))}
 function flyTo(lat,lng,z){if(!map)return;const zoom=Math.max(map.getZoom(),z||15);const p=map.project([lat,lng],zoom);
   const off=isPhone()?L.point(0,70):L.point(detailOpen()?220:0,40);map.flyTo(map.unproject(p.add(off),zoom),zoom,{duration:.7})}
+/* pins that sit on top of each other become one numbered bubble; tap it to zoom in. Very close up, pins that share a spot are fanned out side by side. */
+let pinLayer=null;
 function drawPins(){if(!map)return;
-  for(const id in markers)if(!job(id)||job(id).lost){map.removeLayer(markers[id]);delete markers[id]}
+  if(!pinLayer)pinLayer=L.layerGroup().addTo(map);
+  pinLayer.clearLayers();
+  const items=[];
   for(const r of data){if(r.lat==null||r.lost)continue;const st=STAGES[stageOf(r)],P=PRIOR.by.get(r.id);
-    const c=P?PC[P.p]:(stageOf(r)==='done'?'--s-done':'--p0');
-    const sel=r.id===selId||r.id===mapSel;
-    const cls=['pin',sel?'sel':'',P&&P.p<4?'p'+P.p:'',seen.has(r.id)?'':'new'].join(' ');seen.add(r.id);
-    const html=`<div class="${cls}" style="--c:var(${c})"><span class="ring"></span><div class="t"></div><div class="b">${ico(st.ic)}</div>${P&&P.p<4?`<span class="rank">${P.rank}</span>`:''}</div>`;
-    const icon=L.divIcon({className:'',html,iconSize:[34,42],iconAnchor:[17,40],tooltipAnchor:[0,-40]});
-    if(markers[r.id])markers[r.id].setLatLng([r.lat,r.lng]).setIcon(icon);
-    else markers[r.id]=L.marker([r.lat,r.lng],{icon,title:r.name,riseOnHover:true}).addTo(map).on('click',()=>pinTap(r.id));
-    markers[r.id].setZIndexOffset(sel?2000:(P?(10-P.p)*100+(100-Math.min(P.rank,99)):0));
-    if(!isPhone())markers[r.id].bindTooltip(`<b>${esc(r.name)}</b><br><span style="opacity:.75">${P?esc(actionText(P.item))+' · '+PN[P.p]:st.n}</span>`,{direction:'top'});
+    items.push({r,st,P,c:P?PC[P.p]:(stageOf(r)==='done'?'--s-done':'--p0'),sel:r.id===selId||r.id===mapSel,pt:map.latLngToContainerPoint([r.lat,r.lng])})}
+  const rank=i=>(i.sel?-1:0)*1e6+(i.P?i.P.p*1000+Math.min(i.P.rank,999):9e3);
+  items.sort((x,y)=>rank(x)-rank(y));
+  const close=map.getZoom()>=16,groups=[];
+  for(const it of items){
+    const g=!close&&!it.sel?groups.find(g=>!g.lead.sel&&g.lead.pt.distanceTo(it.pt)<46):null;
+    if(g)g.members.push(it);else groups.push({lead:it,members:[it]})}
+  const placed=[];
+  for(const g of groups){const it=g.lead;
+    if(g.members.length>1){
+      const n=g.members.length,pr=it.P&&it.P.p<4?'p'+it.P.p:'',names=g.members.slice(0,3).map(m=>m.r.name).join(', ')+(n>3?` +${n-3}`:'');
+      const html=`<div class="cl ${pr}" style="--c:var(${it.c})"><b>${n}</b></div>`;
+      const ll=L.latLng(it.r.lat,it.r.lng),mk=L.marker(ll,{icon:L.divIcon({className:'',html,iconSize:[44,44],iconAnchor:[22,22]}),title:names,riseOnHover:true}).addTo(pinLayer);
+      mk.setZIndexOffset(500-(it.P?it.P.p*100:0));
+      mk.on('click',()=>map.flyToBounds(L.latLngBounds(g.members.map(m=>[m.r.lat,m.r.lng])),{maxZoom:17,padding:[70,70],duration:.6}));
+      if(!isPhone())mk.bindTooltip(esc(names),{direction:'top'});
+      continue}
+    const r=it.r,P=it.P,st=it.st,top=!!(P&&P.p<4&&P.rank<=3);
+    const cls=['pin',it.sel?'sel':'',P&&P.p<4?'p'+P.p:'',top?'top':'',seen.has(r.id)?'':'new'].join(' ');seen.add(r.id);
+    const html=`<div class="${cls}" style="--c:var(${it.c})"><span class="ring"></span><div class="t"></div><div class="b">${ico(st.ic)}</div>${top?`<span class="rank">${P.rank}</span>`:''}</div>`;
+    let ll=L.latLng(r.lat,r.lng);
+    if(close){const k=placed.filter(q=>q.distanceTo(it.pt)<14).length;placed.push(it.pt);if(k)ll=map.containerPointToLatLng(it.pt.add([k*38,0]))}
+    const mk=L.marker(ll,{icon:L.divIcon({className:'',html,iconSize:[34,42],iconAnchor:[17,40],tooltipAnchor:[0,-40]}),title:r.name,riseOnHover:true}).addTo(pinLayer).on('click',()=>pinTap(r.id));
+    mk.setZIndexOffset(it.sel?2000:(P?(10-P.p)*100+(100-Math.min(P.rank,99)):0));
+    if(!isPhone())mk.bindTooltip(`<b>${esc(r.name)}</b><br><span style="opacity:.75">${P?esc(actionText(P.item))+' · '+PN[P.p]:st.n}</span>`,{direction:'top'});
   }
 }
 function renderCards(){const el=$('cards');if(!el)return;
@@ -3671,6 +3696,7 @@ if(HAS_MAP){
   $('maptype').onclick=e=>{const b=e.target.closest('button');if(!b)return;mapType=b.dataset.t;[...$('maptype').children].forEach(x=>x.setAttribute('aria-pressed',x===b));setBase()};
   $('zin').onclick=()=>map.zoomIn();$('zout').onclick=()=>map.zoomOut();$('zfit').onclick=()=>{mapSel=null;drawPins();renderCards();fit()};
   $('zsat').onclick=()=>{mapType=mapType==='sat'?'map':'sat';setBase();$('zsat').style.color=mapType==='sat'?'var(--blue)':''};
+  map.on('zoomend',drawPins);
   map.on('click',e=>{if(!placingId)return;const r=job(placingId);
     if(r){r.lat=+e.latlng.lat.toFixed(6);r.lng=+e.latlng.lng.toFixed(6);r.approx=false;log(r,'Pin placed on map');save()}
     const id=stopPlacing();render();if(!isPhone())openDetail(id);toast('Pin saved')});
