@@ -978,14 +978,48 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
   .cmore{font-size:9.5px;padding-left:2px}
   .mhead span{font-size:10px}
   .lt .tools{gap:6px}
-  .iconbtn{width:34px;height:34px}
-  .pill{height:34px;padding:0 12px}
+  .iconbtn{width:40px;height:40px}
+  .pill{height:40px;padding:0 14px}
   .scrim{align-items:flex-end;padding:0}
   .sheet{border-radius:16px 16px 0 0;max-height:94vh;max-height:94dvh;transform:translateY(100%)}
   .sheet .body{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
   .fg label>span{width:96px;font-size:15px}
   .fg input,.fg select,.fg textarea{font-size:16px}
   .toast{max-width:calc(100% - 24px)}
+  /* job page: tighter header, big enough targets */
+  .act{padding:7px 2px 6px;gap:3px}
+  .dtitle{padding-bottom:8px}
+  .navbar button{min-height:44px;min-width:44px;padding:4px 8px}
+  .dtabs button{min-height:40px}
+  .dtabs button svg{display:none}
+  .lstate .btn,.lstate button{min-height:38px}
+  .cfil button,.srctabs button,.lmore{min-height:38px}
+  .bub .meta a,.bub .att{position:relative}
+  .bub .meta a::after,.chk::after,.pay button::after{content:"";position:absolute;inset:-12px -10px}
+  .chk{position:relative}
+  .bub .more{padding:10px 0;margin-top:0}
+  .tpls button{min-height:38px}
+  .label button{position:relative}
+  .label button::after{content:"";position:absolute;inset:-13px -4px}
+  .pay select,.pay input[type=date]{min-height:34px}
+  .nmore{padding:9px 0}
+  .cbox input,.sendbtn{min-height:40px}
+  .secthead button,.gx{position:relative}
+  .secthead button::after,.gx::after{content:"";position:absolute;inset:-14px -10px}
+  .pay button{position:relative}
+  /* leads: header on one line, small Facebook banner */
+  #sLeads .lt>div:first-child{min-width:0;flex:1}
+  .lsub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #oppBtn{display:inline-flex;align-items:center;gap:6px;padding:0 12px}
+  #oppBtn .oppl{display:none}
+  #oppBtn svg{width:15px;height:15px;color:#f26722}
+  #oppBtn b{font-weight:600}
+  .metacard{padding:10px 36px 10px 12px;gap:10px;align-items:center;margin-bottom:10px}
+  .metacard p{display:none}
+  .metacard b{font-size:14.5px}
+  .metacard .gico{width:34px;height:34px;flex:none}
+  .metacard .gico svg{width:17px;height:17px}
+  .metacard .btn{margin-top:6px;padding:7px 14px}
 }
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation:none!important}}
 </style>
@@ -1014,7 +1048,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
     <div class="scroll"><div class="wrap" id="pToday"></div></div>
   </section>
   <section class="screen" id="sLeads" hidden>
-    <header class="lt"><div><h1>Leads</h1><div class="sub" id="leadsSub">New customers</div></div>
+    <header class="lt"><div><h1>Leads</h1><div class="sub lsub" id="leadsSub">New customers</div></div>
       <div class="tools"><button class="pill" id="oppBtn" hidden></button><button class="iconbtn dark" id="leadAdd" aria-label="Add lead"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></header>
     <label class="searchbox" id="leadSearchWrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="lq" type="search" placeholder="Search name, phone, email, city" aria-label="Search leads"></label>
     <div class="scroll"><div class="wrap" id="pLeads"></div></div>
@@ -1497,7 +1531,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.52 (Nov 11) · Email box on the job page';
+const APP_VERSION='1.53 (Nov 14) · Phone polish';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -2459,7 +2493,7 @@ function renderLeads(){
   const wk=addDays(today(),-7),open=L.filter(r=>!r.lost),est=open.filter(r=>stageOf(r)==='sent'),lostN=lostList().length;
   const nNew=open.filter(r=>(r.date||'')>=wk||String(r.history?.[0]?.d||'')>=wk).length,nVis=open.filter(r=>['visit','quote'].includes(stageOf(r))).length;
   $('leadsSub').textContent=[`${open.length} open`,nNew?`${nNew} new this week`:'',nVis?`${nVis} site visit${nVis===1?'':'s'}`:'',est.length?`${est.length} estimate${est.length===1?'':'s'} out · ${kmoney(est.reduce((t,r)=>t+total(r),0))}`:''].filter(Boolean).join(' · ');
-  const ob=$('oppBtn');ob.hidden=!opps.length&&leadView!=='opps';ob.textContent=leadView==='opps'?'Back to leads':`Opportunities ${opps.length}`;
+  const ob=$('oppBtn');ob.hidden=!opps.length&&leadView!=='opps';ob.innerHTML=leadView==='opps'?'Back to leads':`<span class="oppl">Opportunities </span>${ico('star')}<b>${opps.length}</b>`;
   const extra=F.filter(f=>!['all','needs'].includes(f.k)&&base.some(f.f)),act=leadSrc!=='all'||!['all','needs'].includes(fl.k),panel=leadMore||act;
   const chipF=f=>`<button data-lf="${f.k}" aria-pressed="${leadView==='list'&&f.k===fl.k}">${f.n==='Open'?'All':f.n}<em>${base.filter(f.f).length}</em></button>`;
   const bar=`<div class="lbar"><div class="cfil">${chipF(F[1])}${chipF(F[0])}${lostN?`<button data-golost aria-pressed="false">Not interested<em>${lostN}</em></button>`:''}</div><button class="lmore${act?' on':''}" data-lmore aria-expanded="${panel}">Filter${act?'<i></i>':''}</button></div>`;
@@ -3336,7 +3370,7 @@ let mapFitted=false;
 document.addEventListener('click',e=>{const b=e.target.closest('.side [data-tab],.tabbar [data-tab]');if(!b)return;if(isPhone()&&(selId||custSel||partSel||subSel))closeDetail();setTab(b.dataset.tab)});
 $('moreBtn').onclick=()=>showModal('moreModal');$('moreClose').onclick=()=>hideModal('moreModal');$('moreModal').onclick=e=>{if(e.target.id==='moreModal'){hideModal('moreModal');return}
   const b=e.target.closest('[data-more]');if(!b)return;hideModal('moreModal');const k=b.dataset.more;if(k==='find'){setTimeout(openFind,280);return}if(k==='acct'){setTimeout(()=>$('acctBtn').click(),280);return}if(isPhone()&&(selId||custSel||partSel||subSel))closeDetail();setTab(k)};
-function renderMoreCount(){const v=sel=>{const e=document.querySelector(sel);return e&&!e.hidden?(+e.textContent||0):0};const n=v('#custCount')+v('#partCount')+v('.side .scount');document.querySelectorAll('.mcount').forEach(x=>{x.textContent=n;x.hidden=!n})}
+function renderMoreCount(){const v=sel=>{const e=document.querySelector(sel);return e&&!e.hidden?(+e.textContent||0):0};const n=v('#custCount')+v('#partCount')+v('.side .scount');document.querySelectorAll('.mcount').forEach(x=>{x.textContent='';x.hidden=true})}
 
 /* ---------- detail ---------- */
 function setStep(r,k,on,date){
@@ -3375,8 +3409,8 @@ function openDetail(id,pan){
       <button class="act" id="dCal">${ico('calp')}Schedule</button>
     </div>
     <div data-g="overview">${fuCard(r)}</div>
-    ${nx&&!r.lost?`<div class="nextcard"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
-    <div class="dtabs" id="dTabs">${[['overview','Overview'],['money','Money'],['messages','Messages'],['more','Files & more']].map(([k,n])=>`<button data-dv="${k}" aria-pressed="${dView===k}">${n}</button>`).join('')}</div>
+    ${nx&&!r.lost?`<div class="nextcard" data-g="overview"><span class="gl" style="--c:var(${PRIOR.by.get(r.id)?PC[PRIOR.by.get(r.id).p]:nx.c})">${ico(nx.ic)}</span><div><b>Next step</b><p>${esc(nextText)}</p></div></div>`:''}
+    <div class="dtabs" id="dTabs">${[['overview','Overview'],['money','Money'],['messages','Messages'],['more','More']].map(([k,n])=>`<button data-dv="${k}" aria-pressed="${dView===k}">${n}</button>`).join('')}</div>
     <div data-g="money">${finBlock(r)}</div>
     <div data-g="overview">${planCard(r)}</div>
     <div data-g="money">${expBlock(r)}</div>
@@ -3432,7 +3466,7 @@ function openDetail(id,pan){
   bindLeadConv(r);markLeadRead(r);
   if($('planOpen'))$('planOpen').onclick=()=>openPlan(r);if($('planSched'))$('planSched').onclick=()=>openSched(r,false);
   bindExp(r,v);bindFu(r,v);bindFin(r);applyFull();threadEnd();if($('dFull'))$('dFull').onclick=()=>{jobFull=!jobFull;try{localStorage.setItem('nv-jobfull',jobFull?'1':'0')}catch(e){}openDetail(r.id)};
-  $('dTabs').onclick=e=>{const b=e.target.closest('[data-dv]');if(!b)return;dView=b.dataset.dv;const sc=v.querySelector('.scroll');sc.dataset.dv=dView;$('dTabs').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(dView==='messages')threadEnd();if(sc.scrollTop>$('dTabs').offsetTop)sc.scrollTop=$('dTabs').offsetTop};
+  $('dTabs').onclick=e=>{const b=e.target.closest('[data-dv]');if(!b)return;dView=b.dataset.dv;const sc=v.querySelector('.scroll');sc.dataset.dv=dView;$('dTabs').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(dView==='messages')threadEnd();if(isPhone()||sc.scrollTop>$('dTabs').offsetTop)sc.scrollTop=$('dTabs').offsetTop};
   $('dBack').onclick=closeDetail;$('dEdit').onclick=()=>openForm(r);$('dCal').onclick=()=>openEvent(null,{jobId:r.id,type:!stepDone(r,'visit')?'visit':'task'});
   $('dPin').onclick=()=>startPlacing(r.id);
   if($('dNotesEdit'))$('dNotesEdit').onclick=()=>{openForm(r);setTimeout(()=>$('f-notes').focus(),300)};
