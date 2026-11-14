@@ -1544,7 +1544,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.54 (Nov 14) · Wide screen layout';
+const APP_VERSION='1.55 (Nov 14) · Tidy-ups';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -1603,7 +1603,8 @@ const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const today=()=>iso(new Date());
 const addDays=(s,n)=>{const d=new Date(s+'T12:00');d.setDate(d.getDate()+n);return iso(d)};
 const dayDiff=(a,b)=>Math.round((new Date(a+'T12:00')-new Date(b+'T12:00'))/864e5);
-const money=v=>(v==null||v==='')?'':'$'+Number(v).toLocaleString('en-CA',{maximumFractionDigits:0});
+/* whole dollars, and cents only when the amount has cents ($45,000 and $2,937.82) */
+const money=v=>{if(v==null||v==='')return '';const n=Math.round(Number(v)*100)/100,d=Number.isInteger(n)?0:2;return '$'+n.toLocaleString('en-CA',{minimumFractionDigits:d,maximumFractionDigits:d})};
 const kmoney=v=>v>=1000?'$'+(v/1000).toFixed(v>=100000?0:1).replace(/\.0$/,'')+'K':'$'+Math.round(v);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmtDate=d=>{if(!d)return '';const n=dayDiff(d,today());if(n===0)return 'Today';if(n===1)return 'Tomorrow';if(n===-1)return 'Yesterday';return new Date(d+'T12:00').toLocaleDateString('en-CA',{month:'short',day:'numeric'})};
@@ -1828,7 +1829,7 @@ async function refreshFromServer(force){
   const expBefore=new Set((db.exps||[]).map(x=>x.id)),hadExp=(db.exps||[]).length>0||expReady;
   const before=new Set(data.map(r=>r.id)),signedBefore=new Set((db.docs||[]).filter(x=>x.status==='accepted').map(x=>x.id));
   try{if(await fetchAll()===false){remoteT=setTimeout(refreshFromServer,1500);return}}catch(e){console.error(e);return}
-  const linkNew=(db.exps||[]).filter(x=>x.via&&!expBefore.has(x.id));if(hadExp&&linkNew.length){const x=linkNew[0],r=job(x.jobId);toast(linkNew.length>1?`${linkNew.length} new expenses from links`:`New expense from ${x.by||'link'} · ${cents(x.amount)}${r?' · '+r.name:''}`)}
+  const linkNew=(db.exps||[]).filter(x=>x.via&&!expBefore.has(x.id));if(hadExp&&linkNew.length){const x=linkNew[0],r=job(x.jobId);toast(linkNew.length>1?`${linkNew.length} new expenses from links`:`New expense from ${x.by||'link'} · ${money(x.amount)}${r?' · '+r.name:''}`)}
   const fresh=data.filter(r=>!before.has(r.id)&&['Website','HomeStars','Facebook','Instagram'].includes(r.history[0]?.by));
   if(fresh.length&&before.size)toast(fresh.length>1?`${fresh.length} new leads`:`New lead: ${fresh[0].name} · ${fresh[0].source}`);
   const signed=(db.docs||[]).filter(x=>x.status==='accepted'&&!signedBefore.has(x.id));
@@ -2182,17 +2183,22 @@ function pAction(p){
   if(p.status==='cold')return null;
   if(p.follow&&p.follow<=today())return{k:'follow',n:'Follow-up due',c:'--p1'};
   const lm=lastMail(p);
-  if(lm&&lm.dir==='in')return{k:'reply',n:'Needs reply',c:'--blue'};
+  if(lm&&lm.dir==='in'&&!pHandled(p,lm))return{k:'reply',n:'Needs reply',c:'--blue'};
   if(p.status==='meeting'&&p.meet&&p.meet>=today()&&p.meet<=addDays(today(),1))return{k:'meet',n:p.meet===today()?'Meeting today':'Meeting tomorrow',c:'--orange'};
   if(lm&&lm.dir==='out'&&p.status!=='partner'&&!p.follow&&dayDiff(today(),ld(lm.at))>=5)return{k:'follow',n:'Follow-up due',c:'--p1'};
   return null;
 }
 const pNeeds=p=>pUnread(p)||!!pAction(p);
+/* 'No reply needed' is a note on the partner; a newer message from them asks for an answer again */
+const pHandled=(p,lm)=>pmsgs(p).some(m=>m.dir==='note'&&m.body==='No reply needed'&&m.at>lm.at);
 const whenShort=t=>{if(!t)return '';const d=ld(t);if(d===today())return new Date(t).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});return fmtDate(d)};
 const ago=t=>{if(!t)return 'not yet';const m=Math.round((Date.now()-Date.parse(t))/60000);if(m<1)return 'just now';if(m<60)return m+' min ago';if(m<1440)return Math.round(m/60)+' h ago';return fmtDate(ld(t))};
 const gmailUrl=tid=>`https://mail.google.com/mail/?authuser=${encodeURIComponent('nevacobuild@gmail.com')}#all/${tid}`;
 const linkify=s=>s.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]])/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
-const mapMsg=x=>({id:x.id,partnerId:x.partner_id,jobId:x.job_id||'',dir:x.dir,gmailId:x.gmail_id||'',threadId:x.thread_id||'',subject:x.subject||'',body:x.body||'',from:x.from_email||'',to:x.to_email||'',
+/* partner mail that is clearly automatic (noreply senders, 'this is an automated message') is shown as an automatic reply and does not ask for an answer */
+const AUTOFROM=/(^|[^a-z])(no[-_.]?reply|do[-_.]?not[-_.]?reply|mailer-daemon|postmaster)([^a-z]|$)/i,AUTOTXT=/this is an automated (message|reply|response|e-?mail)|auto-?(reply|response)\b|automatic reply|do not reply to this (e-?mail|message)|please do not reply|(this|the) (mailbox|inbox|address) is not monitored|unmonitored (mailbox|e-?mail)/i;
+const isAutoPartnerMail=x=>x.dir==='in'&&!!x.partner_id&&!x.job_id&&(AUTOFROM.test(x.from_email||'')||AUTOTXT.test(String(x.subject||'')+' '+String(x.body||'').slice(0,600)));
+const mapMsg=x=>({id:x.id,partnerId:x.partner_id,jobId:x.job_id||'',dir:isAutoPartnerMail(x)?'auto':x.dir,gmailId:x.gmail_id||'',threadId:x.thread_id||'',subject:x.subject||'',body:x.body||'',from:x.from_email||'',to:x.to_email||'',
   att:Array.isArray(x.attachments)?x.attachments:[],unread:!!x.unread,at:x.at||new Date().toISOString()});
 const mapPartner=x=>({id:x.id,name:x.name||'',company:x.company||'',type:x.type||'re',email:x.email||'',phone:x.phone||'',area:x.area||'',status:x.status||'sent',
   meet:x.meet||'',meetTime:x.meet_time||'',follow:x.follow||'',notes:x.notes||'',source:x.source||'app',createdAt:x.created_at||''});
@@ -2324,6 +2330,7 @@ function paintPartner(p){
     </div>
     <div class="pipe" style="--c:var(${PST[st].c})">${[['sent','Contacted'],['replied','Replied'],['meeting','Meeting'],['partner','Partner']].map(([s,n],i)=>`<button data-pst="${s}" class="${k>=i&&st!=='cold'?'on':''}"><i></i>${n}</button>`).join('')}</div>
     ${st==='cold'?`<div class="pcold">Marked not interested · <button data-pst="sent">Reopen</button></div>`:''}
+    ${pAction(p)?.k==='reply'?`<div class="pcold">Waiting for your reply · <button id="pNoReply">No reply needed</button></div>`:''}
     ${p.status==='meeting'&&p.meet?`<div class="block"><div class="group"><button class="refrow pmeet" id="pMeet2"><span><b>${ico('meet')} Meeting · ${fmtDate(p.meet)}${p.meetTime?', '+fmtTime(p.meetTime):''}</b><small>${new Date(p.meet+'T12:00').toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})}</small></span>${ico('chev')}</button></div></div>`:''}
     <div class="block"><div class="label">Referrals${refs.reduce((t,r)=>t+total(r),0)?` · ${money(refs.reduce((t,r)=>t+total(r),0))}`:''}<button id="pRef">+ Add referral</button></div>
       ${refs.length?`<div class="group">${refs.map(r=>`<div class="refrow"><button class="rl" data-openjob="${r.id}"><b>${esc(r.name)}</b><small>${esc(r.type)}${total(r)?' · '+money(total(r)):''} · ${STAGES[stageOf(r)].n}</small></button>
@@ -2332,6 +2339,7 @@ function paintPartner(p){
     ${p.notes?`<div class="block"><div class="label">Notes</div>${renderNotes(p.notes)}</div>`:''}`;
   $('pThread').innerHTML=threadHtml(pmsgs(p),p.email,`No emails yet. ${p.email?'Write the first one below.':'Add an email address with Edit, then write the first one below.'}`);
   $('pThread').querySelectorAll('.more').forEach(b=>b.onclick=()=>{b.parentElement.classList.remove('clip');b.remove()});
+  const nr=$('pNoReply');if(nr)nr.onclick=()=>{addNote(p,'No reply needed');paintPartner(p);renderPartners();renderToday();renderPartCount();toast('Marked: no reply needed')};
   $('pWrite').onclick=()=>{const t=$('pBody');t.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>t.focus(),250)};
   $('pMeet').onclick=()=>openMeet(p);const m2=$('pMeet2');if(m2)m2.onclick=()=>openMeet(p);
   $('pRef').onclick=()=>{formPre={partnerId:p.id,source:p.type==='pm'?'Property manager referral':'Realtor referral'};openForm(null)};
@@ -2854,9 +2862,9 @@ function finBlock(r){if(!showExp(r))return '';const f=fin(r),cs=changes(r);
   return `<div class="block"><div class="label">Money <span><button id="finCo">+ Change order</button>&nbsp;&nbsp;<button id="finRep">Report / PDF</button></span></div>
     <div class="group"><div class="fink">
       <div><span>Contract value</span><b>${money(f.tcv)||'$0'}</b>${f.co?`<small>incl. ${money(f.co)} extras</small>`:''}</div>
-      <div><span>Received</span><b style="color:var(--green)">${money(f.rec)||'$0'}</b><small>${f.hstIn?'incl. '+cents(f.hstIn)+' HST to keep for CRA · ':''}${f.recv>0.5?money(f.recv)+' to collect':'All collected'}</small></div>
-      <div><span>Expenses</span><b style="color:var(--red)">${cents(f.net)}</b>${f.owed?`<small>+ ${money(f.owed)} labour to pay</small>`:f.spent?'':'<small>None recorded yet</small>'}</div>
-      ${!f.spent&&!f.owed?`<div><span>Profit so far</span><b style="color:var(--label3)">—</b><small>Add this job's expenses to see the profit</small></div>`:`<div><span>Profit so far</span><b style="color:${f.profit<0?'var(--red)':'var(--purple,#af52de)'}">${f.profit<0?'−':''}${cents(Math.abs(f.profit))}</b><small>${f.hstIn?'After HST · ':''}expected ${f.expected<0?'−':''}${money(Math.abs(f.expected))}</small></div>`}
+      <div><span>Received</span><b style="color:var(--green)">${money(f.rec)||'$0'}</b><small>${f.hstIn?'incl. '+money(f.hstIn)+' HST to keep for CRA · ':''}${f.recv>0.5?money(f.recv)+' to collect':'All collected'}</small></div>
+      <div><span>Expenses</span><b style="color:var(--red)">${money(f.net)}</b>${f.owed?`<small>+ ${money(f.owed)} labour to pay</small>`:f.spent?'':'<small>None recorded yet</small>'}</div>
+      ${!f.spent&&!f.owed?`<div><span>Profit so far</span><b style="color:var(--label3)">—</b><small>Add this job's expenses to see the profit</small></div>`:`<div><span>Profit so far</span><b style="color:${f.profit<0?'var(--red)':'var(--purple,#af52de)'}">${f.profit<0?'−':''}${money(Math.abs(f.profit))}</b><small>${f.hstIn?'After HST · ':''}expected ${f.expected<0?'−':''}${money(Math.abs(f.expected))}</small></div>`}
     </div>
     ${chgDocs(r).map(d=>`<button class="row corow" data-doc="${d.id}"><span class="rt"><b>${esc(d.number)} · ${esc((d.items||[]).filter(i=>String(i.d||'').trim()).map(i=>i.d).join(', ')||d.title||'Change order')}</b><span>${d.status==='accepted'?'Approved'+(d.acceptedName&&!/^Approved in person/.test(d.acceptedName)?' online by '+esc(d.acceptedName):''):d.status==='sent'?(d.viewedAt?'Opened · waiting for approval':'Sent · waiting for approval'):'Draft · not sent'} · ${fmtDate(d.date)}</span></span><span class="rv"><em style="${d.status==='accepted'?'':'color:var(--label3)'}">${money(d.total)||'$0'}</em>${ico('chev')}</span></button>`).join('')}
     ${cs.length?cs.map((c,i)=>`<button class="row corow" data-co="${i}"><span class="rt"><b>${esc(c.title||'Extra job')}</b><span>${[fmtDate(c.date),c.by,CO_ST[c.status]||''].filter(Boolean).map(esc).join(' · ')}</span></span><span class="rv"><em style="${coCounts(c)?'':'color:var(--label3);text-decoration:line-through'}">${money(c.amount)||'$0'}</em>${ico('chev')}</span></button>`).join(''):''}
@@ -2979,9 +2987,9 @@ function expBlock(r){
   if(!expReady||!expMeta)return `<div class="block"><div class="label">Expenses</div><div class="group"><div class="empty" style="padding:16px"><b style="font-size:15px">One-time setup needed</b>Run the expenses setup step (sql/12-expenses-who.sql) in Supabase, then expenses and receipt photos work here.</div></div></div>`;
   const xs=expsFor(r.id),tot=xs.reduce((t,x)=>t+x.amount,0),crew=jtasks(r).reduce((t,x)=>t+(+x.cost||0),0),T=fin(r).tcv;
   return `<div class="block"><div class="label">Expenses${xs.length?` · ${xs.length}`:''} <span><button id="shareExp">${expLink(r)?'Partner link ✓':'Share link'}</button>&nbsp;&nbsp;<button id="addExp">+ Add Expense</button></span></div><div class="group">
-    ${xs.length?`<div class="expsum"><div><span>Spent</span><b>${cents(tot)}</b></div><div><span>Job plan contractors</span><b>${crew?money(crew):'—'}</b></div><div><span>Left from contract</span><b style="color:${T&&T-tot-crew<0?'var(--red)':'inherit'}">${T?money(T-tot-crew):'—'}</b></div></div>
+    ${xs.length?`<div class="expsum"><div><span>Spent</span><b>${money(tot)}</b></div><div><span>Job plan contractors</span><b>${crew?money(crew):'—'}</b></div><div><span>Left from contract</span><b style="color:${T&&T-tot-crew<0?'var(--red)':'inherit'}">${T?money(T-tot-crew):'—'}</b></div></div>
     ${xs.map(x=>{const w=expWho(x);return `<button class="exprow${x.amount<0?' ret':''}" data-exp="${x.id}"><span class="eth">${x.photos.length?`<img data-xpath="${esc(x.photos[0].path)}" alt="">${x.photos.length>1?`<em>${x.photos.length}</em>`:''}`:ico('rcpt')}</span>
-      <span class="rt"><b>${esc(expName(x))}</b><span>${[fmtDate(x.date),x.cat,w&&w!==expName(x)?w:''].filter(Boolean).map(esc).join(' · ')}</span><span>${x.via?'<b style="display:inline;color:var(--blue);font-weight:600">via link</b> · ':''}${[x.by,pmShort(x.pm)].filter(Boolean).map(esc).join(' · ')||'Who paid not set'}${x.photos.length?'':' · no receipt'}</span></span><span class="eamt">${x.amount<0?'−'+cents(-x.amount):cents(x.amount)}</span></button>`}).join('')}
+      <span class="rt"><b>${esc(expName(x))}</b><span>${[fmtDate(x.date),x.cat,w&&w!==expName(x)?w:''].filter(Boolean).map(esc).join(' · ')}</span><span>${x.via?'<b style="display:inline;color:var(--blue);font-weight:600">via link</b> · ':''}${[x.by,pmShort(x.pm)].filter(Boolean).map(esc).join(' · ')||'Who paid not set'}${x.photos.length?'':' · no receipt'}</span></span><span class="eamt">${x.amount<0?'−'+money(-x.amount):money(x.amount)}</span></button>`}).join('')}
     ${expBreak(xs)}`
     :`<div class="empty" style="padding:16px"><b style="font-size:15px">No expenses yet</b>Add every cost on this job — materials, labour, rentals, bin, permits, gas — with a photo of the receipt. Returns go here too.</div>`}
   </div></div>`;
@@ -3010,7 +3018,7 @@ function expBreak(xs){
   const by={},cats={};let pers=0;const persBy={};
   xs.forEach(x=>{const c=x.cat||'Other';cats[c]=(cats[c]||0)+x.amount;if(x.by){by[x.by]=(by[x.by]||0)+x.amount}
     if(x.pm==='personal'){pers+=x.amount;if(x.by)persBy[x.by]=(persBy[x.by]||0)+x.amount}});
-  const line=(t,o)=>Object.keys(o).length?`<div class="expcats"><b>${t}</b>${Object.entries(o).sort((a,b)=>b[1]-a[1]).map(([k,a])=>`<span>${esc(k)} ${cents(a)}</span>`).join('')}</div>`:'';
+  const line=(t,o)=>Object.keys(o).length?`<div class="expcats"><b>${t}</b>${Object.entries(o).sort((a,b)=>b[1]-a[1]).map(([k,a])=>`<span>${esc(k)} ${money(a)}</span>`).join('')}</div>`:'';
   return line('Paid by',by)+(pers?line('Paid personally · to pay back',persBy):'')+(Object.keys(cats).length>1?line('By category',cats):'');
 }
 function bindExp(r,v){if($('addExp'))$('addExp').onclick=()=>openExp(null,r);if($('shareExp'))$('shareExp').onclick=()=>openElink(r);
