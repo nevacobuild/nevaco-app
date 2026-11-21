@@ -1235,7 +1235,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
       <div class="fghead">Price</div>
       <div class="fg">
         <label id="d-lumprow"><span>Total price</span><input id="d-lump" inputmode="decimal" placeholder="$0"></label>
-        <label id="d-discrow"><span>Discount</span><input id="d-disc" inputmode="decimal" placeholder="$0 off the whole price"></label>
+        <label id="d-discrow"><span>Discount</span><input id="d-disc" inputmode="decimal" placeholder="$0 off the final total (after HST)"></label>
         <label class="sw" id="d-hstrow"><span>Add HST (13%)</span><input id="d-hst" type="checkbox"></label>
         <label id="d-creditrow" hidden><span>Less paid</span><input id="d-credit" inputmode="decimal" placeholder="$0 already received"></label>
         <label><span>Deposit</span><select id="d-dep"><option value="0">No deposit</option><option value="10">10%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="40">40%</option><option value="50">50%</option></select></label>
@@ -1587,7 +1587,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.61 (Nov 20) · Sold items from the job';
+const APP_VERSION='1.62 (Nov 20) · Discount after HST';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -3916,12 +3916,17 @@ function buildInvoice(r){
     return Object.assign(base,{title:`Deposit – ${title}`,items:[{d:`Deposit (${pct}%) for ${title.toLowerCase()}${est?' as per estimate '+est.number:''}`,a:sub?Math.round(sub*pct)/100:null}]})}
   return Object.assign(base,{title:`Final Invoice – ${title}`,items:[{d:`${title} – contract price${est?' as per estimate '+est.number:''}`,a:sub||null}],credit:Math.round(paid(r)*100)/100})}
 const newToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
-/* the discount (d.extra.discount) comes off the whole price before HST; sub is the price after the discount */
-function calcDoc(d){const items=(d.items||[]).filter(i=>String(i.d||'').trim()||Number(i.a)>0);const priced=items.some(i=>Number(i.a)>0);
-  const gross=Math.round((priced?items.reduce((t,i)=>t+(Number(i.a)||0),0):(Number(d.lump)||0))*100)/100;
-  const disc=isInv(d)||isChg(d)?0:Math.min(gross,Math.max(0,Math.round((Number(d.extra&&d.extra.discount)||0)*100)/100));
-  const sub=Math.round((gross-disc)*100)/100;const tax=d.hst?Math.round(sub*13)/100:0;
-  return{gross,disc,sub,tax,total:Math.round((sub+tax)*100)/100,priced}}
+/* the discount (d.extra.discount) comes off the FINAL total, after HST. The stored subtotal is the price that, with its HST, gives that final total
+   (so the job value, deposit and payment schedule need no other change); gross and grossTax are the figures before the discount. */
+function calcDoc(d,taxOf){const items=(d.items||[]).filter(i=>String(i.d||'').trim()||Number(i.a)>0);const priced=items.some(i=>Number(i.a)>0);
+  const r2=v=>Math.round(v*100)/100,tf=taxOf||(x=>d.hst?Math.round(x*13)/100:0);
+  const gross=r2(priced?items.reduce((t,i)=>t+(Number(i.a)||0),0):(Number(d.lump)||0)),grossTax=tf(gross),grossTotal=r2(gross+grossTax);
+  const disc=isInv(d)||isChg(d)?0:Math.min(grossTotal,Math.max(0,r2(Number(d.extra&&d.extra.discount)||0)));
+  let sub=gross,tax=grossTax,total=grossTotal;
+  if(disc>0){const fin=r2(grossTotal-disc),rate=1+tf(10000)/10000;let s0=r2(fin/rate),best=s0,bd=1e9;
+    for(let k=-4;k<=4;k++){const sv=r2(s0+k/100),t=r2(sv+tf(sv)),dl=Math.abs(t-fin);if(dl<bd-1e-9){bd=dl;best=sv}}
+    sub=Math.max(0,best);tax=tf(sub);total=r2(sub+tax)}
+  return{gross,grossTax,grossTotal,disc,sub,tax,total,priced}}
 let docEdit=null,docJob=null,emailedDoc=null;
 function docLink(d){return location.origin+location.pathname.replace(/[^/]*$/,'')+'doc.html?t='+d.token}
 function itemRow(i,k){return `<div class="itm"><em>${k+1}</em><textarea data-k="${k}" data-f="d" rows="1" placeholder="Describe the work">${esc(i.d||'')}</textarea><input data-k="${k}" data-f="a" inputmode="decimal" placeholder="$" value="${i.a==null?'':i.a}"><button type="button" class="rm" data-rm="${k}" aria-label="Remove line">×</button></div>`}
@@ -3929,18 +3934,20 @@ function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=
   if(isInv(d)){d.validUntil='';d.dueDate=d.date;d.credit=Number($('d-credit').value.replace(/[^0-9.]/g,''))||0}else d.validUntil=addDays(d.date,Number($('d-valid').value)||30);
   d.lump=$('d-lump').value.replace(/[^0-9.]/g,'')||null;d.hst=$('d-hst').checked;d.depositPct=Number($('d-dep').value)||0;d.notes=$('d-notes').value.trim();d.terms=$('d-terms').value.trim();
   if(!isInv(d)&&!isChg(d)){const x=d.extra=d.extra||{},dv=Math.round((Number(String($('d-disc').value||'').replace(/[^0-9.]/g,''))||0)*100)/100;if(dv>0)x.discount=dv;else delete x.discount}
-  const c=calcDoc(d);d.subtotal=c.sub;d.tax=c.tax;d.total=c.total;
+  const schedNow=isCon(d)?conSchedEdit.map(r=>({d:String(r.d||'').trim(),pct:Number(r.pct)||0,hst:!!r.hst})).filter(r=>r.d||r.pct):null;
+  const c=calcDoc(d,schedNow?(x=>conTax(schedNow,x)):null);d.subtotal=c.sub;d.tax=c.tax;d.total=c.total;
+  if(!isInv(d)&&!isChg(d)){const x=d.extra=d.extra||{};if(c.disc>0){x.gross=c.gross;x.grossTax=c.grossTax}else{delete x.gross;delete x.grossTax}}
   if(isChg(d)){const x=d.extra=Object.assign({},d.extra||{});x.customer={};['name','address','city','postal','phone','email'].forEach(k=>x.customer[k]=$('k-'+k).value.trim());x.payWhen=$('k-paywhen').value;
     if(d.status==='draft'&&docJob){const others=chgApproved(docJob).filter(o=>o.id!==d.id);x.prevTotal=Math.round((total(docJob)+coTotal(docJob)-(Number(d.status==='accepted'?d.total:0)||0))*100)/100;x.prevCount=others.length+(Array.isArray(docJob.ms?.changes)?docJob.ms.changes.filter(c=>c.status==='approved'||c.status==='done').length:0)}
     if($('k-chgnote'))$('k-chgnote').textContent=x.prevTotal!=null?`Contract total now ${money(x.prevTotal)} → after this change ${money(x.prevTotal+c.total)}. It is added only after the customer approves it.`:''}
   if(isCon(d)){const x=d.extra=Object.assign({},d.extra||{});x.customer={};['name','address','city','postal','phone','email'].forEach(k=>x.customer[k]=$('k-'+k).value.trim());
     x.start=$('k-start').value;x.end=$('k-end').value;x.warranty=$('k-warranty').value;x.permits=$('k-permits').value;x.schedule=conSchedEdit.map(r=>({d:String(r.d||'').trim(),pct:Number(r.pct)||0,hst:!!r.hst})).filter(r=>r.d||r.pct);d.depositPct=x.schedule[0]?.pct||0;
-    d.tax=c.tax=conTax(x.schedule,c.sub);d.total=c.total=Math.round((c.sub+c.tax)*100)/100;d.hst=c.tax>0}
+    d.hst=c.tax>0}
   return c}
 function paintTotals(){const c=readDocForm(),d=docEdit;$('d-lumprow').hidden=c.priced;if(isCon(d)&&!$('d-conpay').hidden&&$('k-sched').childElementCount){$('k-sched').querySelectorAll('.kpay:not(.kph) b').forEach((b,k)=>{const x=conSchedEdit[k];if(x)b.innerHTML=(money(payBase(x,c.sub)+payHst(x,c.sub))||'$0')+(x.hst?'<small>incl. HST</small>':'')});schedNote()}
   const hstLbl=isCon(d)&&c.tax?(()=>{const on=conSchedEdit.filter(x=>x.hst&&Number(x.pct)>0);return on.length===conSchedEdit.filter(x=>Number(x.pct)>0).length?'HST (13%)':`HST (13%) on ${on.map(x=>x.d.toLowerCase()||'payment').join(', ')}`})():'HST (13%)';
   const dep=Math.round(d.depositPct*d.total)/100;
-  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':isChg(d)?'Change order price':'Contract price')}</span><b>${money(c.gross)||'$0'}</b></div>${c.disc?`<div><span>Discount</span><b style="color:var(--green)">−${money(c.disc)}</b></div>`:''}${d.hst?`<div><span>${esc(hstLbl)}</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">${isCon(d)?'Final total':isChg(d)?'Change order total':'Total'}</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`;$('d-hint').innerHTML=(d.kind==='estimate'||isCon(d))&&$('docForm').dataset.locked!=='1'?costHint(docJob,c.sub):''}
+  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':isChg(d)?'Change order price':'Contract price')}</span><b>${money(c.gross)||'$0'}</b></div>${d.hst?`<div><span>${esc(hstLbl)}</span><b>${money(c.disc?c.grossTax:c.tax)}</b></div>`:''}${c.disc?`<div><span>Discount</span><b style="color:var(--green)">−${money(c.disc)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">${isCon(d)?'Final total':isChg(d)?'Change order total':'Total'}</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`;$('d-hint').innerHTML=(d.kind==='estimate'||isCon(d))&&$('docForm').dataset.locked!=='1'?costHint(docJob,c.sub):''}
 function paintItems(){$('d-items').innerHTML=docEdit.items.map(itemRow).join('');$('d-items').querySelectorAll('textarea').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})}
 const CONTRACT_TERMS=`1. Scope of work. The Contractor will supply the labour, and the materials listed in the scope, to complete the work described in this contract in a good and workmanlike manner and in line with the Ontario Building Code and good trade practice. Anything not listed in the scope is not included.
 
