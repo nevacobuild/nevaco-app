@@ -1352,17 +1352,17 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 
 <div class="scrim" id="saleModal" hidden>
   <form class="sheet" id="saleForm" novalidate>
-    <header><button type="button" id="saleCancel">Cancel</button><h3 id="saleTitleH">New Sale</h3><button type="submit" class="save">Save</button></header>
+    <header><button type="button" id="saleCancel">Cancel</button><h3 id="saleTitleH">New Sold Item</h3><button type="submit" class="save">Save</button></header>
     <div class="body">
       <div class="fg">
-        <label><span>What</span><input id="sale-title" placeholder="e.g. Vanity, light fixtures, tile" autocomplete="off"></label>
-        <label><span>Customer paid</span><input id="sale-amount" inputmode="decimal" placeholder="$0.00"></label>
-        <label class="sw"><span>Includes HST (13%)</span><input id="sale-hst" type="checkbox"></label>
+        <label><span>What</span><input id="sale-title" placeholder="e.g. Old cabinets, copper pipe, appliances" autocomplete="off"></label>
+        <label><span>Sold for</span><input id="sale-amount" inputmode="decimal" placeholder="$0.00"></label>
+        <label><span>Sold to</span><input id="sale-buyer" placeholder="Buyer (optional)" autocomplete="off"></label>
         <label><span>Date</span><input id="sale-date" type="date"></label>
       </div>
-      <p class="fnote">For things you buy and sell on to the customer. Put what you paid for them in Expenses; the money the customer pays you goes here and is added to the job profit. If the amount includes HST, tick the switch and the HST part is kept out of the profit for CRA.</p>
+      <p class="fnote">For things taken out of the customer's home that you sold instead of dumping. The money you got is added to the job profit. It is not a customer payment, so it does not change what the customer owes.</p>
       <div class="fg"><label class="ta"><span>Notes</span><textarea id="sale-notes" placeholder="Details"></textarea></label></div>
-      <button type="button" class="delbtn" id="saleDel" hidden>Delete Sale</button>
+      <button type="button" class="delbtn" id="saleDel" hidden>Delete Sold Item</button>
     </div>
   </form>
 </div>
@@ -1587,7 +1587,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.60 (Nov 20) · Items sold to the customer';
+const APP_VERSION='1.61 (Nov 20) · Sold items from the job';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -2908,7 +2908,7 @@ function paySched(r){
   return rows}
 const progressOf=r=>{const ts=jtasks(r);if(ts.length)return Math.round(ts.filter(t=>t.done).length/ts.length*100);return stageOf(r)==='done'?100:0};
 function finBlock(r){if(!showExp(r))return '';const f=fin(r),cs=changes(r);
-  return `<div class="block"><div class="label">Money <span><button id="finSale">+ Sale</button>&nbsp;&nbsp;<button id="finCo">+ Change order</button>&nbsp;&nbsp;<button id="finRep">Report / PDF</button></span></div>
+  return `<div class="block"><div class="label">Money <span><button id="finSale">+ Sold item</button>&nbsp;&nbsp;<button id="finCo">+ Change order</button>&nbsp;&nbsp;<button id="finRep">Report / PDF</button></span></div>
     <div class="group"><div class="fink">
       <div><span>Contract value</span><b>${money(f.tcv)||'$0'}</b>${f.co?`<small>incl. ${money(f.co)} extras</small>`:''}</div>
       <div><span>Received</span><b style="color:var(--green)">${money(f.rec)||'$0'}</b><small>${f.hstIn?'incl. '+money(f.hstIn)+' HST to keep for CRA · ':''}${f.recv>0.5?money(f.recv)+' to collect':'All collected'}</small></div>
@@ -2917,7 +2917,7 @@ function finBlock(r){if(!showExp(r))return '';const f=fin(r),cs=changes(r);
     </div>
     ${chgDocs(r).map(d=>`<button class="row corow" data-doc="${d.id}"><span class="rt"><b>${esc(d.number)} · ${esc((d.items||[]).filter(i=>String(i.d||'').trim()).map(i=>i.d).join(', ')||d.title||'Change order')}</b><span>${d.status==='accepted'?'Approved'+(d.acceptedName&&!/^Approved in person/.test(d.acceptedName)?' online by '+esc(d.acceptedName):''):d.status==='sent'?(d.viewedAt?'Opened · waiting for approval':'Sent · waiting for approval'):'Draft · not sent'} · ${fmtDate(d.date)}</span></span><span class="rv"><em style="${d.status==='accepted'?'':'color:var(--label3)'}">${money(d.total)||'$0'}</em>${ico('chev')}</span></button>`).join('')}
     ${cs.length?cs.map((c,i)=>`<button class="row corow" data-co="${i}"><span class="rt"><b>${esc(c.title||'Extra job')}</b><span>${[fmtDate(c.date),c.by,CO_ST[c.status]||''].filter(Boolean).map(esc).join(' · ')}</span></span><span class="rv"><em style="${coCounts(c)?'':'color:var(--label3);text-decoration:line-through'}">${money(c.amount)||'$0'}</em>${ico('chev')}</span></button>`).join(''):''}
-    ${f.sales.map((x,i)=>`<button class="row corow" data-sale="${i}"><span class="rt"><b>${esc(x.title||'Item sold')}</b><span>${[fmtDate(x.date),'Sold to the customer',x.hst?'incl. HST':''].filter(Boolean).map(esc).join(' · ')}</span></span><span class="rv"><em>${money(x.amount)||'$0'}</em>${ico('chev')}</span></button>`).join('')}
+    ${f.sales.map((x,i)=>`<button class="row corow" data-sale="${i}"><span class="rt"><b>${esc(x.title||'Sold item')}</b><span>${[fmtDate(x.date),x.buyer?'Sold to '+x.buyer:'Sold'].filter(Boolean).map(esc).join(' · ')}</span></span><span class="rv"><em>${money(x.amount)||'$0'}</em>${ico('chev')}</span></button>`).join('')}
     <label class="row finsw"><span>Hani partner job<small>${f.hani?'Hani 1/2, then Kevin, Raf and Shirin 1/3 each of the rest':'Profit split Kevin, Raf and Shirin 1/3 each'}</small></span><input type="checkbox" id="finHani"${f.hani?' checked':''}></label>
     </div></div>`}
 function bindFin(r){if($('finRep'))$('finRep').onclick=()=>openReport(r);if($('finSale'))$('finSale').onclick=()=>openSale(r,null);
@@ -2938,20 +2938,20 @@ $('coForm').onsubmit=e=>{e.preventDefault();const r=coJob;if(!r)return;const tit
   log(r,coIdx!=null?`Extra job updated: ${title} ${money(amount)}`:`Extra job added: ${title} ${money(amount)} (${CO_ST[c.status]})`);save();hideModal('coModal');render();if(selId===r.id)openDetail(r.id);if(!$('repView').hidden)paintReport();toast('Saved')};
 $('coDel').onclick=()=>{const r=coJob,b=$('coDel');if(!r||coIdx==null)return;if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent='Tap again to delete';return}
   b.classList.remove('sure');b.textContent='Delete Extra Job';const c=changes(r)[coIdx];r.ms.changes=changes(r).filter((_,i)=>i!==coIdx);log(r,`Extra job removed: ${c.title}`);save();hideModal('coModal');render();if(selId===r.id)openDetail(r.id);toast('Deleted')};
-/* items sold to the customer */
+/* items taken out of the job and sold instead of dumped (income that adds to the profit; not a customer payment) */
 let saleJob=null,saleIdx=null;
 function openSale(r,i){saleJob=r;saleIdx=i;const x=i==null?null:(r.ms.sales||[])[i];
-  $('saleTitleH').textContent=x?'Item Sold':'New Sale';$('saleDel').hidden=!x;
-  $('sale-title').value=x?.title||'';$('sale-amount').value=x?.amount??'';$('sale-hst').checked=!!x?.hst;$('sale-date').value=x?.date||today();$('sale-notes').value=x?.notes||'';
+  $('saleTitleH').textContent=x?'Sold Item':'New Sold Item';$('saleDel').hidden=!x;
+  $('sale-title').value=x?.title||'';$('sale-amount').value=x?.amount??'';$('sale-buyer').value=x?.buyer||'';$('sale-date').value=x?.date||today();$('sale-notes').value=x?.notes||'';
   showModal('saleModal');if(!x)setTimeout(()=>$('sale-title').focus(),300)}
 $('saleCancel').onclick=()=>hideModal('saleModal');$('saleModal').onclick=e=>{if(e.target.id==='saleModal')hideModal('saleModal')};
 $('saleForm').onsubmit=e=>{e.preventDefault();const r=saleJob;if(!r)return;const title=$('sale-title').value.trim(),amount=Math.round((Number(($('sale-amount').value||'').replace(/[^0-9.]/g,''))||0)*100)/100;
-  if(!title){toast('What did you sell?');$('sale-title').focus();return}if(!amount){toast('Enter the amount the customer paid');$('sale-amount').focus();return}
-  const x={id:saleIdx!=null?r.ms.sales[saleIdx].id:uid(),title,amount,hst:$('sale-hst').checked,date:$('sale-date').value||today(),notes:$('sale-notes').value.trim()};
+  if(!title){toast('What did you sell?');$('sale-title').focus();return}if(!amount){toast('Enter what you sold it for');$('sale-amount').focus();return}
+  const x={id:saleIdx!=null?r.ms.sales[saleIdx].id:uid(),title,amount,buyer:$('sale-buyer').value.trim(),date:$('sale-date').value||today(),notes:$('sale-notes').value.trim()};
   const list=(r.ms.sales||[]).slice();if(saleIdx!=null)list[saleIdx]=x;else list.push(x);r.ms.sales=list;
-  log(r,saleIdx!=null?`Sale updated: ${title} ${money(amount)}`:`Sale added: ${title} ${money(amount)}`);save();hideModal('saleModal');render();if(selId===r.id)openDetail(r.id);if(!$('repView').hidden)paintReport();toast('Saved')};
+  log(r,saleIdx!=null?`Sold item updated: ${title} ${money(amount)}`:`Sold item added: ${title} ${money(amount)}`);save();hideModal('saleModal');render();if(selId===r.id)openDetail(r.id);if(!$('repView').hidden)paintReport();toast('Saved')};
 $('saleDel').onclick=()=>{const r=saleJob,b=$('saleDel');if(!r||saleIdx==null)return;if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent='Tap again to delete';return}
-  b.classList.remove('sure');b.textContent='Delete Sale';const x=r.ms.sales[saleIdx];r.ms.sales=r.ms.sales.filter((_,i)=>i!==saleIdx);log(r,`Sale removed: ${x.title} ${money(x.amount)}`);save();hideModal('saleModal');render();if(selId===r.id)openDetail(r.id);if(!$('repView').hidden)paintReport();toast('Deleted')};
+  b.classList.remove('sure');b.textContent='Delete Sold Item';const x=r.ms.sales[saleIdx];r.ms.sales=r.ms.sales.filter((_,i)=>i!==saleIdx);log(r,`Sold item removed: ${x.title} ${money(x.amount)}`);save();hideModal('saleModal');render();if(selId===r.id)openDetail(r.id);if(!$('repView').hidden)paintReport();toast('Deleted')};
 /* the report (live, printable as PDF) */
 let repJob=null;
 function openReport(r){repJob=r;paintReport();$('repView').hidden=false;document.body.classList.add('rep-open');$('repScroll').scrollTop=0}
@@ -2991,7 +2991,7 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
         ${sch.map(x=>`<tr><td>${x.due?fmtDate(x.due):''}</td><td>${esc(x.d)}</td><td class="n">${x.amt?cents(x.amt):''}</td><td class="n">${x.got?cents(x.got):''}</td><td><span class="rp-st ${x.st.toLowerCase()}">${x.st}</span></td><td class="sm">${esc(x.notes.join(', '))}</td></tr>`).join('')}
         </tbody><tfoot><tr><td></td><td>Total</td><td class="n">${cents(sch.reduce((t,x)=>t+x.amt,0))}</td><td class="n">${cents(f.rec)}</td><td colspan="2"></td></tr></tfoot></table>
         <table class="rp-kv rp-sum"><tr><th>Contract amount (base)${r.hst?' incl. HST':''}</th><td>${cents(f.base)}</td></tr><tr><th>Extra jobs / change orders (+)</th><td>${cents(f.co)}</td></tr><tr class="b"><th>Total contract value (=)</th><td>${cents(f.tcv)}</td></tr>
-          <tr><th>Total payments received</th><td>${cents(f.rec)}</td></tr><tr><th class="sm">of which HST received</th><td class="sm">${cents(f.hstIn)}</td></tr>${f.salesGross?`<tr><th>Items sold to the customer (+)</th><td>${cents(f.salesGross)}</td></tr>`:''}<tr><th>Remaining receivable</th><td>${cents(f.recv)}</td></tr><tr><th>Less HST received (keep for CRA)</th><td>(${cents(f.hstTotal)})</td></tr><tr><th>Total expenses (net of returns)</th><td>${cents(f.net)}</td></tr>
+          <tr><th>Total payments received</th><td>${cents(f.rec)}</td></tr><tr><th class="sm">of which HST received</th><td class="sm">${cents(f.hstIn)}</td></tr>${f.salesGross?`<tr><th>Items sold from the job (+)</th><td>${cents(f.salesGross)}</td></tr>`:''}<tr><th>Remaining receivable</th><td>${cents(f.recv)}</td></tr><tr><th>Less HST received (keep for CRA)</th><td>(${cents(f.hstTotal)})</td></tr><tr><th>Total expenses (net of returns)</th><td>${cents(f.net)}</td></tr>
           <tr class="b p"><th>Project profit / (loss)</th><td>${neg(f.profit)}</td></tr></table></section></div>
     <section><h4>Project expenses</h4>
       <table class="rp-t rp-cats"><thead><tr><th>Category</th><th class="n">Actual</th><th class="n">% of expenses</th></tr></thead><tbody>
@@ -3008,9 +3008,9 @@ function paintReport(){const r=repJob?job(repJob.id):null;if(!r){closeReport();r
       <section><h4>Extra jobs / change orders</h4><table class="rp-t"><thead><tr><th>Date</th><th>Description</th><th>Requested by</th><th class="n">Amount</th><th>Status</th></tr></thead><tbody>
         ${cs.length||chgDocs(r).length?chgDocs(r).map(d=>`<tr><td>${fmtDate(d.date)}</td><td>${esc(d.number)}${(d.items||[]).filter(i=>String(i.d||'').trim()).map(i=>`<div class="sm">${esc(i.d)}${Number(i.a)>0?' · '+cents(i.a):''}</div>`).join('')}</td><td>Owner</td><td class="n">${cents(d.total)}</td><td>${d.status==='accepted'?'Approved':d.status==='sent'?'Waiting for OK':'Draft'}</td></tr>`).join('')+cs.map(c=>`<tr><td>${c.date?fmtDate(c.date):''}</td><td>${esc(c.title)}${c.notes?`<div class="sm">${esc(c.notes)}</div>`:''}</td><td>${esc(c.by||'')}</td><td class="n">${cents(c.amount)}</td><td>${esc(CO_ST[c.status]||'')}</td></tr>`).join(''):`<tr><td colspan="5" class="rp-none">No extra jobs</td></tr>`}</tbody>
         <tfoot><tr><td colspan="3">Total extra jobs (approved and done)</td><td class="n">${cents(f.co)}</td><td></td></tr></tfoot></table></section></div>
-    ${f.sales.length?`<section><h4>Items sold to the customer</h4><table class="rp-t"><thead><tr><th>Date</th><th>Description</th><th>HST</th><th class="n">Customer paid</th><th class="n">Profit part</th><th>Notes</th></tr></thead><tbody>
-      ${f.sales.map(x=>{const t=x.hst?r2(Number(x.amount)-Number(x.amount)/1.13):0;return `<tr><td>${x.date?fmtDate(x.date):''}</td><td>${esc(x.title)}</td><td>${x.hst?cents(t):'—'}</td><td class="n">${cents(x.amount)}</td><td class="n">${cents(Number(x.amount)-t)}</td><td class="sm">${esc(x.notes||'')}</td></tr>`}).join('')}</tbody>
-      <tfoot><tr><td colspan="3">Total</td><td class="n">${cents(f.salesGross)}</td><td class="n">${cents(f.salesNet)}</td><td></td></tr></tfoot></table></section>`:''}
+    ${f.sales.length?`<section><h4>Items sold from the job</h4><table class="rp-t"><thead><tr><th>Date</th><th>Description</th><th>Sold to</th><th class="n">Sold for</th><th>Notes</th></tr></thead><tbody>
+      ${f.sales.map(x=>`<tr><td>${x.date?fmtDate(x.date):''}</td><td>${esc(x.title)}</td><td>${esc(x.buyer||'')}</td><td class="n">${cents(x.amount)}</td><td class="sm">${esc(x.notes||'')}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="3">Total</td><td class="n">${cents(f.salesGross)}</td><td></td></tr></tfoot></table><p class="rp-note">Things taken out of the customer's home and sold instead of dumped. Added to the profit; not a customer payment.</p></section>`:''}
     <section><h4>Profit split</h4>${(()=>{const sp=f.split(f.profit),ex=f.split(f.expected),pay=sp.map(([n,v])=>[n,v,f.own[n]||0,r2(v+(f.own[n]||0)-(f.held[n]||0)),f.held[n]||0]),anyHeld=PARTNERS.some(n=>f.held[n]);
       return `<table class="rp-t rp-split"><thead><tr><th>Partner</th><th>Share</th><th class="n">Share of profit</th><th class="n">Paid from own pocket</th>${anyHeld?'<th class="n">Cash already in hand</th>':''}<th class="n">Takes now</th><th class="n">Expected at completion</th></tr></thead><tbody>
         ${pay.map(([n,v,o,t,hd],i)=>`<tr><td><b>${n}</b></td><td>${n==='Hani'?'1/2':f.hani?'1/3 of the other half':'1/3'}</td><td class="n">${neg(v)}</td><td class="n">${o?cents(o):'—'}</td>${anyHeld?`<td class="n">${hd?'('+cents(hd)+')':'—'}</td>`:''}<td class="n"><b>${neg(t)}</b></td><td class="n sm">${neg(ex[i][1])}</td></tr>`).join('')}</tbody>
@@ -3383,7 +3383,7 @@ const CCOL={'Materials':'#0a84ff','Labour':'#ff9f0a','Equipment / Tools':'#bf5af
 const pct=v=>{if(v==null)return '—';const n=Math.round(v*100);return (n<0?'−':'')+Math.abs(n)+'%'};
 const mcls=m=>m==null?'':m>=.25?'green':m>=.1?'orange':'red';
 const smoney=v=>(v<0?'−':'')+kmoney(Math.abs(v));
-function costOf(r){const f=fin(r),rev=r2(f.tcv-f.hstAll+f.salesNet),cost=r2(f.net+f.owed),cats=Object.assign({},f.cats);cats.Labour=(cats.Labour||0)+f.owed;
+function costOf(r){const f=fin(r),rev=r2(f.tcv-f.hstAll),cost=r2(f.net+f.owed-f.salesNet),cats=Object.assign({},f.cats);cats.Labour=(cats.Labour||0)+f.owed;
   return{r,rev,cost,profit:r2(rev-cost),margin:rev>0?(rev-cost)/rev:null,done:stageOf(r)==='done',cats}}
 function costJobs(){return data.filter(r=>isJob(r)&&!r.sample).map(costOf).filter(c=>c.rev>0)}
 function costAgg(cs){const rev=r2(cs.reduce((t,c)=>t+c.rev,0)),cost=r2(cs.reduce((t,c)=>t+c.cost,0)),cats=Object.fromEntries(FCATS.map(([n])=>[n,0]));
@@ -3407,7 +3407,7 @@ function renderCost(){
     +(closed.length?`<h3 class="ch">Finished jobs · lowest margin first</h3><div class="group">${closed.slice().sort(byM).map(jrow).join('')}</div>`:'')
     +(open.length?`<h3 class="ch">In progress · costs so far</h3><div class="group">${open.slice().sort(byM).map(jrow).join('')}</div>`:'')
     +(bare.length?`<p class="cnote">${plural(bare.length,'job')} with a price but no costs recorded: ${bare.map(c=>esc(c.r.name)).join(', ')}. Add their expenses to include them.</p>`:'')
-    +`<p class="cnote">Price is the contract plus approved extras and items sold to the customer, without HST. Cost is expenses minus returns, plus contractor work in the job plan, paid or not. Tap a job to open its financial report.</p>`;
+    +`<p class="cnote">Price is the contract plus approved extras, without HST. Cost is expenses minus returns and minus money from items sold, plus contractor work in the job plan, paid or not. Tap a job to open its financial report.</p>`;
 }
 /* shown under the totals while writing an estimate or contract: what similar finished jobs cost */
 function costHint(r,sub){
