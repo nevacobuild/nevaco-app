@@ -1235,6 +1235,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
       <div class="fghead">Price</div>
       <div class="fg">
         <label id="d-lumprow"><span>Total price</span><input id="d-lump" inputmode="decimal" placeholder="$0"></label>
+        <label id="d-discrow"><span>Discount</span><input id="d-disc" inputmode="decimal" placeholder="$0 off the whole price"></label>
         <label class="sw" id="d-hstrow"><span>Add HST (13%)</span><input id="d-hst" type="checkbox"></label>
         <label id="d-creditrow" hidden><span>Less paid</span><input id="d-credit" inputmode="decimal" placeholder="$0 already received"></label>
         <label><span>Deposit</span><select id="d-dep"><option value="0">No deposit</option><option value="10">10%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="40">40%</option><option value="50">50%</option></select></label>
@@ -1570,7 +1571,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.57 (Nov 14) · Clearer map';
+const APP_VERSION='1.58 (Nov 20) · Discount on estimates and contracts';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -3877,15 +3878,19 @@ function buildInvoice(r){
     return Object.assign(base,{title:`Deposit – ${title}`,items:[{d:`Deposit (${pct}%) for ${title.toLowerCase()}${est?' as per estimate '+est.number:''}`,a:sub?Math.round(sub*pct)/100:null}]})}
   return Object.assign(base,{title:`Final Invoice – ${title}`,items:[{d:`${title} – contract price${est?' as per estimate '+est.number:''}`,a:sub||null}],credit:Math.round(paid(r)*100)/100})}
 const newToken=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
+/* the discount (d.extra.discount) comes off the whole price before HST; sub is the price after the discount */
 function calcDoc(d){const items=(d.items||[]).filter(i=>String(i.d||'').trim()||Number(i.a)>0);const priced=items.some(i=>Number(i.a)>0);
-  const sub=Math.round((priced?items.reduce((t,i)=>t+(Number(i.a)||0),0):(Number(d.lump)||0))*100)/100;const tax=d.hst?Math.round(sub*13)/100:0;
-  return{sub,tax,total:Math.round((sub+tax)*100)/100,priced}}
+  const gross=Math.round((priced?items.reduce((t,i)=>t+(Number(i.a)||0),0):(Number(d.lump)||0))*100)/100;
+  const disc=isInv(d)||isChg(d)?0:Math.min(gross,Math.max(0,Math.round((Number(d.extra&&d.extra.discount)||0)*100)/100));
+  const sub=Math.round((gross-disc)*100)/100;const tax=d.hst?Math.round(sub*13)/100:0;
+  return{gross,disc,sub,tax,total:Math.round((sub+tax)*100)/100,priced}}
 let docEdit=null,docJob=null,emailedDoc=null;
 function docLink(d){return location.origin+location.pathname.replace(/[^/]*$/,'')+'doc.html?t='+d.token}
 function itemRow(i,k){return `<div class="itm"><em>${k+1}</em><textarea data-k="${k}" data-f="d" rows="1" placeholder="Describe the work">${esc(i.d||'')}</textarea><input data-k="${k}" data-f="a" inputmode="decimal" placeholder="$" value="${i.a==null?'':i.a}"><button type="button" class="rm" data-rm="${k}" aria-label="Remove line">×</button></div>`}
 function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=$('d-date').value||today();
   if(isInv(d)){d.validUntil='';d.dueDate=d.date;d.credit=Number($('d-credit').value.replace(/[^0-9.]/g,''))||0}else d.validUntil=addDays(d.date,Number($('d-valid').value)||30);
   d.lump=$('d-lump').value.replace(/[^0-9.]/g,'')||null;d.hst=$('d-hst').checked;d.depositPct=Number($('d-dep').value)||0;d.notes=$('d-notes').value.trim();d.terms=$('d-terms').value.trim();
+  if(!isInv(d)&&!isChg(d)){const x=d.extra=d.extra||{},dv=Math.round((Number(String($('d-disc').value||'').replace(/[^0-9.]/g,''))||0)*100)/100;if(dv>0)x.discount=dv;else delete x.discount}
   const c=calcDoc(d);d.subtotal=c.sub;d.tax=c.tax;d.total=c.total;
   if(isChg(d)){const x=d.extra=Object.assign({},d.extra||{});x.customer={};['name','address','city','postal','phone','email'].forEach(k=>x.customer[k]=$('k-'+k).value.trim());x.payWhen=$('k-paywhen').value;
     if(d.status==='draft'&&docJob){const others=chgApproved(docJob).filter(o=>o.id!==d.id);x.prevTotal=Math.round((total(docJob)+coTotal(docJob)-(Number(d.status==='accepted'?d.total:0)||0))*100)/100;x.prevCount=others.length+(Array.isArray(docJob.ms?.changes)?docJob.ms.changes.filter(c=>c.status==='approved'||c.status==='done').length:0)}
@@ -3897,7 +3902,7 @@ function readDocForm(){const d=docEdit;d.title=$('d-title').value.trim();d.date=
 function paintTotals(){const c=readDocForm(),d=docEdit;$('d-lumprow').hidden=c.priced;if(isCon(d)&&!$('d-conpay').hidden&&$('k-sched').childElementCount){$('k-sched').querySelectorAll('.kpay:not(.kph) b').forEach((b,k)=>{const x=conSchedEdit[k];if(x)b.innerHTML=(money(payBase(x,c.sub)+payHst(x,c.sub))||'$0')+(x.hst?'<small>incl. HST</small>':'')});schedNote()}
   const hstLbl=isCon(d)&&c.tax?(()=>{const on=conSchedEdit.filter(x=>x.hst&&Number(x.pct)>0);return on.length===conSchedEdit.filter(x=>Number(x.pct)>0).length?'HST (13%)':`HST (13%) on ${on.map(x=>x.d.toLowerCase()||'payment').join(', ')}`})():'HST (13%)';
   const dep=Math.round(d.depositPct*d.total)/100;
-  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':isChg(d)?'Change order price':'Contract price')}</span><b>${money(c.sub)||'$0'}</b></div>${d.hst?`<div><span>${esc(hstLbl)}</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">${isCon(d)?'Final total':isChg(d)?'Change order total':'Total'}</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`;$('d-hint').innerHTML=(d.kind==='estimate'||isCon(d))&&$('docForm').dataset.locked!=='1'?costHint(docJob,c.sub):''}
+  $('d-totals').innerHTML=`<div><span>${c.priced?'Subtotal':(isInv(d)?'Amount':isChg(d)?'Change order price':'Contract price')}</span><b>${money(c.gross)||'$0'}</b></div>${c.disc?`<div><span>Discount</span><b style="color:var(--green)">−${money(c.disc)}</b></div>`:''}${d.hst?`<div><span>${esc(hstLbl)}</span><b>${money(c.tax)}</b></div>`:''}<div class="${isInv(d)&&d.credit?'':'g'}"><span style="color:var(--label)">${isCon(d)?'Final total':isChg(d)?'Change order total':'Total'}</span><b>${money(c.total)||'$0'}</b></div>${isInv(d)&&d.credit?`<div><span>Less payments received</span><b>−${money(d.credit)}</b></div><div class="g"><span style="color:var(--label)">Balance due</span><b>${money(invDue(d))}</b></div>`:''}${!isInv(d)&&!isCon(d)&&d.depositPct?`<div><span>Deposit at signing (${d.depositPct}%)</span><b>${money(dep)}</b></div>`:''}`;$('d-hint').innerHTML=(d.kind==='estimate'||isCon(d))&&$('docForm').dataset.locked!=='1'?costHint(docJob,c.sub):''}
 function paintItems(){$('d-items').innerHTML=docEdit.items.map(itemRow).join('');$('d-items').querySelectorAll('textarea').forEach(t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'})}
 const CONTRACT_TERMS=`1. Scope of work. The Contractor will supply the labour, and the materials listed in the scope, to complete the work described in this contract in a good and workmanlike manner and in line with the Ontario Building Code and good trade practice. Anything not listed in the scope is not included.
 
@@ -3934,7 +3939,7 @@ function buildContract(r){
   return{id:uid(),jobId:r.id,kind:'contract',number:nextDocNumber('contract'),status:'draft',date:today(),validUntil:'',title:(est?.title||r.type||'Renovation').trim(),
     items:est?JSON.parse(JSON.stringify(est.items||[])):[{d:'',a:null},{d:'',a:null}],lump:est?est.lump:(r.value||null),hst:est?est.hst:r.hst!==false,depositPct:est?.depositPct||30,
     notes:'',terms:CONTRACT_TERMS,token:newToken(),ref:est?.number||'',credit:0,_new:true,
-    extra:{customer:{name:r.name||'',address:r.address||'',city:r.city||'',postal:r.postal||'',phone:r.phone||'',email:r.email||''},start:jStart(r)||'',end:jEnd(r)||'',warranty:'1 year',permits:'Not required',schedule:conSched(est?.depositPct||30,est?est.hst:r.hst!==false)}}}
+    extra:{customer:{name:r.name||'',address:r.address||'',city:r.city||'',postal:r.postal||'',phone:r.phone||'',email:r.email||''},start:jStart(r)||'',end:jEnd(r)||'',warranty:'1 year',permits:'Not required',schedule:conSched(est?.depositPct||30,est?est.hst:r.hst!==false),...(est&&est.extra&&est.extra.discount?{discount:est.extra.discount}:{})}}}
 const CHG_TERMS=`1. Extra work. The Contractor will do the extra work listed in this change order. It is added to the contract and follows the same terms, warranty and quality as the original contract.
 
 2. Price and payment. The price of this change order is added to the contract total and paid as shown above.
@@ -3981,7 +3986,7 @@ function openDoc(d,r,kind){docJob=r;
   if(!d){d={id:uid(),jobId:r.id,kind:'estimate',number:nextDocNumber('estimate'),status:'draft',date:today(),validUntil:addDays(today(),30),title:r.type||'',items:[{d:'',a:null},{d:'',a:null}],lump:r.value||null,hst:r.hst!==false,depositPct:30,notes:'',terms:DEFAULT_TERMS,token:newToken(),_new:true}}
   docEdit=JSON.parse(JSON.stringify(d));if(!docEdit.items.length)docEdit.items=[{d:'',a:null}];
   const inv=isInv(docEdit),con=isCon(docEdit),chg=isChg(docEdit),two=con||chg;$('docTitleH').textContent=`${KN(docEdit)} ${docEdit.number}`;
-  $('d-validrow').hidden=inv||two;$('d-hstrow').hidden=con;$('d-dep').closest('label').hidden=inv||two;$('d-con').hidden=!two;$('d-conpay').hidden=!con;$('d-oursig').hidden=!two;$('d-chg').hidden=!chg;$('k-schedhead').hidden=chg;$('k-schedfg').hidden=chg;
+  $('d-validrow').hidden=inv||two;$('d-hstrow').hidden=con;$('d-discrow').hidden=inv||chg;$('d-dep').closest('label').hidden=inv||two;$('d-con').hidden=!two;$('d-conpay').hidden=!con;$('d-oursig').hidden=!two;$('d-chg').hidden=!chg;$('k-schedhead').hidden=chg;$('k-schedfg').hidden=chg;
   if(chg){const x=docEdit.extra||(docEdit.extra={}),c=x.customer||{};['name','address','city','postal','phone','email'].forEach(k=>$('k-'+k).value=c[k]||'');$('k-paywhen').value=x.payWhen||'Added to the final payment';sigDrawing=false;paintOurSig()}
   $('d-notelbl').textContent=con?'Special conditions':'Notes';$('d-notehead').textContent=con?'Special conditions and terms':'Notes and terms';$('d-terms').rows=con?14:7;
   if(con){const x=docEdit.extra||(docEdit.extra={}),c=x.customer||{};['name','address','city','postal','phone','email'].forEach(k=>$('k-'+k).value=c[k]||'');
@@ -3990,7 +3995,7 @@ function openDoc(d,r,kind){docJob=r;
   $('d-scopehead').textContent=inv?'Description':chg?'Extra work':'Scope of work';$('d-scopenote').hidden=inv||chg;$('d-notes').placeholder=con?'e.g. Owner supplies tiles and fixtures. Work hours 8 AM to 5 PM.':'e.g. Materials supplied by customer. Timeline 5–7 working days.';$('d-termsrow').hidden=inv&&!docEdit.terms;
   $('d-title').value=docEdit.title;$('d-date').value=docEdit.date;
   const vd=docEdit.validUntil?dayDiff(docEdit.validUntil,docEdit.date):30;$('d-valid').value=[15,30,60,90].includes(vd)?String(vd):'30';
-  $('d-lump').value=docEdit.lump??'';$('d-hst').checked=!!docEdit.hst;$('d-dep').value=String(docEdit.depositPct||0);if(!$('d-dep').value)$('d-dep').value='30';
+  $('d-lump').value=docEdit.lump??'';$('d-disc').value=docEdit.extra?.discount||'';$('d-hst').checked=!!docEdit.hst;$('d-dep').value=String(docEdit.depositPct||0);if(!$('d-dep').value)$('d-dep').value='30';
   $('d-notes').value=docEdit.notes;$('d-terms').value=docEdit.terms;
   const locked=docEdit.status==='accepted'||docEdit.status==='paid';$('docForm').dataset.locked=locked?'1':'0';payMode=false;
   $('docBanner').innerHTML=two?conBanner(docEdit):inv?(docEdit.status==='paid'?`<div class="banner ok">${ico('check')} Paid ${money(docEdit.total-docEdit.credit)} on ${fmtDate(ld(docEdit.paidAt))}${docEdit.paidMethod?' by '+esc(docEdit.paidMethod):''}</div>`:docEdit.status==='sent'?`<div class="banner warn">${ico('pay')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · ${money(invDue(docEdit))} due</div>`:''):locked?`<div class="banner ok">${ico('check')} Signed by ${esc(docEdit.acceptedName||'customer')} on ${fmtDate(ld(docEdit.acceptedAt))}</div>`:docEdit.status==='sent'?`<div class="banner info">${ico('sent')} Sent ${docEdit.sentAt?fmtDate(ld(docEdit.sentAt)):''} · waiting for the customer to sign</div>`:'';
@@ -4025,7 +4030,7 @@ $('k-sched').addEventListener('click',e=>{const b=e.target.closest('[data-krm]')
 $('k-addpay').onclick=()=>{const sum=conSchedEdit.reduce((a,x)=>a+(Number(x.pct)||0),0);conSchedEdit.splice(Math.max(0,conSchedEdit.length-1),0,{d:'',pct:Math.max(0,100-sum)||'',hst:$('d-hst').checked});paintTotals();paintConSched()};
 ['k-start','k-end'].forEach(id=>$(id).addEventListener('change',()=>{if($('k-start').value&&$('k-end').value&&$('k-end').value<$('k-start').value)$('k-end').value=$('k-start').value}));
 $('d-addline').onclick=()=>{docEdit.items.push({d:'',a:null});paintItems();const ts=$('d-items').querySelectorAll('textarea');ts[ts.length-1].focus()};
-['d-lump','d-hst','d-dep','d-date','d-valid','d-credit','k-paywhen'].forEach(id=>$(id).addEventListener('input',paintTotals));
+['d-lump','d-disc','d-hst','d-dep','d-date','d-valid','d-credit','k-paywhen'].forEach(id=>$(id).addEventListener('input',paintTotals));
 function storeDoc(){readDocForm();const d=docEdit;d.items=d.items.filter(i=>String(i.d||'').trim()||Number(i.a)>0);if(!d.items.length)d.items=[{d:'',a:null}];
   const clean=Object.assign({},d);delete clean._new;
   const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=clean;else{db.docs.push(clean);log(docJob,`${KN(d)} ${d.number} created`)}

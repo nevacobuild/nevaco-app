@@ -136,6 +136,7 @@ const x=d.extra||{};
 const clauses=t=>String(t||'').split(/\n\s*\n/).map(p=>{const m=p.match(/^(\d+\.\s+[^.\n]{2,60}\.)([\s\S]*)$/);return `<p>${m?`<b>${esc(m[1])}</b>${esc(m[2])}`:esc(p)}</p>`}).join('');
 const sched=(x.schedule||[]).filter(r=>String(r.d||'').trim()&&Number(r.pct)>0);
 const perRow=con&&sched.some(r=>r.hst!==undefined),sub0=Number(d.subtotal)||0;
+const disc=inv||chg?0:Math.max(0,Number(x.discount)||0);   // price before the discount = subtotal + discount
 const pBase=r=>Math.round(Number(r.pct)*sub0)/100,pHst=r=>r.hst?Math.round(pBase(r)*13)/100:0;
 const hstOn=sched.filter(r=>r.hst),hstLabel=perRow&&hstOn.length&&hstOn.length<sched.length?'HST (13%) on '+hstOn.map(r=>r.d.toLowerCase()).join(', '):'HST (13%)';
 const fdt=v=>new Date(v).toLocaleString('en-CA',{dateStyle:'long',timeStyle:'short',timeZone:'America/Toronto'})+' (Toronto time)';
@@ -170,7 +171,8 @@ function render(){accepted=d.status==='accepted';
     <table><thead><tr><th style="width:28px">#</th><th>Description</th><th>${priced?'Amount':''}</th></tr></thead>
       <tbody>${items.map((i,k)=>`<tr><td class="n">${k+1}</td><td class="desc">${esc(i.d)}</td><td class="amt">${Number(i.a)>0?money(i.a):''}</td></tr>`).join('')}</tbody></table>
     <div class="totals">
-      <div><span>${priced?'Subtotal':'Contract price'}</span><span>${money(d.subtotal)}</span></div>
+      <div><span>${priced?'Subtotal':'Contract price'}</span><span>${money(sub0+disc)}</span></div>
+      ${disc>0?`<div><span>Discount</span><span style="color:#2f7d4f">−${money(disc)}</span></div>`:''}
       ${d.hst?`<div><span>${esc(hstLabel)}</span><span>${money(d.tax)}</span></div>`:''}
       <div class="${inv&&credit?'':'grand'}"><span>Total${d.hst||inv?'':' (HST not included)'}</span><span>${money(d.total)}${inv&&credit?'':' CAD'}</span></div>
       ${inv&&credit?`<div><span>Less payments received</span><span>−${money(credit)}</span></div><div class="grand"><span>Balance due</span><span>${money(due)} CAD</span></div>`:''}
