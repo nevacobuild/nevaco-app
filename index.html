@@ -1571,7 +1571,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.58 (Nov 20) · Discount on estimates and contracts';
+const APP_VERSION='1.59 (Nov 20) · Fix a change order amount';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -4005,13 +4005,15 @@ function conBanner(d){if(d.status==='draft')return '';
   const step=(on,t)=>`<span><i class="${on?'on':''}"></i>${t}</span>`;
   return `<div class="banner ${d.status==='accepted'?'ok':'info'}"><div class="ctrack">${step(!!d.sentAt,`Sent${d.sentAt?' '+dtm(d.sentAt):''}${d.extra?.sentTo?' to '+esc(d.extra.sentTo):''}`)}${step(!!d.viewedAt,d.viewedAt?`Opened by the customer ${dtm(d.viewedAt)}`:'Not opened yet')}${step(d.status==='accepted',d.status==='accepted'?`Signed by ${esc(d.acceptedName||'customer')} ${dtm(d.acceptedAt)}${d.signMeta?.ip?' · IP '+esc(d.signMeta.ip):''}`:'Waiting for signature')}</div></div>`}
 let payMode=false;
+/* a change order the customer approved in person has no signature, so a typing mistake in the amounts can be corrected */
+const canFixCo=d=>isChg(d)&&d.status==='accepted'&&/^Approved in person/i.test(d.acceptedName||'')&&!d.signMeta;
 function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,''),inv=isInv(d);
   if(inv&&d.status==='paid'){$('docActs').innerHTML=`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Paid Invoice (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button><button type="button" class="wide danger" data-act="unpay">Undo Payment</button>`;return}
   const payBlock=inv?(payMode?`<div class="banner ok" style="grid-column:1/-1">${ico('pay')} How did they pay ${money(invDue(d))}?</div><button type="button" class="textnow primary" data-act="paid" data-m="e-Transfer">e-Transfer</button><button type="button" data-act="paid" data-m="Cheque">Cheque</button><button type="button" data-act="paid" data-m="Cash">Cash</button><button type="button" class="wide" data-act="paycancel">Cancel</button>`
     :`<button type="button" class="wide paidbtn" data-act="paymode">${ico('check')}Mark as Paid</button>`):'';
   if(inv&&payMode){$('docActs').innerHTML=payBlock;return}
   $('docActs').innerHTML=d.status==='accepted'
-    ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed ${KN(d)} (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>`
+    ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed ${KN(d)} (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>${canFixCo(d)?`<button type="button" class="wide" data-act="fix">Fix a mistake in the amounts</button>`:''}${isChg(d)&&d.signMeta?`<p class="fnote" style="grid-column:1/-1;margin:2px 4px 0">The customer signed this online, so the amounts are locked.</p>`:''}`
     :`${d._emailed&&ph?`<div class="banner ok" style="grid-column:1/-1">${ico('check')} ${isTwo(d)&&gmailSt.connected?KN(d)+' emailed. Send a text too so they see it.':'Email ready in Gmail. Now send the text message.'}</div><button type="button" class="primary textnow" data-act="sms">${ico('msg')}Send Text to ${esc(docJob.phone)}</button>`:''}
       <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email||isTwo(d)?'mail':'sent')}${isTwo(d)?(d.status==='sent'?'Send Again for '+(isChg(d)?'Approval':'Signature'):'Send for '+(isChg(d)?'Approval':'Signature')):(d.status==='sent'?'Send Again':'Send to Customer')+(docJob.email?' by Email':'')}</button>
       <button type="button" data-act="pdf">${ico('quote')}Preview / PDF</button><button type="button" data-act="copy">Copy Link</button>
@@ -4032,7 +4034,7 @@ $('k-addpay').onclick=()=>{const sum=conSchedEdit.reduce((a,x)=>a+(Number(x.pct)
 $('d-addline').onclick=()=>{docEdit.items.push({d:'',a:null});paintItems();const ts=$('d-items').querySelectorAll('textarea');ts[ts.length-1].focus()};
 ['d-lump','d-disc','d-hst','d-dep','d-date','d-valid','d-credit','k-paywhen'].forEach(id=>$(id).addEventListener('input',paintTotals));
 function storeDoc(){readDocForm();const d=docEdit;d.items=d.items.filter(i=>String(i.d||'').trim()||Number(i.a)>0);if(!d.items.length)d.items=[{d:'',a:null}];
-  const clean=Object.assign({},d);delete clean._new;
+  const clean=Object.assign({},d);delete clean._new;delete clean._fixFrom;
   const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=clean;else{db.docs.push(clean);log(docJob,`${KN(d)} ${d.number} created`)}
   d._new=false;return clean}
 function markSent(d){if(d.status==='accepted'||d.status==='paid')return;const r=docJob;
@@ -4049,13 +4051,16 @@ function markSent(d){if(d.status==='accepted'||d.status==='paid')return;const r=
   if(!stepDone(r,'estimate'))setStep(r,'estimate',true);
   const i=db.docs.findIndex(x=>x.id===d.id);if(i>=0)db.docs[i]=Object.assign({},d)}
 $('docForm').onsubmit=async e=>{e.preventDefault();if(!docsReady){toast('Run the estimates setup step first');return}if(isTwo(docEdit)&&!conReady){toast('Run the contracts setup step first');return}if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
-  const d=storeDoc();if(d.status==='sent'&&!isInv(d)){docJob.value=d.subtotal;docJob.hst=d.hst}save();hideModal('docModal');render();if(selId)openDetail(selId);toast(`${KN(d)} saved`)};
+  const fixFrom=docEdit._fixFrom,d=storeDoc();if(d.status==='sent'&&!isInv(d)){docJob.value=d.subtotal;docJob.hst=d.hst}
+  if(fixFrom!=null&&Math.abs(d.total-fixFrom)>=0.005)log(docJob,`Change order ${d.number} corrected: ${money(fixFrom)} → ${money(d.total)}`);save();hideModal('docModal');render();if(selId)openDetail(selId);toast(`${KN(d)} saved`)};
 $('docCancel').onclick=()=>hideModal('docModal');
 $('docModal').onclick=e=>{if(e.target.id==='docModal')hideModal('docModal')};
 $('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const act=b.dataset.act;
   if(!docsReady){toast('Run the estimates setup step first');return}
   if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
   if(isTwo(docEdit)&&!conReady){toast('Run the contracts setup step first');return}
+  if(act==='fix'){if(!canFixCo(docEdit))return;docEdit._fixFrom=Number(docEdit.total)||0;$('docForm').dataset.locked='0';b.hidden=true;
+    $('docBanner').innerHTML=`<div class="banner warn">${ico('pay')} Correct the amounts, then tap Save. The customer already approved this, so only fix a mistake. If the price really changed, tell the customer.</div>`;toast('You can change the amounts now');return}
   if(act==='approve'){const r=docJob;if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again: the customer said yes';return}
     readDocForm();if(!calcDoc(docEdit).total){toast('Add the prices first');return}storeDoc();docEdit.status='accepted';const at=new Date().toISOString(),nm='Approved in person (recorded by NEVACO BUILD)';
     const i=db.docs.findIndex(x=>x.id===docEdit.id);db.docs[i]=Object.assign({},docEdit,{acceptedAt:at,acceptedName:nm});log(r,`Change order ${docEdit.number} approved by the customer (${money(docEdit.total)})`);save();
