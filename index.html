@@ -232,6 +232,8 @@ details.fold:not([open])>summary h3{font-size:17px}
 #remModal .fg label>span{display:block;width:auto;margin-bottom:6px;color:var(--label2);font-size:13px}
 #remModal .fg input,#remModal .fg textarea{width:100%;text-align:left;padding-left:14px;padding-right:14px;box-sizing:border-box}
 #remModal .fg textarea{min-height:230px;line-height:1.4}
+.sopt:disabled{opacity:.45}
+.sopt:disabled .rt>span{color:var(--orange)}
 .nextcard .rbtn{margin-left:auto;flex:none;height:36px;padding:0 14px;border-radius:18px;background:var(--blue);color:#fff;font-weight:600;font-size:14px}
 .nextcard .remnote{display:block;margin-top:2px;font-size:12.5px;color:var(--label2)}
 .nextcard>div{min-width:0}
@@ -1402,6 +1404,12 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
     <div class="body"><label class="searchbox"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="findQ" type="search" placeholder="Name, phone, address or email" aria-label="Search everyone" autocomplete="off"></label><div id="findOut"></div></div>
   </div>
 </div>
+<div class="scrim acct" id="sendModal" hidden>
+  <div class="sheet">
+    <header><span></span><h3 id="sendTitle">Send how?</h3><button type="button" class="save" id="sendCancel">Cancel</button></header>
+    <div class="body"><div class="group" id="sendOpts"></div><p class="fnote" id="sendNote"></p></div>
+  </div>
+</div>
 <div class="scrim acct" id="moreModal" hidden>
   <div class="sheet">
     <header><span></span><h3>More</h3><button type="button" class="save" id="moreClose">Done</button></header>
@@ -1587,7 +1595,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.64 (Nov 23) · Honest Send';
+const APP_VERSION='1.65 (Nov 23) · Send asks how';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -4060,7 +4068,7 @@ function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').
   $('docActs').innerHTML=d.status==='accepted'
     ?`<button type="button" class="primary" data-act="pdf">${ico('quote')}Open Signed ${KN(d)} (PDF)</button><button type="button" class="wide" data-act="copy">Copy Link</button>${canFixCo(d)?`<button type="button" class="wide" data-act="fix">Fix a mistake in the amounts</button>`:''}${isChg(d)&&d.signMeta?`<p class="fnote" style="grid-column:1/-1;margin:2px 4px 0">The customer signed this online, so the amounts are locked.</p>`:''}`
     :`${d._emailed&&ph?`<div class="banner ok" style="grid-column:1/-1">${ico('check')} ${isTwo(d)&&gmailSt.connected?KN(d)+' emailed. Send a text too so they see it.':'Email ready in Gmail. Now send the text message.'}</div><button type="button" class="primary textnow" data-act="sms">${ico('msg')}Send Text to ${esc(docJob.phone)}</button>`:''}
-      <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email||isTwo(d)?'mail':'sent')}${isTwo(d)?(d.status==='sent'?'Send Again for '+(isChg(d)?'Approval':'Signature'):'Send for '+(isChg(d)?'Approval':'Signature')):(d.status==='sent'?'Send Again':'Send to Customer')+(docJob.email?' by Email':'')}</button>
+      <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email||isTwo(d)?'mail':'sent')}${isTwo(d)?(d.status==='sent'?'Send Again for '+(isChg(d)?'Approval':'Signature'):'Send for '+(isChg(d)?'Approval':'Signature')):(d.status==='sent'?'Send Again':'Send to Customer')+'…'}</button>
       <button type="button" data-act="pdf">${ico('quote')}Preview / PDF</button><button type="button" data-act="copy">Copy Link</button>
       ${!isTwo(d)&&(srcKey(docJob)==='homestars'||!docJob.email)?`<button type="button" class="wide" data-act="hs">Copy message for ${srcKey(docJob)==='homestars'?'HomeStars':'WhatsApp or chat'}</button>`:''}
       ${d.status==='draft'&&!isTwo(d)?`<button type="button" class="wide" data-act="sentmanual">${ico('check')}I sent it myself (mark as sent)</button>`:''}
@@ -4102,10 +4110,23 @@ $('docForm').onsubmit=async e=>{e.preventDefault();if(!docsReady){toast('Run the
   if(fixFrom!=null&&Math.abs(d.total-fixFrom)>=0.005)log(docJob,`Change order ${d.number} corrected: ${money(fixFrom)} → ${money(d.total)}`);save();hideModal('docModal');render();if(selId)openDetail(selId);toast(`${KN(d)} saved`)};
 $('docCancel').onclick=()=>hideModal('docModal');
 $('docModal').onclick=e=>{if(e.target.id==='docModal')hideModal('docModal')};
-$('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const act=b.dataset.act;
+/* 'Send' asks how: email, text, WhatsApp, or copy the message; options without a contact are greyed out and say why */
+function askSend(d){return new Promise(res=>{
+  const em=(docJob.email||'').trim(),okMail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em),ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,''),okPh=ph.length>=10;
+  const hs=srcKey(docJob)==='homestars';
+  const rows=[['mail',ico('mail'),'Email',okMail?em:'No email saved',okMail],['sms',ico('msg'),'Text message',okPh?docJob.phone:'No phone saved',okPh],['wa',ico('msg'),'WhatsApp',okPh?docJob.phone:'No phone saved',okPh],['hs',ico('clip'),hs?'Copy message for HomeStars':'Copy the message',hs?'Paste it into the HomeStars chat':'Paste it into any chat or email',true]];
+  $('sendTitle').textContent=`Send ${KN(d).toLowerCase()} ${d.number} how?`;
+  $('sendOpts').innerHTML=rows.map(([k,ic,n,sub,ok])=>`<button type="button" class="row sopt" data-sopt="${k}"${ok?'':' disabled'}><span class="ni" style="--nc:#8e8e93">${ic}</span><span class="rt"><b>${n}</b><span>${esc(sub)}</span></span>${ok?ico('chev'):''}</button>`).join('');
+  $('sendNote').textContent='It is only marked as Sent when you send by email, text or WhatsApp. Copying the message does not mark it as sent.';
+  const done=v=>{$('sendOpts').onclick=null;$('sendCancel').onclick=null;$('sendModal').onclick=null;hideModal('sendModal');res(v)};
+  $('sendOpts').onclick=e=>{const b=e.target.closest('[data-sopt]');if(b&&!b.disabled)done(b.dataset.sopt)};
+  $('sendCancel').onclick=()=>done(null);$('sendModal').onclick=e=>{if(e.target.id==='sendModal')done(null)};
+  showModal('sendModal')})}
+$('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;let act=b.dataset.act;
   if(!docsReady){toast('Run the estimates setup step first');return}
   if(isInv(docEdit)&&!invReady){toast('Run the invoices setup step first');return}
   if(isTwo(docEdit)&&!conReady){toast('Run the contracts setup step first');return}
+  if(act==='send'&&!isTwo(docEdit)){act=await askSend(docEdit);if(!act)return}   // Send asks: email, text, WhatsApp or copy
   if(act==='fix'){if(!canFixCo(docEdit))return;docEdit._fixFrom=Number(docEdit.total)||0;$('docForm').dataset.locked='0';b.hidden=true;
     $('docBanner').innerHTML=`<div class="banner warn">${ico('pay')} Correct the amounts, then tap Save. The customer already approved this, so only fix a mistake. If the price really changed, tell the customer.</div>`;toast('You can change the amounts now');return}
   if(act==='approve'){const r=docJob;if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Tap again: the customer said yes';return}
