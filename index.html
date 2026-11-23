@@ -1587,7 +1587,7 @@ select.paym{margin-left:0;border:0;background:var(--card2);border-radius:7px;fon
 if(typeof L==='undefined'){const m=document.getElementById('map');m.style.cssText+='display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--label2)';m.innerHTML='The map could not load.<br>Open this file in Chrome or Safari with internet on.'}
 (function(){
 const HAS_MAP=typeof L!=='undefined';
-const APP_VERSION='1.63 (Nov 23) · Real PDF download';
+const APP_VERSION='1.64 (Nov 23) · Honest Send';
 const IC={
  lead:'<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
  visit:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
@@ -4062,6 +4062,8 @@ function paintDocActs(){const d=docEdit,ph=(docJob.phone||'').replace(/\D/g,'').
     :`${d._emailed&&ph?`<div class="banner ok" style="grid-column:1/-1">${ico('check')} ${isTwo(d)&&gmailSt.connected?KN(d)+' emailed. Send a text too so they see it.':'Email ready in Gmail. Now send the text message.'}</div><button type="button" class="primary textnow" data-act="sms">${ico('msg')}Send Text to ${esc(docJob.phone)}</button>`:''}
       <button type="button" class="${d._emailed&&ph?'wide':'primary'}" data-act="send">${ico(docJob.email||isTwo(d)?'mail':'sent')}${isTwo(d)?(d.status==='sent'?'Send Again for '+(isChg(d)?'Approval':'Signature'):'Send for '+(isChg(d)?'Approval':'Signature')):(d.status==='sent'?'Send Again':'Send to Customer')+(docJob.email?' by Email':'')}</button>
       <button type="button" data-act="pdf">${ico('quote')}Preview / PDF</button><button type="button" data-act="copy">Copy Link</button>
+      ${!isTwo(d)&&(srcKey(docJob)==='homestars'||!docJob.email)?`<button type="button" class="wide" data-act="hs">Copy message for ${srcKey(docJob)==='homestars'?'HomeStars':'WhatsApp or chat'}</button>`:''}
+      ${d.status==='draft'&&!isTwo(d)?`<button type="button" class="wide" data-act="sentmanual">${ico('check')}I sent it myself (mark as sent)</button>`:''}
       <button type="button" data-act="mail" ${docJob.email||isTwo(d)?'':'disabled style="opacity:.4" title="Add the customer email first"'}>${ico('mail')}Gmail</button><button type="button" data-act="sms" ${ph?'':'disabled style="opacity:.4" title="Add the customer phone first"'}>${ico('msg')}Text</button>
       <button type="button" class="wide" data-act="wa" ${ph?'':'disabled style="opacity:.4"'}>${ico('msg')}WhatsApp</button>
       ${payBlock}
@@ -4133,7 +4135,9 @@ $('docActs').addEventListener('click',async e=>{const b=e.target.closest('[data-
     if(!d.ownerSig||d.status==='draft'){d.ownerSig=conCfg.signature;d.ownerName='';d.ownerSignedAt=new Date().toISOString()}}
   const sendVia=act==='send'?(con&&gmailSt.connected?'direct':(con?cEmail:docJob.email)?'mail':((docJob.phone||'').replace(/\D/g,'').length>=10?'wa':'share')):act;
   const win=['pdf','wa','mail'].includes(sendVia)?window.open('about:blank','_blank'):null;
-  if(d.status!=='accepted'&&d.status!=='paid'){storeDoc();if(['send','copy','mail','wa','sms'].includes(act)){if(con&&cEmail&&['send','mail'].includes(act))docEdit.extra=Object.assign({},docEdit.extra,{sentTo:cEmail});markSent(docEdit)}save()}
+  /* 'Sent' only when a channel was really used: copying a link or a message, or having nowhere to send it, does not count; 'I sent it myself' does */
+  const real=['send','mail','wa','sms','sentmanual'].includes(act)&&sendVia!=='share';
+  if(d.status!=='accepted'&&d.status!=='paid'){storeDoc();if(real){if(con&&cEmail&&['send','mail'].includes(act))docEdit.extra=Object.assign({},docEdit.extra,{sentTo:cEmail});const wasSent=docEdit.status==='sent';markSent(docEdit);if(act==='sentmanual'&&!wasSent)log(docJob,`${KN(docEdit)} ${docEdit.number} marked as sent by hand`)}save()}
   const ok=await flush();
   if(!ok){if(win)win.close();toast('Not saved. Check your connection.');return}
   const link=docLink(docEdit),nm=String(docJob.name||'').trim(),w0=nm.split(/\s+/)[0]||'';
@@ -4209,16 +4213,19 @@ NEVACO BUILD INC.
     try{await gm('send',{job_id:docJob.id,to:cEmail,to_name:cname,subject:conSubject,body:conMsg,reply_latest:true,no_logo:true,signature:'NEVACO BUILD INC.\n437-432-2252 · nevacobuild.ca'});
       log(docJob,`${KN(docEdit)} ${docEdit.number} emailed to ${cEmail}`);save();toast(`${KN(docEdit)} sent to ${cEmail}`,false,true);docEdit._emailed=true;emailedDoc=docEdit.id}
     catch(err){b.disabled=false;b.innerHTML=old;toast(err.message+' Opening Gmail instead.',false,true);location.href=gmail;return}}
-  else if(sendVia==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied')}catch(err){prompt('Copy this link',link)}}
+  else if(sendVia==='copy'){try{await navigator.clipboard.writeText(link);toast('Link copied. Not marked as sent yet.')}catch(err){prompt('Copy this link',link)}}
+  else if(sendVia==='hs'){try{await navigator.clipboard.writeText(waMsg);toast('Message with the link copied. Paste it to the customer, then tap “I sent it myself”.',false,true)}catch(err){prompt('Copy this message',waMsg)}}
+  else if(sendVia==='sentmanual'){toast('Marked as sent')}
   else if(sendVia==='mail'){go(gmail);docEdit._emailed=true;emailedDoc=docEdit.id;toast((docJob.phone?'Gmail opened. Now tap Send Text.':`Gmail opened with the ${KN(docEdit).toLowerCase()} email`))}
   else if(sendVia==='sms'){const raw=(docJob.phone||'').replace(/[^\d+]/g,'');const num=raw.startsWith('+')?raw:(raw.length===10?'+1'+raw:'+'+raw);
     const apple=/iPhone|iPad|Macintosh/.test(navigator.userAgent);location.href=`sms:${num}${apple?'&':'?'}body=${encodeURIComponent(con?conSms:smsMsg)}`;emailedDoc=null;log(docJob,`Text sent about ${KN(docEdit).toLowerCase()} ${docEdit.number}`);save()}
   else if(sendVia==='wa'){const ph=(docJob.phone||'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');go(`https://wa.me/1${ph}?text=${encodeURIComponent(waMsg)}`)}
   else if(sendVia==='share'){
     if(navigator.share){try{await navigator.share({title:subject,text:waMsg})}catch(err){}}
-    else{try{await navigator.clipboard.writeText(waMsg);toast('Message with link copied')}catch(err){prompt('Copy this message',waMsg)}}}
+    else{try{await navigator.clipboard.writeText(waMsg);toast('No email or phone saved, so nothing was sent. Message with the link copied.',false,true)}catch(err){prompt('Copy this message',waMsg)}}}
   render();if(selId)openDetail(selId);docEdit=JSON.parse(JSON.stringify(db.docs.find(x=>x.id===docEdit.id)||docEdit));docEdit._emailed=emailedDoc===docEdit.id;
-  $('docBanner').innerHTML=isTwo(docEdit)?conBanner(docEdit):docEdit.status==='sent'?(isInv(docEdit)?`<div class="banner warn">${ico('pay')} Sent · ${money(invDue(docEdit))} due</div>`:`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`):$('docBanner').innerHTML;paintDocActs();
+  const notSent=docEdit.status==='draft'&&!isTwo(docEdit)&&['copy','hs','share'].includes(sendVia);
+  $('docBanner').innerHTML=notSent?`<div class="banner warn">${ico('sent')} Not sent yet. The ${sendVia==='copy'?'link':'message'} was only copied. After you send it, tap “I sent it myself”.</div>`:isTwo(docEdit)?conBanner(docEdit):docEdit.status==='sent'?(isInv(docEdit)?`<div class="banner warn">${ico('pay')} Sent · ${money(invDue(docEdit))} due</div>`:`<div class="banner info">${ico('sent')} Sent · waiting for the customer to sign</div>`):$('docBanner').innerHTML;paintDocActs();
 });
 
 /* ---------- event form ---------- */
