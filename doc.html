@@ -247,7 +247,30 @@ function setupPad(){
     if(errMsg){$('err').textContent=errMsg;$('go').disabled=false;$('go').textContent=con?'Sign Contract':chg?'Approve & Sign':'Accept & Sign';return}
     const again=await sb.rpc('get_shared_doc',{p_token:token});if(again.data)d=again.data;render();window.scrollTo({top:0,behavior:'smooth'})};
 }
-$('pdfBtn').onclick=()=>window.print();
+/* Download PDF: build a real PDF file. On a phone it opens the share sheet (Save to Files, Mail, WhatsApp...); on a computer it downloads.
+   window.print() stays as the fallback when the PDF tool cannot load. */
+const loadJs=src=>new Promise((ok,no)=>{const t=document.createElement('script');t.src=src;t.onload=ok;t.onerror=no;document.head.appendChild(t)});
+async function savePdf(){
+  const btn=$('pdfBtn'),label=btn.textContent;btn.disabled=true;btn.textContent='Preparing PDF…';
+  try{
+    if(!window.html2pdf)await loadJs('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+    const page=document.querySelector('article.page');if(!page)throw new Error('no page');
+    const who=(d.customer&&d.customer.name)||'',name=(KIND+'-'+d.number+(who?'-'+who:'')).replace(/[^A-Za-z0-9._-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')+'.pdf';
+    const opt={margin:0,filename:name,image:{type:'jpeg',quality:.95},html2canvas:{scale:1.8,useCORS:true,backgroundColor:'#ffffff',windowWidth:816,scrollX:0,scrollY:0},
+      jsPDF:{unit:'in',format:'letter',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['tr','p','.row','.sigline','h4']}};
+    window.scrollTo(0,0);
+    const mh=page.style.minHeight;page.style.minHeight='10.96in';   // a hair under one letter page, so a one-page document does not spill a blank second page
+    let blob;try{blob=await window.html2pdf().set(opt).from(page).outputPdf('blob')}finally{page.style.minHeight=mh}
+    const file=new File([blob],name,{type:'application/pdf'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})&&matchMedia('(pointer:coarse)').matches){
+      try{await navigator.share({files:[file],title:name})}catch(e){if(e&&e.name!=='AbortError')throw e}
+    }else{
+      const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)
+    }
+  }catch(e){console.error(e);window.print()}
+  btn.disabled=false;btn.textContent=label;
+}
+$('pdfBtn').onclick=savePdf;
 $('signBtn').onclick=()=>{const f=$('acc');if(f){f.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>$('nm').focus({preventScroll:true}),500)}};
 render();
 if(d.status==='sent'&&!inv&&qs.get('print')!=='1'&&qs.get('me')!=='1')post({action:'view'}).catch(()=>{});
